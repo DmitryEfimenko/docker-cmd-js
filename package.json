@@ -1,5 +1,5 @@
 {
-  "name": "docker-cmd",
+  "name": "docker-cmd-js",
   "version": "0.1.0",
   "description": "run docker commands in javascript",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DmitryEfimenko/docker-cmd.git"
+    "url": "git+https://github.com/DmitryEfimenko/docker-cmd-js.git"
   },
   "keywords": [
     "docker",
@@ -27,10 +27,6 @@
     "definition": "index.d.ts"
   },
   "bugs": {
-    "url": "https://github.com/DmitryEfimenko/docker-cmd/issues"
-  },
-  "_npmUser": {
-    "name": "dmitryefimenko",
-    "email": "dmitrief@gmail.com"
+    "url": "https://github.com/DmitryEfimenko/docker-cmd-js/issues"
   }
 }
