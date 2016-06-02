@@ -1,0 +1,27 @@
+{
+  "name": "docker-cmd",
+  "version": "0.1.0",
+  "description": "run docker commands in javascript",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DmitryEfimenko/docker-cmd.git"
+  },
+  "keywords": [
+    "docker",
+    "gulp",
+    "javascript"
+  ],
+  "author": {
+    "name": "Dmitry Efimenko",
+    "email": "dmitrief@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DmitryEfimenko/docker-cmd/issues"
+  },
+  "_npmUser": {
+    "name": "dmitryefimenko",
+    "email": "dmitrief@gmail.com"
+  }
+}
