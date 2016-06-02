@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "description": "run docker commands in javascript",
   "main": "dist/index.js",
+  "devDependencies": {
+    "typescript": "~1.5.3"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DmitryEfimenko/docker-cmd.git"
@@ -17,6 +23,9 @@
     "email": "dmitrief@gmail.com"
   },
   "license": "MIT",
+  "typescript": {
+    "definition": "index.d.ts"
+  },
   "bugs": {
     "url": "https://github.com/DmitryEfimenko/docker-cmd/issues"
   },
