@@ -1,4 +1,8 @@
-var spawnSync = require('child_process').spawnSync;
+import child_process = require('child_process');
+import colors = require('colors');
+
+var spawnSync = child_process.spawnSync;
+var spawn = child_process.spawn;
 
 export class Docker {
     private _debug: boolean;
@@ -11,16 +15,51 @@ export class Docker {
         return this;
     }
 
-    run(command: string): RunResult {
+    run(command: string, cb: (err: string, result: string)=> void): void {
         if (this._debug)
-            this.log('Running: ' + command);
-        let result = this.spawn(command, this.getEnvironmentObject());
-        if (this._debug)
-            console.dir(result);
-        return result;
+            console.log(colors.america('Running: ' + command));
+        
+        this.spawn(command, this.getEnvironmentObject(), (result) => { 
+            if (this._debug) {
+                if (result.stdErr) {
+                    process.stdout.write(colors.red('command finnished with errors. Checking if docker machine got into error state...'));
+                    
+                }
+                else process.stdout.write(result.stdOut);
+            }
+            cb(result.stdErr, result.stdOut);
+        });
     }
     
-    private spawn(command: string, env ?: any): RunResult {
+    private spawn(command: string, env: any, cb: (result: RunResult)=> void) {
+        let items = command.split(' ');
+        //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
+        //console.dir(items);
+
+        let r = spawn(items[0], items.slice(1), { env: env });
+        let result = { stdOut: '', stdErr: '' };
+        
+        r.stdout.on('data', (data) => {
+            result.stdOut = result.stdOut + data.toString();
+            process.stdout.write(data.toString());
+        });
+
+        r.stderr.on('data', (data) => {
+            result.stdErr = result.stdErr + data.toString();
+            process.stdout.write(colors.red(`stderr: ${data.toString()}`));
+        });
+
+        r.on('error', (err) => {
+            process.stdout.write('Failed to start command');
+        });
+
+        r.on('close', (code) => {
+            //console.log(`command exited with code ${code}`);
+            cb(result);
+        });
+    }
+
+    private spawnSync(command: string, env ?: any): RunResult {
         let items = command.split(' ');
         //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
         //console.dir(items);
@@ -37,12 +76,12 @@ export class Docker {
         if (Docker.envObj)
             return Docker.envObj;
         const env = process.env;
-        const envTxt = this.spawn(`docker-machine env --shell cmd ${this.machineName}`, env).stdOut;
+        const envTxt = this.spawnSync(`docker-machine env ${this.machineName} --shell cmd`, env).stdOut;
         const lines = envTxt.split('\n');
         for (let i = 0; i < lines.length; i++) {
             if (!this.isEnvironmentVariableLine(lines[i]))
                 continue;
-            this.addEnvironmentKeyValueToObject(lines[i],env);
+            this.addEnvironmentKeyValueToObject(lines[i], env);
         }
         Docker.envObj = env;
         return env;

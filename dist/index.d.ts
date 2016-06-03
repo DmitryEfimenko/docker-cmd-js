@@ -3,8 +3,9 @@ export declare class Docker {
     private _debug;
     constructor(machineName?: string);
     debug(): this;
-    run(command: string): RunResult;
-    private spawn(command, env?);
+    run(command: string, cb: (err: string, result: string) => void): void;
+    private spawn(command, env, cb);
+    private spawnSync(command, env?);
     private static envObj;
     private getEnvironmentObject();
     private isEnvironmentVariableLine(line);
