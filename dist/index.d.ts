@@ -1,9 +1,10 @@
+import Q = require('q');
 export declare class Docker {
     machineName: string;
     private _debug;
     constructor(machineName?: string);
     debug(): this;
-    run(command: string, cb: (err: string, result: string) => void): void;
+    run(command: string): Q.Promise<string>;
     private spawn(command, env, cb);
     private spawnSync(command, env?);
     private static envObj;

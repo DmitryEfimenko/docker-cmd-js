@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "dependencies": {
     "colors": "~1.1.2",
-    "inquirer": "~1.0.3"
+    "inquirer": "~1.0.3",
+    "q": "~1.4.1"
   },
   "devDependencies": {
     "typescript": "~1.5.3"

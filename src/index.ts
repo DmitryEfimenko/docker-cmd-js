@@ -1,7 +1,7 @@
 import child_process = require('child_process');
 import colors = require('colors');
 import inquirer = require('inquirer');
-
+import Q = require('q');
 var spawnSync = child_process.spawnSync;
 var spawn = child_process.spawn;
 
@@ -16,30 +16,36 @@ export class Docker {
         return this;
     }
 
-    run(command: string, cb: (err: string, result: string)=> void): void {
+    run(command: string): Q.Promise<string> {
         if (this._debug)
             console.log(colors.cyan('Running: ' + command));
-        
+
+        let deferred = Q.defer<string>();
         this.spawn(command, this.getEnvironmentObject(), (result) => { 
             if (this._debug) {
                 if (result.stdErr) {
                     console.log(colors.red('command finnished with errors.'));
                     if (result.stdErr.indexOf('no space left on device') > -1) {
-                        this.checkForDanglingImages(() => { 
-                            cb(result.stdErr, result.stdOut);
+                        this.checkForDanglingImages(() => {
+                            if (result.stdErr) deferred.reject(result.stdErr);
+                            else deferred.resolve(result.stdOut);
                         });
                     } else {
                         console.log(colors.yellow('Checking if docker machine got into error state...'))
                         this.checkDockerMachineStatus(() => {
-                            cb(result.stdErr, result.stdOut);
+                            if (result.stdErr) deferred.reject(result.stdErr);
+                            else deferred.resolve(result.stdOut);
                         });
                     }    
                 } else
-                    cb(result.stdErr, result.stdOut);
+                    if (result.stdErr) deferred.reject(result.stdErr);
+                    else deferred.resolve(result.stdOut);
             } else {
-                cb(result.stdErr, result.stdOut);
+                if (result.stdErr) deferred.reject(result.stdErr);
+                else deferred.resolve(result.stdOut);
             }    
         });
+        return deferred.promise;
     }
     
     private spawn(command: string, env: any, cb: (result: RunResult)=> void) {
@@ -111,44 +117,54 @@ export class Docker {
     private checkForDanglingImages(cb: () => void) {
         let _debug = this._debug;
         this._debug = false;
-        this.run('docker images --filter dangling=true', (err, result) => { 
-            if (err) console.log(colors.red('could not check for dangling images:'), err);
-            else {
+        this.run('docker images --filter dangling=true').then(
+            (result) => {
                 var images = this.resToJSON(result);
                 if (images.length > 0) {
-                    inquirer.prompt({ message: 'Found dangling images. Would you like to remove them?', choices: ['Yes', 'No'] }).then((answers) => {
-                        console.log('answers');
-                        console.dir(answers);
-                        if (answers[0] == 'Yes') {
-                            this.run('docker rmi $(docker images -f dangling=true -q)', (err, res) => {
-                                if(err) console.log(colors.red('could not clean up dangling images:'), err);
-                                else console.log(colors.green('Cleaned up dangling images. Try running your command again.'))
-                                this._debug = _debug;
-                                cb();
-                            });
+                    let promptOpts = {
+                        type: 'list',
+                        name: 'remove',
+                        message: 'Found dangling images. Would you like to remove them?',
+                        choices: ['Yes', 'No']
+                    };
+                    inquirer.prompt(promptOpts).then((answers: any) => {
+                        if (answers.remove == 'Yes') {
+                            let promises = [];
+                            for (var i = 0, l = images.length; i < l; i++) {
+                                let p = this.run(`docker rmi ${images[i]['IMAGE ID']}`);
+                                promises.push(p);
+                            }
+                            Q.all(promises).then(
+                                () => {
+                                    console.log(colors.green('Cleaned up dangling images. Try running your command again.'));
+                                    this._debug = _debug;
+                                    cb();
+                                },
+                                (err) => { console.log(colors.red('could not clean up dangling images:'), err); }
+                            );
                         } else {
                             cb();
                         }
                     });
-                    
                 } else {
                     cb();
                 }
-            }
-        })
+            },
+            (err) => { console.log(colors.red('could not check for dangling images:'), err); }
+        );
     }
 
-    private checkDockerMachineStatus(cb: ()=> void) { 
-        this.run('docker-machine status', (err, result) => {
-            if (err) console.log(colors.red('could not get docket-machine status:'), err);
-            else {
+    private checkDockerMachineStatus(cb: () => void) {
+        this.run('docker-machine status').then(
+            (result) => {
                 console.log(result);
                 if (result != 'Running') {
                     console.log('TODO');
                 }
                 cb();
-            }
-        });
+            },
+            (err) => { console.log(colors.red('could not get docket-machine status:'), err); }
+        );
     }
 
     resToJSON(s: string): any[] {

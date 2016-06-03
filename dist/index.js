@@ -2,6 +2,7 @@
 var child_process = require('child_process');
 var colors = require('colors');
 var inquirer = require('inquirer');
+var Q = require('q');
 var spawnSync = child_process.spawnSync;
 var spawn = child_process.spawn;
 var Docker = (function () {
@@ -14,33 +15,46 @@ var Docker = (function () {
         this._debug = true;
         return this;
     };
-    Docker.prototype.run = function (command, cb) {
+    Docker.prototype.run = function (command) {
         var _this = this;
         if (this._debug)
             console.log(colors.cyan('Running: ' + command));
+        var deferred = Q.defer();
         this.spawn(command, this.getEnvironmentObject(), function (result) {
             if (_this._debug) {
                 if (result.stdErr) {
                     console.log(colors.red('command finnished with errors.'));
                     if (result.stdErr.indexOf('no space left on device') > -1) {
                         _this.checkForDanglingImages(function () {
-                            cb(result.stdErr, result.stdOut);
+                            if (result.stdErr)
+                                deferred.reject(result.stdErr);
+                            else
+                                deferred.resolve(result.stdOut);
                         });
                     }
                     else {
                         console.log(colors.yellow('Checking if docker machine got into error state...'));
                         _this.checkDockerMachineStatus(function () {
-                            cb(result.stdErr, result.stdOut);
+                            if (result.stdErr)
+                                deferred.reject(result.stdErr);
+                            else
+                                deferred.resolve(result.stdOut);
                         });
                     }
                 }
+                else if (result.stdErr)
+                    deferred.reject(result.stdErr);
                 else
-                    cb(result.stdErr, result.stdOut);
+                    deferred.resolve(result.stdOut);
             }
             else {
-                cb(result.stdErr, result.stdOut);
+                if (result.stdErr)
+                    deferred.reject(result.stdErr);
+                else
+                    deferred.resolve(result.stdOut);
             }
         });
+        return deferred.promise;
     };
     Docker.prototype.spawn = function (command, env, cb) {
         var items = command.split(' ');
@@ -100,48 +114,46 @@ var Docker = (function () {
         var _this = this;
         var _debug = this._debug;
         this._debug = false;
-        this.run('docker images --filter dangling=true', function (err, result) {
-            if (err)
-                console.log(colors.red('could not check for dangling images:'), err);
-            else {
-                var images = _this.resToJSON(result);
-                if (images.length > 0) {
-                    inquirer.prompt({ message: 'Found dangling images. Would you like to remove them?', choices: ['Yes', 'No'] }).then(function (answers) {
-                        console.log('answers');
-                        console.dir(answers);
-                        if (answers[0] == 'Yes') {
-                            _this.run('docker rmi $(docker images -f dangling=true -q)', function (err, res) {
-                                if (err)
-                                    console.log(colors.red('could not clean up dangling images:'), err);
-                                else
-                                    console.log(colors.green('Cleaned up dangling images. Try running your command again.'));
-                                _this._debug = _debug;
-                                cb();
-                            });
+        this.run('docker images --filter dangling=true').then(function (result) {
+            var images = _this.resToJSON(result);
+            if (images.length > 0) {
+                var promptOpts = {
+                    type: 'list',
+                    name: 'remove',
+                    message: 'Found dangling images. Would you like to remove them?',
+                    choices: ['Yes', 'No']
+                };
+                inquirer.prompt(promptOpts).then(function (answers) {
+                    if (answers.remove == 'Yes') {
+                        var promises = [];
+                        for (var i = 0, l = images.length; i < l; i++) {
+                            var p = _this.run("docker rmi " + images[i]['IMAGE ID']);
+                            promises.push(p);
                         }
-                        else {
+                        Q.all(promises).then(function () {
+                            console.log(colors.green('Cleaned up dangling images. Try running your command again.'));
+                            _this._debug = _debug;
                             cb();
-                        }
-                    });
-                }
-                else {
-                    cb();
-                }
+                        }, function (err) { console.log(colors.red('could not clean up dangling images:'), err); });
+                    }
+                    else {
+                        cb();
+                    }
+                });
             }
-        });
-    };
-    Docker.prototype.checkDockerMachineStatus = function (cb) {
-        this.run('docker-machine status', function (err, result) {
-            if (err)
-                console.log(colors.red('could not get docket-machine status:'), err);
             else {
-                console.log(result);
-                if (result != 'Running') {
-                    console.log('TODO');
-                }
                 cb();
             }
-        });
+        }, function (err) { console.log(colors.red('could not check for dangling images:'), err); });
+    };
+    Docker.prototype.checkDockerMachineStatus = function (cb) {
+        this.run('docker-machine status').then(function (result) {
+            console.log(result);
+            if (result != 'Running') {
+                console.log('TODO');
+            }
+            cb();
+        }, function (err) { console.log(colors.red('could not get docket-machine status:'), err); });
     };
     Docker.prototype.resToJSON = function (s) {
         var lines = s.split('\n').filter(function (val) { return val != ''; });

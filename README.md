@@ -1,5 +1,5 @@
 # docker-cmd-js
-Run docker commands in your javascript - useful for use in gulp
+Apparently running a **docker** in the `cmd.exe` requires a bunch of environment variables set up. Just spawning a `spawnSync` from `child_process` won't do in most cases. Thus the birth of this lib.
 
 ## Why?
 What if you have multiple commands that you always run to set up your environment or to deploy a project to AWS?
@@ -34,4 +34,7 @@ function checkRunError(err, done) {
 
 ## But why a library to run a command?
 
-Apparently running a **docker** cmd requires a bunch of environment variables set up. Just spawning a `spawnSync` from `child_process` won't do in most cases.
+
+
+## Credits
+Thanks to [Matt Klein](https://github.com/mattklein999), who started out coding this lib.
