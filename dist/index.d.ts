@@ -10,7 +10,9 @@ export declare class Docker {
     private getEnvironmentObject();
     private isEnvironmentVariableLine(line);
     private addEnvironmentKeyValueToObject(line, obj);
-    private log(text);
+    private checkForDanglingImages(cb);
+    private checkDockerMachineStatus(cb);
+    resToJSON(s: string): any[];
 }
 export interface RunResult {
     stdOut: string;

@@ -4,7 +4,8 @@
   "description": "run docker commands in javascript",
   "main": "dist/index.js",
   "dependencies": {
-    "colors": "~1.1.2"
+    "colors": "~1.1.2",
+    "inquirer": "~1.0.3"
   },
   "devDependencies": {
     "typescript": "~1.5.3"
