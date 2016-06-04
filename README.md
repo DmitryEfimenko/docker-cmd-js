@@ -11,25 +11,14 @@ var dockerCmd = require('docker-cmd-js');
 var cmd = new dockerCmd.Docker();
 
 gulp.task('deploy', (done) => {
-    var loginCmd = cmd.run('aws ecr get-login --region us-east-1');
-    checkRunError(loginCmd.stdErr, done);
-    var loginResult = cmd.run(loginCmd.stdOut);
-    checkRunError(loginResult.stdErr, done);
-    var buildResult = cmd.run('docker build -t myapp .');
-    checkRunError(buildResult.stdErr, done);
-    var tagResult = cmd.run('docker tag myapp:latest someamazonlink.ecr.us-east-1.amazonaws.com/myapp:latest');
-    checkRunError(tagResult.stdErr, done);
-    var pushResult = cmd.run('docker push someamazonlink.ecr.us-east-1.amazonaws.com/myapp:latest');
-    checkRunError(pushResult.stdErr, done);
-    done();
+    cmd.debug().run('aws ecr get-login --region us-east-1', true)
+        .then((authCmd)=> cmd.run(authCmd))
+        .then(()=> cmd.run('docker build -t myapp .'))
+        .then(()=> cmd.run('docker tag myapp:latest someawsid.dkr.ecr.us-east-1.amazonaws.com/myapp:latest'))
+        .then(()=> cmd.run('docker push someawsid.dkr.ecr.us-east-1.amazonaws.com/myapp:latest'))
+        .catch((err) => { console.log(err); })
+        .finally(() => { done() });
 });
-
-function checkRunError(err, done) {
-    if (err) {
-        console.log(err);
-        done();
-    }
-}
 ```
 
 ## But why a library to run a command?

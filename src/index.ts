@@ -7,6 +7,8 @@ var spawn = child_process.spawn;
 
 export class Docker {
     private _debug: boolean;
+    memory: number; 
+    
     constructor(public machineName?: string) {
         if (!this.machineName) this.machineName = 'default';
     }
@@ -16,34 +18,30 @@ export class Docker {
         return this;
     }
 
-    run(command: string): Q.Promise<string> {
-        if (this._debug)
-            console.log(colors.cyan('Running: ' + command));
+    run(command: string, noNewLines?: boolean): Q.Promise<string> {
+        if (this._debug) {
+            this.info('Running:', command);
+        }
 
         let deferred = Q.defer<string>();
         this.spawn(command, this.getEnvironmentObject(), (result) => { 
             if (this._debug) {
                 if (result.stdErr) {
-                    console.log(colors.red('command finnished with errors.'));
-                    if (result.stdErr.indexOf('no space left on device') > -1) {
+                    this.err('command finnished with errors.')
+                    if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
                         this.checkForDanglingImages(() => {
                             if (result.stdErr) deferred.reject(result.stdErr);
                             else deferred.resolve(result.stdOut);
                         });
                     } else {
-                        console.log(colors.yellow('Checking if docker machine got into error state...'))
-                        this.checkDockerMachineStatus(() => {
-                            if (result.stdErr) deferred.reject(result.stdErr);
-                            else deferred.resolve(result.stdOut);
-                        });
+                        deferred.reject(result.stdErr);
                     }    
                 } else
-                    if (result.stdErr) deferred.reject(result.stdErr);
-                    else deferred.resolve(result.stdOut);
+                     deferred.resolve(noNewLines ? result.stdOut.replace('\r\n', ''): result.stdOut);
             } else {
                 if (result.stdErr) deferred.reject(result.stdErr);
-                else deferred.resolve(result.stdOut);
-            }    
+                else deferred.resolve(noNewLines ? result.stdOut.replace('\r\n', '') : result.stdOut);
+            }
         });
         return deferred.promise;
     }
@@ -131,7 +129,7 @@ export class Docker {
                         if (answers.remove == 'Yes') {
                             let promises = [];
                             for (var i = 0, l = images.length; i < l; i++) {
-                                let p = this.run(`docker rmi ${images[i]['IMAGE ID']}`);
+                                let p = this.run(`docker rmi -f ${images[i]['IMAGE ID']}`);
                                 promises.push(p);
                             }
                             Q.all(promises).then(
@@ -140,7 +138,7 @@ export class Docker {
                                     this._debug = _debug;
                                     cb();
                                 },
-                                (err) => { console.log(colors.red('could not clean up dangling images:'), err); }
+                                (err) => { this.err('could not clean up dangling images:', err); }
                             );
                         } else {
                             cb();
@@ -150,7 +148,7 @@ export class Docker {
                     cb();
                 }
             },
-            (err) => { console.log(colors.red('could not check for dangling images:'), err); }
+            (err) => { this.err('could not check for dangling images:', err); }
         );
     }
 
@@ -197,6 +195,48 @@ export class Docker {
         }
         return result;
     }
+
+    startMachine(memory: number) {
+        return Q.Promise((resolve, reject) => {
+            this.memory = memory;
+            let _debug = this._debug;
+            this._debug = false;
+
+            this.run(`docker-machine status ${this.machineName}`).then(
+                (res) => {
+                    if (res != 'Running') {
+                        this.runStartCommand(memory).then(resolve, reject);
+                    } else {
+                        this.info('docker-machine status:', res);
+                        resolve(res);
+                    }
+                },
+                (err) => {
+                    this.runStartCommand(memory).then(resolve, reject);
+                }
+            ).finally(() => { this._debug = _debug });
+        });
+    }
+
+    private runStartCommand(memory) { 
+        return Q.Promise((resolve, reject) => {
+            let _debug = this._debug;
+            this._debug = false;
+            this.info(`Starting virtual machine ${this.machineName} (memory: ${memory})`);
+            this.run(`docker-machine create --driver virtualbox --virtualbox-no-vtx-check ${memory ? '--virtualbox-memory ' + memory : ''} ${this.machineName}`).then(
+                (resp) => { resolve(resp); },
+                (err) => { reject(err); }
+            ).finally(() => { this._debug = _debug; });
+        });
+    }
+
+    private info(...message: string[]) { 
+        console.log(colors.cyan(message.join(' ')));
+    }
+
+    private err(...message: string[]) { 
+        console.log(colors.red(message.join(' ')));
+    } 
 }
 
 export interface RunResult {
