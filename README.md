@@ -21,9 +21,5 @@ gulp.task('deploy', (done) => {
 });
 ```
 
-## But why a library to run a command?
-
-
-
 ## Credits
 Thanks to [Matt Klein](https://github.com/mattklein999), who started out coding this lib.
