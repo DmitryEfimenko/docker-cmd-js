@@ -1,19 +1,29 @@
 "use strict";
-var child_process = require('child_process');
 var colors = require('colors');
 var inquirer = require('inquirer');
 var Q = require('q');
-var spawnSync = child_process.spawnSync;
-var spawn = child_process.spawn;
+var childProcessHelpers_1 = require('./childProcessHelpers');
+var environment_1 = require('./environment');
 var Docker = (function () {
     function Docker(machineName) {
         this.machineName = machineName;
         if (!this.machineName)
             this.machineName = 'default';
+        environment_1.setEnvironment(this.machineName);
     }
     Docker.prototype.debug = function () {
         this._debug = true;
         return this;
+    };
+    Docker.prototype.runWithoutDebug = function (command, noNewLines) {
+        var _this = this;
+        return Q.Promise(function (resolve, reject) {
+            var _debug = _this._debug;
+            _this._debug = false;
+            _this.run(command, noNewLines)
+                .then(resolve, reject)
+                .finally(function () { _this._debug = _debug; });
+        });
     };
     Docker.prototype.run = function (command, noNewLines) {
         var _this = this;
@@ -21,7 +31,7 @@ var Docker = (function () {
             this.info('Running:', command);
         }
         var deferred = Q.defer();
-        this.spawn(command, this.getEnvironmentObject(), function (result) {
+        childProcessHelpers_1.spawn(command, process.env, function (result) {
             if (_this._debug) {
                 if (result.stdErr) {
                     _this.err('command finnished with errors.');
@@ -38,76 +48,20 @@ var Docker = (function () {
                     }
                 }
                 else
-                    deferred.resolve(noNewLines ? result.stdOut.replace('\r\n', '') : result.stdOut);
+                    deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
             }
             else {
                 if (result.stdErr)
                     deferred.reject(result.stdErr);
                 else
-                    deferred.resolve(noNewLines ? result.stdOut.replace('\r\n', '') : result.stdOut);
+                    deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
             }
         });
         return deferred.promise;
     };
-    Docker.prototype.spawn = function (command, env, cb) {
-        var items = command.split(' ');
-        //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
-        //console.dir(items);
-        var r = spawn(items[0], items.slice(1), { env: env });
-        var result = { stdOut: '', stdErr: '' };
-        r.stdout.on('data', function (data) {
-            result.stdOut = result.stdOut + data.toString();
-            process.stdout.write(data.toString());
-        });
-        r.stderr.on('data', function (data) {
-            result.stdErr = result.stdErr + data.toString();
-            process.stdout.write(colors.red("stderr: " + data.toString()));
-        });
-        r.on('error', function (err) {
-            process.stdout.write('Failed to start command');
-        });
-        r.on('close', function (code) {
-            //console.log(`command exited with code ${code}`);
-            cb(result);
-        });
-    };
-    Docker.prototype.spawnSync = function (command, env) {
-        var items = command.split(' ');
-        //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
-        //console.dir(items);
-        var r = spawnSync(items[0], items.slice(1), { env: env });
-        return {
-            stdOut: r.stdout.toString(),
-            stdErr: r.stderr.toString()
-        };
-    };
-    Docker.prototype.getEnvironmentObject = function () {
-        if (Docker.envObj)
-            return Docker.envObj;
-        var env = process.env;
-        var envTxt = this.spawnSync("docker-machine env " + this.machineName + " --shell cmd", env).stdOut;
-        var lines = envTxt.split('\n');
-        for (var i = 0; i < lines.length; i++) {
-            if (!this.isEnvironmentVariableLine(lines[i]))
-                continue;
-            this.addEnvironmentKeyValueToObject(lines[i], env);
-        }
-        Docker.envObj = env;
-        return env;
-    };
-    Docker.prototype.isEnvironmentVariableLine = function (line) {
-        return line.indexOf('SET') === 0;
-    };
-    Docker.prototype.addEnvironmentKeyValueToObject = function (line, obj) {
-        line = line.substr(4);
-        var kvp = line.split('=');
-        obj[kvp[0]] = kvp[1];
-    };
     Docker.prototype.checkForDanglingImages = function (cb) {
         var _this = this;
-        var _debug = this._debug;
-        this._debug = false;
-        this.run('docker images --filter dangling=true').then(function (result) {
+        this.runWithoutDebug('docker images --filter dangling=true').then(function (result) {
             var images = _this.resToJSON(result);
             if (images.length > 0) {
                 var promptOpts = {
@@ -120,12 +74,11 @@ var Docker = (function () {
                     if (answers.remove == 'Yes') {
                         var promises = [];
                         for (var i = 0, l = images.length; i < l; i++) {
-                            var p = _this.run("docker rmi -f " + images[i]['IMAGE ID']);
+                            var p = _this.removeImage(images[i]['IMAGE ID']);
                             promises.push(p);
                         }
                         Q.all(promises).then(function () {
                             console.log(colors.green('Cleaned up dangling images. Try running your command again.'));
-                            _this._debug = _debug;
                             cb();
                         }, function (err) { _this.err('could not clean up dangling images:', err); });
                     }
@@ -139,7 +92,7 @@ var Docker = (function () {
             }
         }, function (err) { _this.err('could not check for dangling images:', err); });
     };
-    Docker.prototype.checkDockerMachineStatus = function (cb) {
+    Docker.prototype.machineStatus = function (cb) {
         this.run('docker-machine status').then(function (result) {
             console.log(result);
             if (result != 'Running') {
@@ -147,6 +100,112 @@ var Docker = (function () {
             }
             cb();
         }, function (err) { console.log(colors.red('could not get docket-machine status:'), err); });
+    };
+    Docker.prototype.startMachine = function (memory) {
+        var _this = this;
+        return Q.Promise(function (resolve, reject) {
+            _this.runWithoutDebug("docker-machine status " + _this.machineName).then(function (res) {
+                if (res != 'Running') {
+                    _this.runStartMachine(memory).then(resolve, reject);
+                }
+                else {
+                    _this.info('docker-machine status:', res);
+                    resolve(res);
+                }
+            }, function (err) {
+                _this.runStartMachine(memory).then(resolve, reject);
+            });
+        });
+    };
+    Docker.prototype.runStartMachine = function (memory) {
+        var _this = this;
+        return Q.Promise(function (resolve, reject) {
+            _this.info("Starting virtual machine " + _this.machineName + " (memory: " + memory + ")");
+            _this.runWithoutDebug("docker-machine create --driver virtualbox --virtualbox-no-vtx-check " + (memory ? '--virtualbox-memory ' + memory : '') + " " + _this.machineName).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
+        });
+    };
+    Docker.prototype.buildImage = function (imageName, opts) {
+        var _this = this;
+        return Q.Promise(function (resolve, reject) {
+            _this.runWithoutDebug("docker images --format {{.Repository}} " + imageName, true).then(function (img) {
+                if (img == imageName) {
+                    if (opts && opts.buildAndReplace) {
+                        _this.removeImage(imageName).then(function () { _this.runBuildImage(imageName, opts.dockerFile).then(resolve, reject); }, reject);
+                    }
+                    else {
+                        var promptOpts = {
+                            type: 'list',
+                            name: 'opts',
+                            message: 'Image already exists. What would you like to do?',
+                            choices: ['Build and replace old', 'Build and leave old one as dangling', 'Don not build']
+                        };
+                        inquirer.prompt(promptOpts).then(function (answers) {
+                            if (answers.opts == 'Build and replace old') {
+                                _this.removeImage(imageName).then(function () { _this.runBuildImage(imageName, opts.dockerFile).then(resolve, reject); }, reject);
+                            }
+                            if (answers.opts == 'Build and leave old one as dangling') {
+                                _this.runBuildImage(imageName, opts.dockerFile).then(resolve, reject);
+                            }
+                            if (answers.opts == 'Don not build') {
+                                resolve(undefined);
+                            }
+                        });
+                    }
+                }
+                else {
+                    _this.runBuildImage(imageName, opts.dockerFile).then(resolve, reject);
+                }
+            });
+        });
+    };
+    Docker.prototype.runBuildImage = function (imageName, dockerFile) {
+        this.info("Building image " + imageName + " via dockerFile: " + dockerFile + "...");
+        return this.runWithoutDebug("docker build -t " + imageName + " " + (dockerFile || ''));
+    };
+    Docker.prototype.removeImage = function (imageName) {
+        return this.runWithoutDebug("docker rmi -f " + imageName);
+    };
+    Docker.prototype.startContainer = function (imageName, opts, command) {
+        var _this = this;
+        return Q.Promise(function (resolve, reject) {
+            var containerName = (opts && opts.name) ? opts.name : imageName;
+            _this.runWithoutDebug("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"").then(function (status) {
+                if (!status) {
+                    _this.info("Creating and starting container " + containerName + "...");
+                    var c = "docker run -d --name " + containerName;
+                    if (opts) {
+                        if (opts.port)
+                            c += " -p " + opts.port;
+                        if (opts.volume)
+                            c += " --volume " + opts.volume;
+                        if (opts.volumesFrom)
+                            c += " --volumes-from " + opts.volumesFrom;
+                        if (opts.link)
+                            c += " --link " + opts.link;
+                        if (opts.env) {
+                            for (var i = 0, l = opts.env.length; i < l; i++) {
+                                c += " -e " + opts.env[i];
+                            }
+                        }
+                    }
+                    c += " " + imageName;
+                    if (command)
+                        c += " " + command;
+                    _this.runWithoutDebug(c).then(function () { resolve(true); }, reject);
+                }
+                else if (status.indexOf('Up') == 1) {
+                    _this.info("Container " + containerName + " already started.");
+                    resolve(false);
+                }
+                else if (status.indexOf('Exited') == 1) {
+                    _this.info("Container " + containerName + " exists but is not started. Starting now.");
+                    _this.runWithoutDebug("docker start " + containerName).then(function () { resolve(true); }, reject);
+                }
+                else {
+                    reject("Could not start container " + containerName() + ". Status was " + status + " Should never hit this.");
+                }
+            }, reject);
+        });
     };
     Docker.prototype.resToJSON = function (s) {
         var lines = s.split('\n').filter(function (val) { return val != ''; });
@@ -177,34 +236,6 @@ var Docker = (function () {
             result.push(obj);
         }
         return result;
-    };
-    Docker.prototype.startMachine = function (memory) {
-        var _this = this;
-        return Q.Promise(function (resolve, reject) {
-            _this.memory = memory;
-            var _debug = _this._debug;
-            _this._debug = false;
-            _this.run("docker-machine status " + _this.machineName).then(function (res) {
-                if (res != 'Running') {
-                    _this.runStartCommand(memory).then(resolve, reject);
-                }
-                else {
-                    _this.info('docker-machine status:', res);
-                    resolve(res);
-                }
-            }, function (err) {
-                _this.runStartCommand(memory).then(resolve, reject);
-            }).finally(function () { _this._debug = _debug; });
-        });
-    };
-    Docker.prototype.runStartCommand = function (memory) {
-        var _this = this;
-        return Q.Promise(function (resolve, reject) {
-            var _debug = _this._debug;
-            _this._debug = false;
-            _this.info("Starting virtual machine " + _this.machineName + " (memory: " + memory + ")");
-            _this.run("docker-machine create --driver virtualbox --virtualbox-no-vtx-check " + (memory ? '--virtualbox-memory ' + memory : '') + " " + _this.machineName).then(function (resp) { resolve(resp); }, function (err) { reject(err); }).finally(function () { _this._debug = _debug; });
-        });
     };
     Docker.prototype.info = function () {
         var message = [];
