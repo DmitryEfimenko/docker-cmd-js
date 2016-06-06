@@ -5,7 +5,7 @@ import { spawn } from './childProcessHelpers';
 import { setEnvironment } from './environment';
 import * as Q from 'q';
 
-export default class Cmd {
+export class Cmd {
     private _debug: boolean;
     private _env;
 

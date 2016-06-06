@@ -1,5 +1,5 @@
 import * as Q from 'q';
-export default class Cmd {
+export declare class Cmd {
     machineName: string;
     private _debug;
     private _env;

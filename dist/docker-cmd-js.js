@@ -255,5 +255,4 @@ var Cmd = (function () {
     };
     return Cmd;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Cmd;
+exports.Cmd = Cmd;
