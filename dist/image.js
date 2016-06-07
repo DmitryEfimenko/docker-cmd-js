@@ -1,10 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var Q = require('q');
 var inquirer = require('inquirer');
 var base_1 = require('./base');
-var Image = (function () {
+var debuggable_1 = require('./debuggable');
+var Image = (function (_super) {
+    __extends(Image, _super);
     function Image(_debug) {
-        this._debug = _debug;
+        _super.call(this, _debug);
     }
     Image.prototype.build = function (imageName, opts) {
         var _this = this;
@@ -94,5 +101,5 @@ var Image = (function () {
         });
     };
     return Image;
-}());
+}(debuggable_1.Debuggable));
 exports.Image = Image;

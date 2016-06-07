@@ -1,6 +1,6 @@
 import * as Q from 'q';
-export declare class Container {
-    private _debug;
+import { Debuggable } from './debuggable';
+export declare class Container extends Debuggable {
     constructor(_debug: any);
     start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>;
     status(containerName: string): Q.Promise<string>;

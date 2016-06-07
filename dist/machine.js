@@ -1,10 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var Q = require('q');
 var base_1 = require('./base');
-var Machine = (function () {
+var debuggable_1 = require('./debuggable');
+var Machine = (function (_super) {
+    __extends(Machine, _super);
     function Machine(machineName, _debug) {
+        _super.call(this, _debug);
         this.machineName = machineName;
-        this._debug = _debug;
     }
     Machine.prototype.status = function () {
         return base_1.run('docker-machine status', this._debug, true);
@@ -15,7 +22,7 @@ var Machine = (function () {
     Machine.prototype.start = function (opts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
-            base_1.runWithoutDebug("docker-machine status " + _this.machineName, true).then(function (res) {
+            _this.runWithoutDebugOnce(_this.status()).then(function (res) {
                 if (res != 'Running') {
                     _this.runStartMachine(opts).then(resolve, reject);
                 }
@@ -47,5 +54,5 @@ var Machine = (function () {
         });
     };
     return Machine;
-}());
+}(debuggable_1.Debuggable));
 exports.Machine = Machine;

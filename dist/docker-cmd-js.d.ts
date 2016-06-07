@@ -10,7 +10,7 @@ export declare class Cmd {
     image: Image;
     container: Container;
     constructor(machineName?: string);
-    debug(): this;
+    debug(debugging?: boolean): this;
     run(command: string, noNewLines?: boolean): Q.Promise<string>;
     runSync(command: string): RunResult;
     resToJSON(s: string): any[];

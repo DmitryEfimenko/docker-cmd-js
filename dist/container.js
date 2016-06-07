@@ -1,17 +1,22 @@
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var Q = require('q');
 var base_1 = require('./base');
-var Container = (function () {
+var debuggable_1 = require('./debuggable');
+var Container = (function (_super) {
+    __extends(Container, _super);
     function Container(_debug) {
-        this._debug = _debug;
+        _super.call(this, _debug);
     }
     Container.prototype.start = function (imageName, opts, command) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             var containerName = (opts && opts.name) ? opts.name : imageName;
-            var _d = _this._debug;
-            _this._debug = false;
-            _this.status(containerName).then(function (status) {
+            _this.runWithoutDebugOnce(_this.status(containerName)).then(function (status) {
                 if (!status) {
                     base_1.info("Creating and starting container " + containerName + "...");
                     var c = "docker run -d";
@@ -24,7 +29,6 @@ var Container = (function () {
                     c += " " + imageName;
                     if (command)
                         c += " " + command;
-                    _this._debug = _d;
                     base_1.run(c, _this._debug).then(function () { resolve(true); }, reject);
                 }
                 else if (status.indexOf('Up') == 1) {
@@ -45,5 +49,5 @@ var Container = (function () {
         return base_1.run("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"", this._debug);
     };
     return Container;
-}());
+}(debuggable_1.Debuggable));
 exports.Container = Container;

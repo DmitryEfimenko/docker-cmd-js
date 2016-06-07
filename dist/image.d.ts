@@ -1,6 +1,6 @@
 import * as Q from 'q';
-export declare class Image {
-    private _debug;
+import { Debuggable } from './debuggable';
+export declare class Image extends Debuggable {
     constructor(_debug: any);
     build(imageName: string, opts?: IBuildImageOpts): Q.Promise<{}>;
     remove(imageName: string): Q.Promise<string>;

@@ -1,16 +1,16 @@
 import * as Q from 'q';
 import { run, runWithoutDebug, addOpts, addOpt, info, err, success, resToJSON } from './base';
+import { Debuggable } from './debuggable';
 
-export class Container{
-    constructor(private _debug) { 
+export class Container extends Debuggable {
+    constructor(_debug) {
+        super(_debug);
     }
 
     start(imageName, opts?: IStartDockerOpts, command?: string) {
         return Q.Promise((resolve, reject) => {
             let containerName = (opts && opts.name) ? opts.name : imageName;
-            let _d = this._debug;
-            this._debug = false;
-            this.status(containerName).then(
+            this.runWithoutDebugOnce(this.status(containerName)).then(
                 (status) => {
                     if (!status) {
                         info(`Creating and starting container ${containerName}...`);
@@ -21,7 +21,6 @@ export class Container{
                         if (!opts.name) addOpt(c, '--name', containerName);
                         c += ` ${imageName}`;
                         if (command) c += ` ${command}`;
-                        this._debug = _d;
                         run(c, this._debug).then(() => { resolve(true); }, reject);
                     } else if (status.indexOf('Up') == 1) {
                         info(`Container ${containerName} already started.`);

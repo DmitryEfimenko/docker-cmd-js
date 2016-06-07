@@ -1,7 +1,7 @@
 import * as Q from 'q';
-export declare class Machine {
+import { Debuggable } from './debuggable';
+export declare class Machine extends Debuggable {
     private machineName;
-    private _debug;
     constructor(machineName: string, _debug: any);
     status(): Q.Promise<string>;
     ipAddress(): Q.Promise<string>;

@@ -20,8 +20,11 @@ export class Cmd {
         this.container = new Container(this._debug);
     }
 
-    debug() {
-        this._debug = true;
+    debug(debugging?: boolean) {
+        this._debug = (debugging === undefined || debugging === true) ? true : false;
+        this.machine.debug(debugging);
+        this.image.debug(debugging);
+        this.container.debug(debugging);
         return this;
     }
 

@@ -1,9 +1,11 @@
 import * as Q from 'q';
 import inquirer = require('inquirer');
 import { run, runWithoutDebug, addOpts, addOpt, info, err, success, resToJSON } from './base';
+import { Debuggable } from './debuggable';
 
-export class Image {
-    constructor(private _debug) { 
+export class Image extends Debuggable {
+    constructor(_debug) {
+        super(_debug);
     }
 
     build(imageName: string, opts?: IBuildImageOpts) {

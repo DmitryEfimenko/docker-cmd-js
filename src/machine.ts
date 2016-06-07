@@ -1,8 +1,10 @@
 import * as Q from 'q';
-import { run, runWithoutDebug, addOpts, addOpt, info, err } from './base';
+import { run, addOpts, addOpt, info, err } from './base';
+import { Debuggable } from './debuggable';
 
-export class Machine {
-    constructor(private machineName: string, private _debug) { 
+export class Machine extends Debuggable {
+    constructor(private machineName: string, _debug) {
+        super(_debug);
     }
 
     status() {
@@ -15,7 +17,7 @@ export class Machine {
 
     start(opts?: IStartOpts) {
         return Q.Promise((resolve, reject) => {
-            runWithoutDebug(`docker-machine status ${this.machineName}`, true).then(
+            this.runWithoutDebugOnce(this.status()).then(
                 (res) => {
                     if (res != 'Running') {
                         this.runStartMachine(opts).then(resolve, reject);

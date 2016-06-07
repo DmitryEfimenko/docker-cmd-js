@@ -14,8 +14,11 @@ var Cmd = (function () {
         this.image = new image_1.Image(this._debug);
         this.container = new container_1.Container(this._debug);
     }
-    Cmd.prototype.debug = function () {
-        this._debug = true;
+    Cmd.prototype.debug = function (debugging) {
+        this._debug = (debugging === undefined || debugging === true) ? true : false;
+        this.machine.debug(debugging);
+        this.image.debug(debugging);
+        this.container.debug(debugging);
         return this;
     };
     Cmd.prototype.run = function (command, noNewLines) {
