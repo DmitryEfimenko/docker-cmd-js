@@ -27,16 +27,19 @@ gulp.task('deploy', (done) => {
 
 ## API
 
-### `new dockerCmdJs.Cmd(machineName?: string)`
+##### `new dockerCmdJs.Cmd(machineName?: string)`
 Instantiates object that'll run commands. Optionally you can set machine name against which commands will run.
 
-### `cmd.debug(): dockerCmdJs.Cmd`
+---
+##### `cmd.debug(): dockerCmdJs.Cmd`
 Sets verbose output.
 
-### `cmd.run(command: string, noNewLines?: boolean): Q.Promise<string>`
+---
+##### `cmd.run(command: string, noNewLines?: boolean): Q.Promise<string>`
 Takes any command as string. Parameter `noNewLines` set to true removes cariage returns from the output.
 
-### `cmd.resToJSON(s: string): any[]`
+---
+##### `cmd.resToJSON(s: string): any[]`
 Whenever a command run that returns a tabular data (ex: `docker images`), you can pass the result to this method, which will convert data into JSON.
 Example:
 ```javascript
@@ -48,16 +51,20 @@ cmd.run('docker images').then(
 );
 ```
 
-### `cmd.machine.start(opts: IStartOpts): Q.Promise<{}>`
+---
+##### `cmd.machine.start(opts: IStartOpts): Q.Promise<{}>`
 Starts machine. If it does not exist, it'll be created. Resolves even if machine is already started. 
 
-### `cmd.machine.ipAddress(): Q.Promise<string>`
+---
+##### `cmd.machine.ipAddress(): Q.Promise<string>`
 Returns machine's IP address.
 
-### `cmd.machine.status(): Q.Promise<string>`
+---
+##### `cmd.machine.status(): Q.Promise<string>`
 Returns machine's status.
 
-### `cmd.image.build(imageName: string, opts?: IBuildImageOpts): Q.Promise<{}>`
+---
+##### `cmd.image.build(imageName: string, opts?: IBuildImageOpts): Q.Promise<{}>`
 Builds desired image.
 You can provide object with the following options:
 ```javascript
@@ -75,13 +82,16 @@ export interface IBuildImageOpts {
 }
 ```
 
-### `cmd.image.remove(imageName: any): Q.Promise<string>`
+---
+##### `cmd.image.remove(imageName: any): Q.Promise<string>`
 Removes desired image
 
-### `cmd.image.checkForDangling(): Q.Promise<{}>`
+---
+##### `cmd.image.checkForDangling(): Q.Promise<{}>`
 Checks for dangling images. If found, prompts with question whether to remove them or not.
 
-### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>`
+---
+##### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>`
 Starts container from desired image.
 You can provide object with the following options. See docker docs for options' description:
 ```javascript
@@ -95,8 +105,10 @@ export interface IStartDockerOpts {
 }
 ```
 
-### `cmd.container.status(containerName: string): Q.Promise<string>`
+---
+##### `cmd.container.status(containerName: string): Q.Promise<string>`
 Returns container's status.
 
+---
 ## Credits
 Thanks to [Matt Klein](https://github.com/mattklein999), who started out coding this lib.
