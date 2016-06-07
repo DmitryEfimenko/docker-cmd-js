@@ -1,4 +1,8 @@
-# docker-cmd-js
+
+[npm-url]: https://www.npmjs.com/package/docker-cmd-js
+[npm-image]: https://img.shields.io/npm/v/docker-cmd-js.svg
+
+# docker-cmd-js [![NPM version][npm-image]][npm-url]
 Apparently running a **docker** in the `cmd.exe` requires a bunch of environment variables set up. Just spawning a `spawnSync` from `child_process` won't do in most cases. Thus the birth of this lib.
 
 Besides, command execution is wrapped in Promises, and there are some helper methods one can use. See API. 
