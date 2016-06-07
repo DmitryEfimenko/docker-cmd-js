@@ -1,7 +1,7 @@
 import child_process = require('child_process');
 import colors = require('colors');
 
-export function spawn(command: string, env, cb: (result: RunResult)=> void) {
+export function spawn(command: string, env, debug: boolean, cb: (result: RunResult)=> void) {
     let items = command.split(' ');
     //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
     //console.dir(items);
@@ -11,7 +11,8 @@ export function spawn(command: string, env, cb: (result: RunResult)=> void) {
     
     r.stdout.on('data', (data) => {
         result.stdOut = result.stdOut + data.toString();
-        process.stdout.write(data.toString());
+        if(debug)
+            process.stdout.write(data.toString());
     });
 
     r.stderr.on('data', (data) => {
@@ -20,11 +21,12 @@ export function spawn(command: string, env, cb: (result: RunResult)=> void) {
     });
 
     r.on('error', (err) => {
-        process.stdout.write('Failed to start command');
+        process.stdout.write(`Failed to start command: ${command}`);
     });
 
     r.on('close', (code) => {
-        //console.log(`command exited with code ${code}`);
+        if(debug)
+            console.log(`command exited with code ${code}`);
         cb(result);
     });
 }
