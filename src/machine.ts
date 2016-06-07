@@ -53,18 +53,18 @@ export class Machine {
 export interface IStartOpts {
     driver?: string;
     engineInstallUrl?: string;
-    engineOpt?: string[];
-    engineInsecureRegistry?: string[];
-    engineRegistryMirror?: string[];
-    engineLabel?: string[];
+    engineOpt?: string|string[];
+    engineInsecureRegistry?: string|string[];
+    engineRegistryMirror?: string|string[];
+    engineLabel?: string|string[];
     engineStorageDriver?: boolean;
-    engineEnv?: string[];
+    engineEnv?: string|string[];
     swarm?: boolean;
     swarmImage?: string;
     swarmMaster?: boolean;
     swarmDiscovery?: boolean;
     swarmStrategy?: string;
-    swarmOpt?: string[];
+    swarmOpt?: string|string[];
     swarmHost?: string;
     swarmAddr?: boolean;
     swarmExperimental?: boolean;

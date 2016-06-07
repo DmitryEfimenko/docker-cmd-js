@@ -48,9 +48,9 @@ export class Container{
 
 export interface IStartDockerOpts {
     name?: string;
-    publish?: string[];
+    publish?: string|string[];
     volume?: string;
-    volumesFrom?: string[];
-    link?: string[];
-    env?: string[];
+    volumesFrom?: string|string[];
+    link?: string|string[];
+    env?: string|string[];
 }
