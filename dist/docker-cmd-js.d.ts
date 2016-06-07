@@ -11,6 +11,7 @@ export declare class Cmd {
     private machineStatus(cb);
     startMachine(memory: number): Q.Promise<{}>;
     private runStartMachine(memory);
+    machineIpAddress(): Q.Promise<string>;
     buildImage(imageName: string, opts?: IBuildImageOpts): Q.Promise<{}>;
     private runBuildImage(imageName, opts?);
     removeImage(imageName: any): Q.Promise<string>;
@@ -20,12 +21,12 @@ export declare class Cmd {
     private err(...message);
 }
 export interface IStartDockerOpts {
-    name: string;
-    port: string;
-    volume: string;
-    volumesFrom: string;
-    link: string;
-    env: string[];
+    name?: string;
+    port?: string;
+    volume?: string;
+    volumesFrom?: string;
+    link?: string;
+    env?: string[];
 }
 export interface IBuildImageOpts {
     dockerFile?: string;

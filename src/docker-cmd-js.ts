@@ -109,7 +109,7 @@ export class Cmd {
 
     startMachine(memory: number) {
         return Q.Promise((resolve, reject) => {
-            this.runWithoutDebug(`docker-machine status ${this.machineName}`).then(
+            this.runWithoutDebug(`docker-machine status ${this.machineName}`, true).then(
                 (res) => {
                     if (res != 'Running') {
                         this.runStartMachine(memory).then(resolve, reject);
@@ -133,6 +133,10 @@ export class Cmd {
                 (err) => { reject(err); }
             );
         });
+    }
+
+    machineIpAddress() {
+        return this.runWithoutDebug(`docker-machine ip ${this.machineName}`, true);
     }
 
     buildImage(imageName: string, opts?: IBuildImageOpts) {
@@ -176,10 +180,22 @@ export class Cmd {
     }
 
     private runBuildImage(imageName: string, opts?: IBuildImageOpts) {
-        this.info(`Building image ${imageName} via dockerFile: ${opts && opts.dockerFile ? opts.dockerFile : 'Dockerfile'}...`);
-        let c = `docker build -t ${imageName}`;
-        c += (opts && opts.dockerFile) ? ` ${opts.dockerFile}` : ' .';
-        return this.runWithoutDebug(c);
+        return Q.Promise((resolve, reject) => { 
+            this.info(`Building image ${imageName} via dockerFile: ${opts && opts.dockerFile ? opts.dockerFile : 'Dockerfile'}...`);
+            let c = `docker build -t ${imageName}`;
+            c += (opts && opts.dockerFile) ? ` ${opts.dockerFile}` : ' .';
+            this.runWithoutDebug(c).then(
+                resolve,
+                (err: string) => { 
+                    if (err.indexOf('SECURITY WARNING:') > -1) {
+                        // issue when warning returns as a critical error: https://github.com/docker/docker/issues/22623
+                        resolve(true);
+                    }
+                    else
+                        reject(err);
+                }
+            );
+        });
     }
 
     removeImage(imageName) {
@@ -267,12 +283,12 @@ export class Cmd {
 }
 
 export interface IStartDockerOpts {
-    name: string;
-    port: string;
-    volume: string;
-    volumesFrom: string;
-    link: string;
-    env: string[];
+    name?: string;
+    port?: string;
+    volume?: string;
+    volumesFrom?: string;
+    link?: string;
+    env?: string[];
 }
 
 export interface IBuildImageOpts {

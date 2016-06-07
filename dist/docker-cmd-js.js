@@ -104,7 +104,7 @@ var Cmd = (function () {
     Cmd.prototype.startMachine = function (memory) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
-            _this.runWithoutDebug("docker-machine status " + _this.machineName).then(function (res) {
+            _this.runWithoutDebug("docker-machine status " + _this.machineName, true).then(function (res) {
                 if (res != 'Running') {
                     _this.runStartMachine(memory).then(resolve, reject);
                 }
@@ -123,6 +123,9 @@ var Cmd = (function () {
             _this.info("Starting virtual machine " + _this.machineName + " (memory: " + memory + ")");
             _this.runWithoutDebug("docker-machine create --driver virtualbox --virtualbox-no-vtx-check " + (memory ? '--virtualbox-memory ' + memory : '') + " " + _this.machineName).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
         });
+    };
+    Cmd.prototype.machineIpAddress = function () {
+        return this.runWithoutDebug("docker-machine ip " + this.machineName, true);
     };
     Cmd.prototype.buildImage = function (imageName, opts) {
         var _this = this;
@@ -159,10 +162,20 @@ var Cmd = (function () {
         });
     };
     Cmd.prototype.runBuildImage = function (imageName, opts) {
-        this.info("Building image " + imageName + " via dockerFile: " + (opts && opts.dockerFile ? opts.dockerFile : 'Dockerfile') + "...");
-        var c = "docker build -t " + imageName;
-        c += (opts && opts.dockerFile) ? " " + opts.dockerFile : ' .';
-        return this.runWithoutDebug(c);
+        var _this = this;
+        return Q.Promise(function (resolve, reject) {
+            _this.info("Building image " + imageName + " via dockerFile: " + (opts && opts.dockerFile ? opts.dockerFile : 'Dockerfile') + "...");
+            var c = "docker build -t " + imageName;
+            c += (opts && opts.dockerFile) ? " " + opts.dockerFile : ' .';
+            _this.runWithoutDebug(c).then(resolve, function (err) {
+                if (err.indexOf('SECURITY WARNING:') > -1) {
+                    // issue when warning returns as a critical error: https://github.com/docker/docker/issues/22623
+                    resolve(true);
+                }
+                else
+                    reject(err);
+            });
+        });
     };
     Cmd.prototype.removeImage = function (imageName) {
         return this.runWithoutDebug("docker rmi -f " + imageName);
