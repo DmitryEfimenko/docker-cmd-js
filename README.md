@@ -42,6 +42,21 @@ Sets verbose output.
 ##### `cmd.run(command: string, noNewLines?: boolean): Q.Promise<string>`
 Takes any command as string. Parameter `noNewLines` set to true removes cariage returns from the output.
 
+Returns Promise.
+
+---
+##### `cmd.runSync(command: string): RunResult;`
+Takes any command as string.
+
+Returns the following object:
+```javascript
+interface RunResult {
+    stdOut: string;
+    stdErr: string;
+}
+
+```
+
 ---
 ##### `cmd.resToJSON(s: string): any[]`
 Whenever a command run that returns a tabular data (ex: `docker images`), you can pass the result to this method, which will convert data into JSON.
