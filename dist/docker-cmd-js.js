@@ -21,6 +21,9 @@ var Cmd = (function () {
     Cmd.prototype.run = function (command, noNewLines) {
         return base_1.run(command, this._debug, noNewLines);
     };
+    Cmd.prototype.runSync = function (command) {
+        return base_1.runSync(command, this._debug);
+    };
     Cmd.prototype.resToJSON = function (s) {
         return base_1.resToJSON(s);
     };

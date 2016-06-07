@@ -4,9 +4,8 @@ var colors = require('colors');
 var childProcessHelpers_1 = require('./childProcessHelpers');
 function run(command, _debug, noNewLines) {
     var _this = this;
-    if (_debug) {
+    if (_debug)
         info('Running:', command);
-    }
     var deferred = Q.defer();
     childProcessHelpers_1.spawn(command, process.env, _debug, function (result) {
         if (_debug) {
@@ -37,6 +36,12 @@ function run(command, _debug, noNewLines) {
     return deferred.promise;
 }
 exports.run = run;
+function runSync(command, _debug) {
+    if (_debug)
+        info('Running:', command);
+    return childProcessHelpers_1.spawnSync(command, process.env, _debug);
+}
+exports.runSync = runSync;
 function runWithoutDebug(command, noNewLines) {
     return Q.Promise(function (resolve, reject) {
         run(command, false, noNewLines)

@@ -1,11 +1,9 @@
 import * as Q from 'q';
 import colors = require('colors');
-import { spawn } from './childProcessHelpers';
+import { spawn, spawnSync, RunResult } from './childProcessHelpers';
 
 export function run(command: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string> {
-    if (_debug) {
-        info('Running:', command);
-    }
+    if (_debug) info('Running:', command);
 
     let deferred = Q.defer<string>();
     spawn(command, process.env, _debug, (result) => {
@@ -28,6 +26,12 @@ export function run(command: string, _debug: boolean, noNewLines?: boolean): Q.P
         }
     });
     return deferred.promise;
+}
+
+export function runSync(command: string, _debug: boolean) { 
+    if (_debug) info('Running:', command);
+    
+    return spawnSync(command, process.env, _debug);
 }
 
 export function runWithoutDebug(command: string, noNewLines?: boolean) {

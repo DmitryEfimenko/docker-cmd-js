@@ -1,6 +1,7 @@
 "use strict";
 var child_process = require('child_process');
 var colors = require('colors');
+var base_1 = require('./base');
 function spawn(command, env, debug, cb) {
     var items = command.split(' ');
     //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
@@ -26,11 +27,21 @@ function spawn(command, env, debug, cb) {
     });
 }
 exports.spawn = spawn;
-function spawnSync(command, env) {
+function spawnSync(command, env, debug) {
     var items = command.split(' ');
     //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
     //console.dir(items);
     var r = child_process.spawnSync(items[0], items.slice(1), { env: env });
+    if (debug) {
+        if (r.stdout) {
+            base_1.info('stdout:');
+            process.stdout.write(r.stdout.toString());
+        }
+        if (r.stderr) {
+            base_1.info('stderr:');
+            process.stdout.write(colors.red(r.stderr.toString()));
+        }
+    }
     return {
         stdOut: r.stdout.toString(),
         stdErr: r.stderr.toString()

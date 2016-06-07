@@ -1,5 +1,6 @@
 import child_process = require('child_process');
 import colors = require('colors');
+import { info } from './base';
 
 export function spawn(command: string, env, debug: boolean, cb: (result: RunResult)=> void) {
     let items = command.split(' ');
@@ -31,12 +32,22 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
     });
 }
 
-export function spawnSync(command: string, env): RunResult {
+export function spawnSync(command: string, env, debug: boolean): RunResult {
         let items = command.split(' ');
         //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
         //console.dir(items);
 
         let r = child_process.spawnSync(items[0], items.slice(1), { env: env });
+        if (debug) {
+            if (r.stdout) {
+                info('stdout:')
+                process.stdout.write(r.stdout.toString())
+            }
+            if (r.stderr) {
+                info('stderr:')
+                process.stdout.write(colors.red(r.stderr.toString()));
+            }    
+        }
         return {
             stdOut: r.stdout.toString(),
             stdErr: r.stderr.toString()
