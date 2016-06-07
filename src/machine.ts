@@ -13,7 +13,7 @@ export class Machine {
         return run(`docker-machine ip ${this.machineName}`, this._debug, true);
     }
 
-    start(opts: IStartOpts) {
+    start(opts?: IStartOpts) {
         return Q.Promise((resolve, reject) => {
             runWithoutDebug(`docker-machine status ${this.machineName}`, true).then(
                 (res) => {
