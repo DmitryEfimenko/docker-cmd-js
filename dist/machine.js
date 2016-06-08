@@ -41,14 +41,14 @@ var Machine = (function (_super) {
             var c = "docker-machine create";
             if (!opts)
                 opts = {};
-            base_1.addOpts(c, opts);
+            c = base_1.addOpts(c, opts);
             // set sinsible defaults
             if (!opts.driver)
-                base_1.addOpt(c, '--driver', 'virtualbox');
+                c = base_1.addOpt(c, '--driver', 'virtualbox');
             if (!opts.virtualboxMemory)
-                base_1.addOpt(c, '--virtualbox-memory', '6144');
+                c = base_1.addOpt(c, '--virtualbox-memory', '6144');
             if (!opts.virtualboxNoVtxCheck)
-                base_1.addOpt(c, '--virtualbox-no-vtx-check');
+                c = base_1.addOpt(c, '--virtualbox-no-vtx-check');
             c += " " + _this.machineName;
             base_1.run(c, _this._debug).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
         });

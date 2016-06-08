@@ -16,9 +16,9 @@ export class Container extends Debuggable {
                         info(`Creating and starting container ${containerName}...`);
                         let c = `docker run -d`;
                         if (!opts) opts = {};
-                        addOpts(c, opts);
+                        c = addOpts(c, opts);
                         // set sinsible defaults
-                        if (!opts.name) addOpt(c, '--name', containerName);
+                        if (!opts.name) c = addOpt(c, '--name', containerName);
                         c += ` ${imageName}`;
                         if (command) c += ` ${command}`;
                         run(c, this._debug).then(() => { resolve(true); }, reject);

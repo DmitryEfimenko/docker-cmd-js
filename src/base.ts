@@ -55,17 +55,19 @@ export function addOpt(command: string, optionName: string, optionVal?: string|s
     } else {
         command += ` ${optionName}`;
     }
+    return command;
 }
 
 export function addOpts(command: string, opts: any) {
     for (let prop in opts) {
         let optName = getOptionName(prop);
         if (opts[prop] != undefined) {
-            addOpt(command, optName, opts[prop]);
+            command = addOpt(command, optName, opts[prop]);
         } else {
-            addOpt(command, optName);
+            command = addOpt(command, optName);
         }
     }
+    return command;
 }
 
 function getOptionName(opt: string) {

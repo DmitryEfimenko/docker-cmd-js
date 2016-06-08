@@ -37,11 +37,11 @@ export class Machine extends Debuggable {
         return Q.Promise((resolve, reject) => {
             let c = `docker-machine create`; 
             if (!opts) opts = {};
-            addOpts(c, opts);
+            c = addOpts(c, opts);
             // set sinsible defaults
-            if (!opts.driver) addOpt(c, '--driver', 'virtualbox');
-            if (!opts.virtualboxMemory) addOpt(c, '--virtualbox-memory', '6144');
-            if (!opts.virtualboxNoVtxCheck) addOpt(c, '--virtualbox-no-vtx-check');
+            if (!opts.driver) c = addOpt(c, '--driver', 'virtualbox');
+            if (!opts.virtualboxMemory) c = addOpt(c, '--virtualbox-memory', '6144');
+            if (!opts.virtualboxNoVtxCheck) c = addOpt(c, '--virtualbox-no-vtx-check');
             c += ` ${this.machineName}`;
 
             run(c, this._debug).then(

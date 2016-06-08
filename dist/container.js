@@ -22,10 +22,10 @@ var Container = (function (_super) {
                     var c = "docker run -d";
                     if (!opts)
                         opts = {};
-                    base_1.addOpts(c, opts);
+                    c = base_1.addOpts(c, opts);
                     // set sinsible defaults
                     if (!opts.name)
-                        base_1.addOpt(c, '--name', containerName);
+                        c = base_1.addOpt(c, '--name', containerName);
                     c += " " + imageName;
                     if (command)
                         c += " " + command;

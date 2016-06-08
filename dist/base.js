@@ -66,18 +66,20 @@ function addOpt(command, optionName, optionVal) {
     else {
         command += " " + optionName;
     }
+    return command;
 }
 exports.addOpt = addOpt;
 function addOpts(command, opts) {
     for (var prop in opts) {
         var optName = getOptionName(prop);
         if (opts[prop] != undefined) {
-            addOpt(command, optName, opts[prop]);
+            command = addOpt(command, optName, opts[prop]);
         }
         else {
-            addOpt(command, optName);
+            command = addOpt(command, optName);
         }
     }
+    return command;
 }
 exports.addOpts = addOpts;
 function getOptionName(opt) {
