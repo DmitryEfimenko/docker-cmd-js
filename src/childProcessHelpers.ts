@@ -17,8 +17,10 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
     });
 
     r.stderr.on('data', (data) => {
-        result.stdErr = result.stdErr + data.toString();
-        process.stdout.write(colors.red(`stderr: ${data.toString()}`));
+        if (data.indexOf('SECURITY WARNING:') == -1) {
+            result.stdErr = result.stdErr + data.toString();
+            process.stdout.write(colors.red(`stderr: ${data.toString()}`));
+        }
     });
 
     r.on('error', (err) => {

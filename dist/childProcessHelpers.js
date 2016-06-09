@@ -14,8 +14,10 @@ function spawn(command, env, debug, cb) {
             process.stdout.write(data.toString());
     });
     r.stderr.on('data', function (data) {
-        result.stdErr = result.stdErr + data.toString();
-        process.stdout.write(colors.red("stderr: " + data.toString()));
+        if (data.indexOf('SECURITY WARNING:') == -1) {
+            result.stdErr = result.stdErr + data.toString();
+            process.stdout.write(colors.red("stderr: " + data.toString()));
+        }
     });
     r.on('error', function (err) {
         process.stdout.write("Failed to start command: " + command);
