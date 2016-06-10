@@ -126,17 +126,20 @@ export class Log {
     static infoProgress(...message: string[]): IProgress {
         let c = '\\';
         let m = `${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))}`;
+
+        process.stdout.write(`${m} ${c}\r`);
         let interval = setInterval(() => {
             if (c == '\\') c = '/';
             else if (c == '/') c = '-';
             else if (c == '-') c = '\\';
             process.stdout.write(`${m} ${c}\r`);
-        }, 1000)
+        }, 300)
         return { interval: interval, message: m };
     }
 
     static terminateProgress(progress: IProgress) {
         clearInterval(progress.interval);
+        (<any>process.stdout).clearLine();
         process.stdout.write(progress.message);
         this.newLine();
         return this;

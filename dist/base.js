@@ -152,6 +152,7 @@ var Log = (function () {
         }
         var c = '\\';
         var m = colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' '));
+        process.stdout.write(m + " " + c + "\r");
         var interval = setInterval(function () {
             if (c == '\\')
                 c = '/';
@@ -160,11 +161,12 @@ var Log = (function () {
             else if (c == '-')
                 c = '\\';
             process.stdout.write(m + " " + c + "\r");
-        }, 1000);
+        }, 300);
         return { interval: interval, message: m };
     };
     Log.terminateProgress = function (progress) {
         clearInterval(progress.interval);
+        process.stdout.clearLine();
         process.stdout.write(progress.message);
         this.newLine();
         return this;
