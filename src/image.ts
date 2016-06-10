@@ -1,6 +1,6 @@
 import * as Q from 'q';
 import inquirer = require('inquirer');
-import { run, runWithoutDebug, success, resToJSON } from './base';
+import { run, runWithoutDebug, Log, resToJSON } from './base';
 import { Debuggable } from './debuggable';
 
 export class Image extends Debuggable {
@@ -73,7 +73,7 @@ export class Image extends Debuggable {
                                 }
                                 Q.all(promises).then(
                                     () => {
-                                        success('Cleaned up dangling images.');
+                                        Log.success('Cleaned up dangling images.');
                                         resolve(true);
                                     },
                                     (err) => { err('could not clean up dangling images:', err); }
@@ -95,15 +95,22 @@ export class Image extends Debuggable {
         return Q.Promise((resolve, reject) => { 
             let c = `docker build -t ${imageName}`;
             c += (opts && opts.pathOrUrl) ? ` ${opts.pathOrUrl}` : ' .';
+            let interval = Log.infoProgress(`Building image ${imageName}`);
             run(c, this._debug).then(
-                resolve,
+                () => {
+                    Log.terminateInterval(interval).info(`Image ${imageName} built`);
+                    resolve(true);
+                },
                 (err: string) => { 
                     if (err.indexOf('SECURITY WARNING:') > -1) {
                         // issue when warning returns as a critical error: https://github.com/docker/docker/issues/22623
+                        Log.terminateInterval(interval).info(`Image ${imageName} built`);
                         resolve(true);
                     }
-                    else
+                    else {
+                        Log.terminateInterval(interval)
                         reject(err);
+                    }
                 }
             );
         });

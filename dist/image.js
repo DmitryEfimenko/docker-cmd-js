@@ -70,7 +70,7 @@ var Image = (function (_super) {
                                 promises.push(p);
                             }
                             Q.all(promises).then(function () {
-                                base_1.success('Cleaned up dangling images.');
+                                base_1.Log.success('Cleaned up dangling images.');
                                 resolve(true);
                             }, function (err) { err('could not clean up dangling images:', err); });
                         }
@@ -90,13 +90,20 @@ var Image = (function (_super) {
         return Q.Promise(function (resolve, reject) {
             var c = "docker build -t " + imageName;
             c += (opts && opts.pathOrUrl) ? " " + opts.pathOrUrl : ' .';
-            base_1.run(c, _this._debug).then(resolve, function (err) {
+            var interval = base_1.Log.infoProgress("Building image " + imageName);
+            base_1.run(c, _this._debug).then(function () {
+                base_1.Log.terminateInterval(interval).info("Image " + imageName + " built");
+                resolve(true);
+            }, function (err) {
                 if (err.indexOf('SECURITY WARNING:') > -1) {
                     // issue when warning returns as a critical error: https://github.com/docker/docker/issues/22623
+                    base_1.Log.terminateInterval(interval).info("Image " + imageName + " built");
                     resolve(true);
                 }
-                else
+                else {
+                    base_1.Log.terminateInterval(interval);
                     reject(err);
+                }
             });
         });
     };

@@ -1,6 +1,6 @@
 import child_process = require('child_process');
 import colors = require('colors');
-import { info } from './base';
+import { Log } from './base';
 
 export function spawn(command: string, env, debug: boolean, cb: (result: RunResult)=> void) {
     let items = command.split(' ');
@@ -42,11 +42,11 @@ export function spawnSync(command: string, env, debug: boolean): RunResult {
         let r = child_process.spawnSync(items[0], items.slice(1), { env: env });
         if (debug) {
             if (r.stdout) {
-                info('stdout:')
+                Log.info('stdout:')
                 process.stdout.write(r.stdout.toString())
             }
             if (r.stderr) {
-                info('stderr:')
+                Log.info('stderr:')
                 process.stdout.write(colors.red(r.stderr.toString()));
             }    
         }

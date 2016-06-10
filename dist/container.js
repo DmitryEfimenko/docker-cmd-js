@@ -15,10 +15,11 @@ var Container = (function (_super) {
     Container.prototype.start = function (imageName, opts, command) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
+            var interval = base_1.Log.infoProgress('Checking if container needs to be started');
             var containerName = (opts && opts.name) ? opts.name : imageName;
             _this.runWithoutDebugOnce(_this.status(containerName)).then(function (status) {
                 if (!status) {
-                    base_1.info("Creating and starting container " + containerName + "...");
+                    interval = base_1.Log.terminateInterval(interval).infoProgress("Creating and starting container " + containerName + "...");
                     var c = "docker run -d";
                     if (!opts)
                         opts = {};
@@ -29,20 +30,30 @@ var Container = (function (_super) {
                     c += " " + imageName;
                     if (command)
                         c += " " + command;
-                    base_1.run(c, _this._debug).then(function () { resolve(true); }, reject);
+                    base_1.run(c, _this._debug).then(function () {
+                        base_1.Log.terminateInterval(interval).info("Container " + containerName + " started.");
+                        resolve(true);
+                    }, function (err) {
+                        base_1.Log.terminateInterval(interval);
+                        reject(err);
+                    });
                 }
                 else if (status.indexOf('Up') == 1) {
-                    base_1.info("Container " + containerName + " already started.");
+                    base_1.Log.terminateInterval(interval).info("Container " + containerName + " already started.");
                     resolve(false);
                 }
                 else if (status.indexOf('Exited') == 1) {
-                    base_1.info("Container " + containerName + " exists but is not started. Starting now.");
+                    base_1.Log.terminateInterval(interval).info("Container " + containerName + " exists but is not started. Starting now.");
                     base_1.runWithoutDebug("docker start " + containerName).then(function () { resolve(true); }, reject);
                 }
                 else {
+                    base_1.Log.terminateInterval(interval);
                     reject("Could not start container " + containerName() + ". Status was " + status + " Should never hit this.");
                 }
-            }, reject);
+            }, function (err) {
+                base_1.Log.terminateInterval(interval);
+                reject(err);
+            });
         });
     };
     Container.prototype.status = function (containerName) {

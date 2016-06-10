@@ -5,12 +5,12 @@ var childProcessHelpers_1 = require('./childProcessHelpers');
 function run(command, _debug, noNewLines) {
     var _this = this;
     if (_debug)
-        info('Running:', command);
+        Log.info('Running:', command);
     var deferred = Q.defer();
     childProcessHelpers_1.spawn(command, process.env, _debug, function (result) {
         if (_debug) {
             if (result.stdErr) {
-                err('command finnished with errors.');
+                Log.err('command finnished with errors.');
                 if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
                     _this.checkForDanglingImages(function () {
                         if (result.stdErr)
@@ -38,7 +38,7 @@ function run(command, _debug, noNewLines) {
 exports.run = run;
 function runSync(command, _debug) {
     if (_debug)
-        info('Running:', command);
+        Log.info('Running:', command);
     return childProcessHelpers_1.spawnSync(command, process.env, _debug);
 }
 exports.runSync = runSync;
@@ -118,27 +118,51 @@ function resToJSON(s) {
     return result;
 }
 exports.resToJSON = resToJSON;
-function success() {
-    var message = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        message[_i - 0] = arguments[_i];
+var Log = (function () {
+    function Log() {
     }
-    console.log(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
-}
-exports.success = success;
-function info() {
-    var message = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        message[_i - 0] = arguments[_i];
-    }
-    console.log(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
-}
-exports.info = info;
-function err() {
-    var message = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        message[_i - 0] = arguments[_i];
-    }
-    console.log(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
-}
-exports.err = err;
+    Log.success = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i - 0] = arguments[_i];
+        }
+        console.log(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
+    };
+    Log.err = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i - 0] = arguments[_i];
+        }
+        console.log(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
+    };
+    Log.info = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i - 0] = arguments[_i];
+        }
+        console.log(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
+    };
+    Log.infoProgress = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i - 0] = arguments[_i];
+        }
+        var c = '\\';
+        var interval = setInterval(function () {
+            if (c == '\\')
+                c = '/';
+            else if (c == '/')
+                c = '-';
+            else if (c == '-')
+                c = '\\';
+            console.log(colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' ')) + " " + c + "\\r");
+        }, 1000);
+        return interval;
+    };
+    Log.terminateInterval = function (interval) {
+        clearInterval(interval);
+        return this;
+    };
+    return Log;
+}());
+exports.Log = Log;

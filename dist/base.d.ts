@@ -6,6 +6,10 @@ export declare function runWithoutDebug(command: string, noNewLines?: boolean): 
 export declare function addOpt(command: string, optionName: string, optionVal?: string | string[] | boolean): string;
 export declare function addOpts(command: string, opts: any): string;
 export declare function resToJSON(s: string): any[];
-export declare function success(...message: string[]): void;
-export declare function info(...message: string[]): void;
-export declare function err(...message: string[]): void;
+export declare class Log {
+    static success(...message: string[]): void;
+    static err(...message: string[]): void;
+    static info(...message: string[]): void;
+    static infoProgress(...message: string[]): NodeJS.Timer;
+    static terminateInterval(interval: NodeJS.Timer): typeof Log;
+}

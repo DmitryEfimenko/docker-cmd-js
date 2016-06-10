@@ -1,5 +1,5 @@
 import * as Q from 'q';
-import { run, addOpts, addOpt, info, err } from './base';
+import { run, addOpts, addOpt, Log } from './base';
 import { Debuggable } from './debuggable';
 
 export class Machine extends Debuggable {
@@ -22,7 +22,7 @@ export class Machine extends Debuggable {
                     if (res != 'Running') {
                         this.runStartMachine(opts).then(resolve, reject);
                     } else {
-                        info('docker-machine status:', res);
+                        Log.info('docker-machine status:', res);
                         resolve(res);
                     }
                 },

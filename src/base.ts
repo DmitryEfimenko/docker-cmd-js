@@ -3,13 +3,13 @@ import colors = require('colors');
 import { spawn, spawnSync, RunResult } from './childProcessHelpers';
 
 export function run(command: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string> {
-    if (_debug) info('Running:', command);
+    if (_debug) Log.info('Running:', command);
 
     let deferred = Q.defer<string>();
     spawn(command, process.env, _debug, (result) => {
         if (_debug) {
             if (result.stdErr) {
-                err('command finnished with errors.')
+                Log.err('command finnished with errors.')
                 if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
                     this.checkForDanglingImages(() => {
                         if (result.stdErr) deferred.reject(result.stdErr);
@@ -29,7 +29,7 @@ export function run(command: string, _debug: boolean, noNewLines?: boolean): Q.P
 }
 
 export function runSync(command: string, _debug: boolean) { 
-    if (_debug) info('Running:', command);
+    if (_debug) Log.info('Running:', command);
     
     return spawnSync(command, process.env, _debug);
 }
@@ -107,14 +107,32 @@ export function resToJSON(s: string): any[] {
     return result;
 }
 
-export function success(...message: string[]) {
-    console.log(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
-}
+export class Log {
+    static success(...message: string[]) {
+        console.log(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
+    }
 
-export function info(...message: string[]) {
-    console.log(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
-}
+    static err(...message: string[]) {
+        console.log(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
+    }
 
-export function err(...message: string[]) {
-    console.log(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
+    static info(...message: string[]) { 
+        console.log(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
+    }
+
+    static infoProgress(...message: string[]) {
+        let c = '\\';
+        let interval = setInterval(() => {
+            if (c == '\\') c = '/';
+            else if (c == '/') c = '-';
+            else if (c == '-') c = '\\';
+            console.log(`${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))} ${c}\\r`);
+        }, 1000)
+        return interval;
+    }
+
+    static terminateInterval(interval: NodeJS.Timer) { 
+        clearInterval(interval);
+        return this;
+    }
 }

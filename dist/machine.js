@@ -27,7 +27,7 @@ var Machine = (function (_super) {
                     _this.runStartMachine(opts).then(resolve, reject);
                 }
                 else {
-                    base_1.info('docker-machine status:', res);
+                    base_1.Log.info('docker-machine status:', res);
                     resolve(res);
                 }
             }, function (err) {

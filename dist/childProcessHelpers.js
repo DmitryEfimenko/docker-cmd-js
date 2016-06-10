@@ -36,11 +36,11 @@ function spawnSync(command, env, debug) {
     var r = child_process.spawnSync(items[0], items.slice(1), { env: env });
     if (debug) {
         if (r.stdout) {
-            base_1.info('stdout:');
+            base_1.Log.info('stdout:');
             process.stdout.write(r.stdout.toString());
         }
         if (r.stderr) {
-            base_1.info('stderr:');
+            base_1.Log.info('stderr:');
             process.stdout.write(colors.red(r.stderr.toString()));
         }
     }
