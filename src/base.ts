@@ -109,15 +109,15 @@ export function resToJSON(s: string): any[] {
 
 export class Log {
     static success(...message: string[]) {
-        console.log(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
+        process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
     }
 
     static err(...message: string[]) {
-        console.log(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
+        process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
     }
 
     static info(...message: string[]) { 
-        console.log(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
+        process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
     }
 
     static infoProgress(...message: string[]) {
@@ -126,7 +126,7 @@ export class Log {
             if (c == '\\') c = '/';
             else if (c == '/') c = '-';
             else if (c == '-') c = '\\';
-            console.log(`${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))} ${c}\r`);
+            process.stdout.write(`${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))} ${c}\r`);
         }, 1000)
         return interval;
     }

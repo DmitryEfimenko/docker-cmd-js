@@ -126,21 +126,21 @@ var Log = (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             message[_i - 0] = arguments[_i];
         }
-        console.log(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
+        process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
     };
     Log.err = function () {
         var message = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             message[_i - 0] = arguments[_i];
         }
-        console.log(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
+        process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
     };
     Log.info = function () {
         var message = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             message[_i - 0] = arguments[_i];
         }
-        console.log(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
+        process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
     };
     Log.infoProgress = function () {
         var message = [];
@@ -155,7 +155,7 @@ var Log = (function () {
                 c = '-';
             else if (c == '-')
                 c = '\\';
-            console.log(colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' ')) + " " + c + "\r");
+            process.stdout.write(colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' ')) + " " + c + "\r");
         }, 1000);
         return interval;
     };
