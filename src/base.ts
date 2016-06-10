@@ -131,7 +131,8 @@ export class Log {
         return interval;
     }
 
-    static terminateInterval(interval: NodeJS.Timer) { 
+    static terminateInterval(interval: NodeJS.Timer) {
+        process.stdout.write(`\n`);
         clearInterval(interval);
         return this;
     }

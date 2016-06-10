@@ -160,6 +160,7 @@ var Log = (function () {
         return interval;
     };
     Log.terminateInterval = function (interval) {
+        process.stdout.write("\n");
         clearInterval(interval);
         return this;
     };
