@@ -95,20 +95,20 @@ export class Image extends Debuggable {
         return Q.Promise((resolve, reject) => { 
             let c = `docker build -t ${imageName}`;
             c += (opts && opts.pathOrUrl) ? ` ${opts.pathOrUrl}` : ' .';
-            let interval = Log.infoProgress(`Building image ${imageName}`);
+            let progress = Log.infoProgress(`Building image ${imageName}`);
             run(c, this._debug).then(
                 () => {
-                    Log.terminateInterval(interval).info(`Image ${imageName} built`);
+                    Log.terminateProgress(progress).info(`Image ${imageName} built`);
                     resolve(true);
                 },
                 (err: string) => { 
                     if (err.indexOf('SECURITY WARNING:') > -1) {
                         // issue when warning returns as a critical error: https://github.com/docker/docker/issues/22623
-                        Log.terminateInterval(interval).info(`Image ${imageName} built`);
+                        Log.terminateProgress(progress).info(`Image ${imageName} built`);
                         resolve(true);
                     }
                     else {
-                        Log.terminateInterval(interval)
+                        Log.terminateProgress(progress)
                         reject(err);
                     }
                 }

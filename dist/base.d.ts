@@ -10,6 +10,11 @@ export declare class Log {
     static success(...message: string[]): void;
     static err(...message: string[]): void;
     static info(...message: string[]): void;
-    static infoProgress(...message: string[]): NodeJS.Timer;
-    static terminateInterval(interval: NodeJS.Timer): typeof Log;
+    static infoProgress(...message: string[]): IProgress;
+    static terminateProgress(progress: IProgress): typeof Log;
+    private static newLine();
+}
+export interface IProgress {
+    interval: NodeJS.Timer;
+    message: string;
 }

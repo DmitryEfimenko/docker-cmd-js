@@ -9,12 +9,12 @@ export class Container extends Debuggable {
 
     start(imageName, opts?: IStartDockerOpts, command?: string) {
         return Q.Promise((resolve, reject) => {
-            let interval = Log.infoProgress('Checking if container needs to be started');
+            let progress = Log.infoProgress('Checking if container needs to be started');
             let containerName = (opts && opts.name) ? opts.name : imageName;
             this.runWithoutDebugOnce(this.status(containerName)).then(
                 (status) => {
                     if (!status) {
-                        interval = Log.terminateInterval(interval).infoProgress(`Creating and starting container ${containerName}...`);
+                        progress = Log.terminateProgress(progress).infoProgress(`Creating and starting container ${containerName}...`);
                         let c = `docker run -d`;
                         if (!opts) opts = {};
                         c = addOpts(c, opts);
@@ -24,30 +24,30 @@ export class Container extends Debuggable {
                         if (command) c += ` ${command}`;
                         run(c, this._debug).then(
                             () => {
-                                Log.terminateInterval(interval).info(`Container ${containerName} started.`);
+                                Log.terminateProgress(progress).info(`Container ${containerName} started.`);
                                 resolve(true);
                             },
                             (err) => {
-                                Log.terminateInterval(interval)
+                                Log.terminateProgress(progress)
                                 reject(err);
                             }
                         );
                     } else if (status.indexOf('Up') == 1) {
-                        Log.terminateInterval(interval).info(`Container ${containerName} already started.`);
+                        Log.terminateProgress(progress).info(`Container ${containerName} already started.`);
                         resolve(false)
                     } else if (status.indexOf('Exited') == 1) {
-                        Log.terminateInterval(interval).info(`Container ${containerName} exists but is not started. Starting now.`);
+                        Log.terminateProgress(progress).info(`Container ${containerName} exists but is not started. Starting now.`);
                         runWithoutDebug(`docker start ${containerName}`).then(
                             () => { resolve(true) },
                             reject
                         );
                     } else {
-                        Log.terminateInterval(interval);
+                        Log.terminateProgress(progress);
                         reject(`Could not start container ${containerName()}. Status was ${status} Should never hit this.`);
                     }
                 },
                 (err) => { 
-                    Log.terminateInterval(interval);
+                    Log.terminateProgress(progress);
                     reject(err);
                 }
             );

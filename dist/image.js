@@ -90,18 +90,18 @@ var Image = (function (_super) {
         return Q.Promise(function (resolve, reject) {
             var c = "docker build -t " + imageName;
             c += (opts && opts.pathOrUrl) ? " " + opts.pathOrUrl : ' .';
-            var interval = base_1.Log.infoProgress("Building image " + imageName);
+            var progress = base_1.Log.infoProgress("Building image " + imageName);
             base_1.run(c, _this._debug).then(function () {
-                base_1.Log.terminateInterval(interval).info("Image " + imageName + " built");
+                base_1.Log.terminateProgress(progress).info("Image " + imageName + " built");
                 resolve(true);
             }, function (err) {
                 if (err.indexOf('SECURITY WARNING:') > -1) {
                     // issue when warning returns as a critical error: https://github.com/docker/docker/issues/22623
-                    base_1.Log.terminateInterval(interval).info("Image " + imageName + " built");
+                    base_1.Log.terminateProgress(progress).info("Image " + imageName + " built");
                     resolve(true);
                 }
                 else {
-                    base_1.Log.terminateInterval(interval);
+                    base_1.Log.terminateProgress(progress);
                     reject(err);
                 }
             });

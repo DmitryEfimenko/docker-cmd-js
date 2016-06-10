@@ -110,31 +110,44 @@ export function resToJSON(s: string): any[] {
 export class Log {
     static success(...message: string[]) {
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
+        this.newLine();
     }
 
     static err(...message: string[]) {
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
+        this.newLine();
     }
 
     static info(...message: string[]) { 
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
+        this.newLine();
     }
 
-    static infoProgress(...message: string[]) {
+    static infoProgress(...message: string[]): IProgress {
         let c = '\\';
-        process.stdout.write(`\n`);
+        let m = `${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))}`;
         let interval = setInterval(() => {
             if (c == '\\') c = '/';
             else if (c == '/') c = '-';
             else if (c == '-') c = '\\';
-            process.stdout.write(`${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))} ${c}\r`);
+            process.stdout.write(`${m} ${c}\r`);
         }, 1000)
-        return interval;
+        return { interval: interval, message: m };
     }
 
-    static terminateInterval(interval: NodeJS.Timer) {
-        process.stdout.write(`\n`);
-        clearInterval(interval);
+    static terminateProgress(progress: IProgress) {
+        clearInterval(progress.interval);
+        process.stdout.write(progress.message);
+        this.newLine();
         return this;
     }
+
+    private static newLine() { 
+        process.stdout.write(`\n`);
+    }
+}
+
+export interface IProgress {
+    interval: NodeJS.Timer;
+    message: string;
 }

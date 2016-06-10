@@ -127,6 +127,7 @@ var Log = (function () {
             message[_i - 0] = arguments[_i];
         }
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
+        this.newLine();
     };
     Log.err = function () {
         var message = [];
@@ -134,6 +135,7 @@ var Log = (function () {
             message[_i - 0] = arguments[_i];
         }
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
+        this.newLine();
     };
     Log.info = function () {
         var message = [];
@@ -141,6 +143,7 @@ var Log = (function () {
             message[_i - 0] = arguments[_i];
         }
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
+        this.newLine();
     };
     Log.infoProgress = function () {
         var message = [];
@@ -148,7 +151,7 @@ var Log = (function () {
             message[_i - 0] = arguments[_i];
         }
         var c = '\\';
-        process.stdout.write("\n");
+        var m = colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' '));
         var interval = setInterval(function () {
             if (c == '\\')
                 c = '/';
@@ -156,14 +159,18 @@ var Log = (function () {
                 c = '-';
             else if (c == '-')
                 c = '\\';
-            process.stdout.write(colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' ')) + " " + c + "\r");
+            process.stdout.write(m + " " + c + "\r");
         }, 1000);
-        return interval;
+        return { interval: interval, message: m };
     };
-    Log.terminateInterval = function (interval) {
-        process.stdout.write("\n");
-        clearInterval(interval);
+    Log.terminateProgress = function (progress) {
+        clearInterval(progress.interval);
+        process.stdout.write(progress.message);
+        this.newLine();
         return this;
+    };
+    Log.newLine = function () {
+        process.stdout.write("\n");
     };
     return Log;
 }());
