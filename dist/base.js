@@ -155,7 +155,7 @@ var Log = (function () {
                 c = '-';
             else if (c == '-')
                 c = '\\';
-            console.log(colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' ')) + " " + c + "\\r");
+            console.log(colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' ')) + " " + c + "\r");
         }, 1000);
         return interval;
     };

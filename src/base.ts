@@ -126,7 +126,7 @@ export class Log {
             if (c == '\\') c = '/';
             else if (c == '/') c = '-';
             else if (c == '-') c = '\\';
-            console.log(`${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))} ${c}\\r`);
+            console.log(`${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))} ${c}\r`);
         }, 1000)
         return interval;
     }
