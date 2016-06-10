@@ -148,6 +148,7 @@ var Log = (function () {
             message[_i - 0] = arguments[_i];
         }
         var c = '\\';
+        process.stdout.write("\n");
         var interval = setInterval(function () {
             if (c == '\\')
                 c = '/';

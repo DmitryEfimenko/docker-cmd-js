@@ -122,6 +122,7 @@ export class Log {
 
     static infoProgress(...message: string[]) {
         let c = '\\';
+        process.stdout.write(`\n`);
         let interval = setInterval(() => {
             if (c == '\\') c = '/';
             else if (c == '/') c = '-';
