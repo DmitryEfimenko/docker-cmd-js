@@ -14,6 +14,9 @@ var Image = (function (_super) {
     function Image() {
         _super.apply(this, arguments);
     }
+    Image.prototype.build = function (imageName, opts) {
+        return this.build(imageName, opts);
+    };
     Image.build = function (imageName, opts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
@@ -48,8 +51,14 @@ var Image = (function (_super) {
             });
         });
     };
+    Image.prototype.remove = function (imageName) {
+        return this.remove(imageName);
+    };
     Image.remove = function (imageName) {
         return base_1.run("docker rmi -f " + imageName, docker_cmd_js_1.Opts.debug);
+    };
+    Image.prototype.checkForDangling = function () {
+        return this.checkForDangling();
     };
     Image.checkForDangling = function () {
         var _this = this;

@@ -5,12 +5,24 @@ import { CommonMethods } from './commonMethods';
 
 export class Machine extends CommonMethods {
 
+    status() {
+        return this.status();
+    }
+
     static status() {
         return run('docker-machine status', Opts.debug, true);
     }
 
+    ipAddress() { 
+        return this.ipAddress();
+    }
+
     static ipAddress() { 
         return run(`docker-machine ip ${Opts.machineName}`, Opts.debug, true);
+    }
+
+    start(opts?: IStartOpts) { 
+        return this.start(opts);
     }
 
     static start(opts?: IStartOpts) {

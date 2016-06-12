@@ -6,6 +6,10 @@ import { CommonMethods } from './commonMethods';
 
 export class Image extends CommonMethods {
 
+    build(imageName: string, opts?: IBuildImageOpts) {
+        return this.build(imageName, opts);
+    }
+    
     static build(imageName: string, opts?: IBuildImageOpts) {
         return Q.Promise((resolve, reject) => {
             runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, true).then(
@@ -46,8 +50,16 @@ export class Image extends CommonMethods {
         });
     }
 
+    remove(imageName: string) {
+        return this.remove(imageName);
+    }
+    
     static remove(imageName: string) { 
         return run(`docker rmi -f ${imageName}`, Opts.debug);
+    }
+
+    checkForDangling() { 
+        return this.checkForDangling();
     }
 
     static checkForDangling() {

@@ -13,11 +13,20 @@ var Machine = (function (_super) {
     function Machine() {
         _super.apply(this, arguments);
     }
+    Machine.prototype.status = function () {
+        return this.status();
+    };
     Machine.status = function () {
         return base_1.run('docker-machine status', docker_cmd_js_1.Opts.debug, true);
     };
+    Machine.prototype.ipAddress = function () {
+        return this.ipAddress();
+    };
     Machine.ipAddress = function () {
         return base_1.run("docker-machine ip " + docker_cmd_js_1.Opts.machineName, docker_cmd_js_1.Opts.debug, true);
+    };
+    Machine.prototype.start = function (opts) {
+        return this.start(opts);
     };
     Machine.start = function (opts) {
         var _this = this;

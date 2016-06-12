@@ -15,6 +15,9 @@ var Container = (function (_super) {
     function Container() {
         _super.apply(this, arguments);
     }
+    Container.prototype.waitForPort = function (opts) {
+        return this.waitForPort(opts);
+    };
     Container.waitForPort = function (opts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
@@ -35,6 +38,9 @@ var Container = (function (_super) {
     };
     Container.runWaitForPort = function (opts) {
         return tcpPortUsed.waitUntilFreeOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
+    };
+    Container.prototype.start = function (imageName, opts, command) {
+        return this.start(imageName, opts, command);
     };
     Container.start = function (imageName, opts, command) {
         var _this = this;
@@ -79,6 +85,9 @@ var Container = (function (_super) {
                 reject(err);
             });
         });
+    };
+    Container.prototype.status = function (containerName) {
+        return this.status(containerName);
     };
     Container.status = function (containerName) {
         return base_1.run("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"", docker_cmd_js_1.Opts.debug);

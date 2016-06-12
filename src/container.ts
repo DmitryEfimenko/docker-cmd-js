@@ -7,6 +7,10 @@ var tcpPortUsed = require('tcp-port-used');
 
 export class Container extends CommonMethods {
 
+    waitForPort(opts: IWaitForPortOpts) {
+        return this.waitForPort(opts);
+    }
+
     static waitForPort(opts: IWaitForPortOpts) {
         return Q.Promise((resolve, reject) => {
             if (!opts.retryIntervalMs) opts.retryIntervalMs = 100;
@@ -27,6 +31,10 @@ export class Container extends CommonMethods {
 
     private static runWaitForPort(opts: IWaitForPortOpts) { 
         return tcpPortUsed.waitUntilFreeOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
+    }
+
+    start(imageName, opts?: IStartDockerOpts, command?: string) {
+        return this.start(imageName, opts, command);
     }
 
     static start(imageName, opts?: IStartDockerOpts, command?: string) {
@@ -74,6 +82,10 @@ export class Container extends CommonMethods {
                 }
             );
         });
+    }
+
+    status(containerName: string) {
+        return this.status(containerName);
     }
 
     static status(containerName: string) { 
