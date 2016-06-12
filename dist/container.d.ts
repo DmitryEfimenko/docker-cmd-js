@@ -1,9 +1,10 @@
 import * as Q from 'q';
-import { Debuggable } from './debuggable';
-export declare class Container extends Debuggable {
-    constructor(_debug: any);
-    start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>;
-    status(containerName: string): Q.Promise<string>;
+import { CommonMethods } from './commonMethods';
+export declare class Container extends CommonMethods {
+    static waitForPort(opts: IWaitForPortOpts): Q.Promise<{}>;
+    private static runWaitForPort(opts);
+    static start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>;
+    static status(containerName: string): Q.Promise<string>;
 }
 export interface IStartDockerOpts {
     name?: string;
@@ -12,4 +13,10 @@ export interface IStartDockerOpts {
     volumesFrom?: string | string[];
     link?: string | string[];
     env?: string | string[];
+}
+export interface IWaitForPortOpts {
+    port: number;
+    host?: string;
+    retryIntervalMs?: number;
+    timeoutMs?: number;
 }

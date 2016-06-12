@@ -1,14 +1,12 @@
 import * as Q from 'q';
 import inquirer = require('inquirer');
+import { Opts } from './docker-cmd-js';
 import { run, runWithoutDebug, Log, resToJSON } from './base';
-import { Debuggable } from './debuggable';
+import { CommonMethods } from './commonMethods';
 
-export class Image extends Debuggable {
-    constructor(_debug) {
-        super(_debug);
-    }
+export class Image extends CommonMethods {
 
-    build(imageName: string, opts?: IBuildImageOpts) {
+    static build(imageName: string, opts?: IBuildImageOpts) {
         return Q.Promise((resolve, reject) => {
             runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, true).then(
                 (img) => {
@@ -48,11 +46,11 @@ export class Image extends Debuggable {
         });
     }
 
-    remove(imageName: string) { 
-        return run(`docker rmi -f ${imageName}`, this._debug);
+    static remove(imageName: string) { 
+        return run(`docker rmi -f ${imageName}`, Opts.debug);
     }
 
-    checkForDangling() {
+    static checkForDangling() {
         return Q.Promise((resolve, reject) => {
             runWithoutDebug('docker images --filter dangling=true').then(
                 (result) => {
@@ -91,12 +89,12 @@ export class Image extends Debuggable {
         });
     }
 
-    private runBuildImage(imageName: string, opts?: IBuildImageOpts) {
+    private static runBuildImage(imageName: string, opts?: IBuildImageOpts) {
         return Q.Promise((resolve, reject) => { 
             let c = `docker build -t ${imageName}`;
             c += (opts && opts.pathOrUrl) ? ` ${opts.pathOrUrl}` : ' .';
             let progress = Log.infoProgress(`Building image ${imageName}`);
-            run(c, this._debug).then(
+            run(c, Opts.debug).then(
                 () => {
                     Log.terminateProgress(progress).info(`Image ${imageName} built`);
                     resolve(true);

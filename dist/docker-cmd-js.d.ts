@@ -5,7 +5,6 @@ import { Image } from './image';
 import { Container } from './container';
 export declare class Cmd {
     machineName: string;
-    private _debug;
     machine: Machine;
     image: Image;
     container: Container;
@@ -14,4 +13,8 @@ export declare class Cmd {
     run(command: string, noNewLines?: boolean): Q.Promise<string>;
     runSync(command: string): RunResult;
     resToJSON(s: string): any[];
+}
+export declare class Opts {
+    static debug: boolean;
+    static machineName: string;
 }

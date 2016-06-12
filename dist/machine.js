@@ -5,21 +5,21 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Q = require('q');
+var docker_cmd_js_1 = require('./docker-cmd-js');
 var base_1 = require('./base');
-var debuggable_1 = require('./debuggable');
+var commonMethods_1 = require('./commonMethods');
 var Machine = (function (_super) {
     __extends(Machine, _super);
-    function Machine(machineName, _debug) {
-        _super.call(this, _debug);
-        this.machineName = machineName;
+    function Machine() {
+        _super.apply(this, arguments);
     }
-    Machine.prototype.status = function () {
-        return base_1.run('docker-machine status', this._debug, true);
+    Machine.status = function () {
+        return base_1.run('docker-machine status', docker_cmd_js_1.Opts.debug, true);
     };
-    Machine.prototype.ipAddress = function () {
-        return base_1.run("docker-machine ip " + this.machineName, this._debug, true);
+    Machine.ipAddress = function () {
+        return base_1.run("docker-machine ip " + docker_cmd_js_1.Opts.machineName, docker_cmd_js_1.Opts.debug, true);
     };
-    Machine.prototype.start = function (opts) {
+    Machine.start = function (opts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             _this.runWithoutDebugOnce(_this.status()).then(function (res) {
@@ -35,8 +35,7 @@ var Machine = (function (_super) {
             });
         });
     };
-    Machine.prototype.runStartMachine = function (opts) {
-        var _this = this;
+    Machine.runStartMachine = function (opts) {
         return Q.Promise(function (resolve, reject) {
             var c = "docker-machine create";
             if (!opts)
@@ -49,10 +48,10 @@ var Machine = (function (_super) {
                 c = base_1.addOpt(c, '--virtualbox-memory', '6144');
             if (!opts.virtualboxNoVtxCheck)
                 c = base_1.addOpt(c, '--virtualbox-no-vtx-check');
-            c += " " + _this.machineName;
-            base_1.run(c, _this._debug).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
+            c += " " + docker_cmd_js_1.Opts.machineName;
+            base_1.run(c, docker_cmd_js_1.Opts.debug).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
         });
     };
     return Machine;
-}(debuggable_1.Debuggable));
+}(commonMethods_1.CommonMethods));
 exports.Machine = Machine;

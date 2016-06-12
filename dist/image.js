@@ -6,14 +6,15 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var Q = require('q');
 var inquirer = require('inquirer');
+var docker_cmd_js_1 = require('./docker-cmd-js');
 var base_1 = require('./base');
-var debuggable_1 = require('./debuggable');
+var commonMethods_1 = require('./commonMethods');
 var Image = (function (_super) {
     __extends(Image, _super);
-    function Image(_debug) {
-        _super.call(this, _debug);
+    function Image() {
+        _super.apply(this, arguments);
     }
-    Image.prototype.build = function (imageName, opts) {
+    Image.build = function (imageName, opts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             base_1.runWithoutDebug("docker images --format {{.Repository}} " + imageName, true).then(function (img) {
@@ -47,10 +48,10 @@ var Image = (function (_super) {
             });
         });
     };
-    Image.prototype.remove = function (imageName) {
-        return base_1.run("docker rmi -f " + imageName, this._debug);
+    Image.remove = function (imageName) {
+        return base_1.run("docker rmi -f " + imageName, docker_cmd_js_1.Opts.debug);
     };
-    Image.prototype.checkForDangling = function () {
+    Image.checkForDangling = function () {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             base_1.runWithoutDebug('docker images --filter dangling=true').then(function (result) {
@@ -85,13 +86,12 @@ var Image = (function (_super) {
             }, function (err) { err('could not check for dangling images:', err); });
         });
     };
-    Image.prototype.runBuildImage = function (imageName, opts) {
-        var _this = this;
+    Image.runBuildImage = function (imageName, opts) {
         return Q.Promise(function (resolve, reject) {
             var c = "docker build -t " + imageName;
             c += (opts && opts.pathOrUrl) ? " " + opts.pathOrUrl : ' .';
             var progress = base_1.Log.infoProgress("Building image " + imageName);
-            base_1.run(c, _this._debug).then(function () {
+            base_1.run(c, docker_cmd_js_1.Opts.debug).then(function () {
                 base_1.Log.terminateProgress(progress).info("Image " + imageName + " built");
                 resolve(true);
             }, function (err) {
@@ -108,5 +108,5 @@ var Image = (function (_super) {
         });
     };
     return Image;
-}(debuggable_1.Debuggable));
+}(commonMethods_1.CommonMethods));
 exports.Image = Image;

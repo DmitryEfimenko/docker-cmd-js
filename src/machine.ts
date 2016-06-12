@@ -1,21 +1,19 @@
 import * as Q from 'q';
+import { Opts } from './docker-cmd-js';
 import { run, addOpts, addOpt, Log } from './base';
-import { Debuggable } from './debuggable';
+import { CommonMethods } from './commonMethods';
 
-export class Machine extends Debuggable {
-    constructor(private machineName: string, _debug) {
-        super(_debug);
+export class Machine extends CommonMethods {
+
+    static status() {
+        return run('docker-machine status', Opts.debug, true);
     }
 
-    status() {
-        return run('docker-machine status', this._debug, true);
+    static ipAddress() { 
+        return run(`docker-machine ip ${Opts.machineName}`, Opts.debug, true);
     }
 
-    ipAddress() { 
-        return run(`docker-machine ip ${this.machineName}`, this._debug, true);
-    }
-
-    start(opts?: IStartOpts) {
+    static start(opts?: IStartOpts) {
         return Q.Promise((resolve, reject) => {
             this.runWithoutDebugOnce(this.status()).then(
                 (res) => {
@@ -33,7 +31,7 @@ export class Machine extends Debuggable {
         });
     }
 
-    private runStartMachine(opts?: IStartOpts) {
+    private static runStartMachine(opts?: IStartOpts) {
         return Q.Promise((resolve, reject) => {
             let c = `docker-machine create`; 
             if (!opts) opts = {};
@@ -42,9 +40,9 @@ export class Machine extends Debuggable {
             if (!opts.driver) c = addOpt(c, '--driver', 'virtualbox');
             if (!opts.virtualboxMemory) c = addOpt(c, '--virtualbox-memory', '6144');
             if (!opts.virtualboxNoVtxCheck) c = addOpt(c, '--virtualbox-no-vtx-check');
-            c += ` ${this.machineName}`;
+            c += ` ${Opts.machineName}`;
 
-            run(c, this._debug).then(
+            run(c, Opts.debug).then(
                 (resp) => { resolve(resp); },
                 (err) => { reject(err); }
             );

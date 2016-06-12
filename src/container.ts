@@ -1,13 +1,35 @@
 import * as Q from 'q';
 import { run, runWithoutDebug, addOpts, addOpt, Log, resToJSON } from './base';
-import { Debuggable } from './debuggable';
+import { Opts } from './docker-cmd-js';
+import { Machine } from './machine';
+import { CommonMethods } from './commonMethods';
+var tcpPortUsed = require('tcp-port-used');
 
-export class Container extends Debuggable {
-    constructor(_debug) {
-        super(_debug);
+export class Container extends CommonMethods {
+
+    static waitForPort(opts: IWaitForPortOpts) {
+        return Q.Promise((resolve, reject) => {
+            if (!opts.retryIntervalMs) opts.retryIntervalMs = 100;
+            if (!opts.timeoutMs) opts.timeoutMs = 5000;
+            if (!opts.host) {
+                Machine.ipAddress().then(
+                    (ipAddress) => {
+                        opts.host = ipAddress;
+                        this.runWaitForPort(opts).then(resolve, reject);
+                    },
+                    (err) => { reject(err); }
+                )
+            } else {
+                this.runWaitForPort(opts).then(resolve, reject);
+            }
+        });
     }
 
-    start(imageName, opts?: IStartDockerOpts, command?: string) {
+    private static runWaitForPort(opts: IWaitForPortOpts) { 
+        return tcpPortUsed.waitUntilFreeOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
+    }
+
+    static start(imageName, opts?: IStartDockerOpts, command?: string) {
         return Q.Promise((resolve, reject) => {
             let progress = Log.infoProgress('Checking if container needs to be started');
             let containerName = (opts && opts.name) ? opts.name : imageName;
@@ -22,7 +44,7 @@ export class Container extends Debuggable {
                         if (!opts.name) c = addOpt(c, '--name', containerName);
                         c += ` ${imageName}`;
                         if (command) c += ` ${command}`;
-                        run(c, this._debug).then(
+                        run(c, Opts.debug).then(
                             () => {
                                 Log.terminateProgress(progress).info(`Container ${containerName} started.`);
                                 resolve(true);
@@ -54,8 +76,8 @@ export class Container extends Debuggable {
         });
     }
 
-    status(containerName: string) { 
-        return run(`docker ps -a --filter name=${containerName} --format "{{.Status}}"`, this._debug);
+    static status(containerName: string) { 
+        return run(`docker ps -a --filter name=${containerName} --format "{{.Status}}"`, Opts.debug);
     }
 }
 
@@ -66,4 +88,11 @@ export interface IStartDockerOpts {
     volumesFrom?: string|string[];
     link?: string|string[];
     env?: string|string[];
+}
+
+export interface IWaitForPortOpts {
+    port: number;
+    host?: string;
+    retryIntervalMs?: number;
+    timeoutMs?: number;
 }
