@@ -14,6 +14,9 @@ export class Cmd {
     constructor(public machineName?: string) {
         if (!this.machineName) this.machineName = 'default';
         setEnvironment(this.machineName);
+        this.container = new Container();
+        this.machine = new Machine();
+        this.image = new Image();
     }
 
     debug(debugging?: boolean) {
