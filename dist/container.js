@@ -6,7 +6,6 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var Q = require('q');
 var base_1 = require('./base');
-var docker_cmd_js_1 = require('./docker-cmd-js');
 var machine_1 = require('./machine');
 var commonMethods_1 = require('./commonMethods');
 var tcpPortUsed = require('tcp-port-used');
@@ -60,7 +59,7 @@ var Container = (function (_super) {
                     c += " " + imageName;
                     if (command)
                         c += " " + command;
-                    base_1.run(c, docker_cmd_js_1.Opts.debug).then(function () {
+                    base_1.run(c, base_1.Opts.debug).then(function () {
                         base_1.Log.terminateProgress(progress).info("Container " + containerName + " started.");
                         resolve(true);
                     }, function (err) {
@@ -90,7 +89,7 @@ var Container = (function (_super) {
         return this.status(containerName);
     };
     Container.status = function (containerName) {
-        return base_1.run("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"", docker_cmd_js_1.Opts.debug);
+        return base_1.run("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"", base_1.Opts.debug);
     };
     return Container;
 }(commonMethods_1.CommonMethods));

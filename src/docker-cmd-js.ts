@@ -1,5 +1,5 @@
 import * as Q from 'q';
-import { run, runSync, resToJSON } from './base';
+import { Opts, run, runSync, resToJSON } from './base';
 import { RunResult } from './childProcessHelpers';
 import { setEnvironment } from './environment';
 import { Machine } from './machine';
@@ -35,9 +35,4 @@ export class Cmd {
     resToJSON(s: string): any[] {
         return resToJSON(s);
     }
-}
-
-export class Opts {
-    static debug: boolean;
-    static machineName: string;
 }

@@ -14,7 +14,3 @@ export declare class Cmd {
     runSync(command: string): RunResult;
     resToJSON(s: string): any[];
 }
-export declare class Opts {
-    static debug: boolean;
-    static machineName: string;
-}

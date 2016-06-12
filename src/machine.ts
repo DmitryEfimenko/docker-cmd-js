@@ -1,6 +1,5 @@
 import * as Q from 'q';
-import { Opts } from './docker-cmd-js';
-import { run, addOpts, addOpt, Log } from './base';
+import { Opts, run, addOpts, addOpt, Log } from './base';
 import { CommonMethods } from './commonMethods';
 
 export class Machine extends CommonMethods {

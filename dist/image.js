@@ -6,7 +6,6 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var Q = require('q');
 var inquirer = require('inquirer');
-var docker_cmd_js_1 = require('./docker-cmd-js');
 var base_1 = require('./base');
 var commonMethods_1 = require('./commonMethods');
 var Image = (function (_super) {
@@ -55,7 +54,7 @@ var Image = (function (_super) {
         return this.remove(imageName);
     };
     Image.remove = function (imageName) {
-        return base_1.run("docker rmi -f " + imageName, docker_cmd_js_1.Opts.debug);
+        return base_1.run("docker rmi -f " + imageName, base_1.Opts.debug);
     };
     Image.prototype.checkForDangling = function () {
         return this.checkForDangling();
@@ -100,7 +99,7 @@ var Image = (function (_super) {
             var c = "docker build -t " + imageName;
             c += (opts && opts.pathOrUrl) ? " " + opts.pathOrUrl : ' .';
             var progress = base_1.Log.infoProgress("Building image " + imageName);
-            base_1.run(c, docker_cmd_js_1.Opts.debug).then(function () {
+            base_1.run(c, base_1.Opts.debug).then(function () {
                 base_1.Log.terminateProgress(progress).info("Image " + imageName + " built");
                 resolve(true);
             }, function (err) {

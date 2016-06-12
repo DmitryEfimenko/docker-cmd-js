@@ -15,14 +15,14 @@ var Cmd = (function () {
         this.image = new image_1.Image();
     }
     Cmd.prototype.debug = function (debugging) {
-        Opts.debug = (debugging === undefined || debugging === true) ? true : false;
+        base_1.Opts.debug = (debugging === undefined || debugging === true) ? true : false;
         return this;
     };
     Cmd.prototype.run = function (command, noNewLines) {
-        return base_1.run(command, Opts.debug, noNewLines);
+        return base_1.run(command, base_1.Opts.debug, noNewLines);
     };
     Cmd.prototype.runSync = function (command) {
-        return base_1.runSync(command, Opts.debug);
+        return base_1.runSync(command, base_1.Opts.debug);
     };
     Cmd.prototype.resToJSON = function (s) {
         return base_1.resToJSON(s);
@@ -30,9 +30,3 @@ var Cmd = (function () {
     return Cmd;
 }());
 exports.Cmd = Cmd;
-var Opts = (function () {
-    function Opts() {
-    }
-    return Opts;
-}());
-exports.Opts = Opts;

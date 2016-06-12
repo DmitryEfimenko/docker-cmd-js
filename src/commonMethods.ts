@@ -1,5 +1,5 @@
 import * as Q from 'q';
-import { Opts } from './docker-cmd-js';
+import { Opts } from './base';
 
 export abstract class CommonMethods {
     protected static runWithoutDebugOnce(promise: Q.Promise<any>) {

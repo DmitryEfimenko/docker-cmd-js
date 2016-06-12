@@ -1,11 +1,16 @@
 "use strict";
 var Q = require('q');
 var colors = require('colors');
-var docker_cmd_js_1 = require('./docker-cmd-js');
 var childProcessHelpers_1 = require('./childProcessHelpers');
+var Opts = (function () {
+    function Opts() {
+    }
+    return Opts;
+}());
+exports.Opts = Opts;
 function run(command, _debug, noNewLines) {
     var _this = this;
-    _debug = _debug !== undefined ? _debug : docker_cmd_js_1.Opts.debug;
+    _debug = _debug !== undefined ? _debug : Opts.debug;
     if (_debug)
         Log.info('Running:', command);
     var deferred = Q.defer();

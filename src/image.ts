@@ -1,7 +1,6 @@
 import * as Q from 'q';
 import inquirer = require('inquirer');
-import { Opts } from './docker-cmd-js';
-import { run, runWithoutDebug, Log, resToJSON } from './base';
+import { Opts, run, runWithoutDebug, Log, resToJSON } from './base';
 import { CommonMethods } from './commonMethods';
 
 export class Image extends CommonMethods {

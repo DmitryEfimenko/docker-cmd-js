@@ -1,5 +1,9 @@
 import * as Q from 'q';
 import { RunResult } from './childProcessHelpers';
+export declare class Opts {
+    static debug: boolean;
+    static machineName: string;
+}
 export declare function run(command: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string>;
 export declare function runSync(command: string, _debug: boolean): RunResult;
 export declare function runWithoutDebug(command: string, noNewLines?: boolean): Q.Promise<string>;

@@ -5,7 +5,6 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Q = require('q');
-var docker_cmd_js_1 = require('./docker-cmd-js');
 var base_1 = require('./base');
 var commonMethods_1 = require('./commonMethods');
 var Machine = (function (_super) {
@@ -17,13 +16,13 @@ var Machine = (function (_super) {
         return this.status();
     };
     Machine.status = function () {
-        return base_1.run('docker-machine status', docker_cmd_js_1.Opts.debug, true);
+        return base_1.run('docker-machine status', base_1.Opts.debug, true);
     };
     Machine.prototype.ipAddress = function () {
         return this.ipAddress();
     };
     Machine.ipAddress = function () {
-        return base_1.run("docker-machine ip " + docker_cmd_js_1.Opts.machineName, docker_cmd_js_1.Opts.debug, true);
+        return base_1.run("docker-machine ip " + base_1.Opts.machineName, base_1.Opts.debug, true);
     };
     Machine.prototype.start = function (opts) {
         return this.start(opts);
@@ -57,8 +56,8 @@ var Machine = (function (_super) {
                 c = base_1.addOpt(c, '--virtualbox-memory', '6144');
             if (!opts.virtualboxNoVtxCheck)
                 c = base_1.addOpt(c, '--virtualbox-no-vtx-check');
-            c += " " + docker_cmd_js_1.Opts.machineName;
-            base_1.run(c, docker_cmd_js_1.Opts.debug).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
+            c += " " + base_1.Opts.machineName;
+            base_1.run(c, base_1.Opts.debug).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
         });
     };
     return Machine;

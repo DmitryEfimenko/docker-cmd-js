@@ -1,7 +1,11 @@
 import * as Q from 'q';
 import colors = require('colors');
-import { Opts } from './docker-cmd-js';
 import { spawn, spawnSync, RunResult } from './childProcessHelpers';
+
+export class Opts {
+    static debug: boolean;
+    static machineName: string;
+}
 
 export function run(command: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string> {
     _debug = _debug !== undefined ? _debug : Opts.debug;

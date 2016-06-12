@@ -1,6 +1,5 @@
 import * as Q from 'q';
-import { run, runWithoutDebug, addOpts, addOpt, Log, resToJSON } from './base';
-import { Opts } from './docker-cmd-js';
+import { Opts, run, runWithoutDebug, addOpts, addOpt, Log, resToJSON } from './base';
 import { Machine } from './machine';
 import { CommonMethods } from './commonMethods';
 var tcpPortUsed = require('tcp-port-used');
