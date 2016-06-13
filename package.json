@@ -3,7 +3,7 @@
   "version": "3.1.0",
   "description": "run docker commands in javascript",
   "main": "dist/src/docker-cmd-js.js",
-  "typings": "dist/typings/src/docker-cmd-js.d.ts",
+  "typings": "dist/typings/docker-cmd-js.d.ts",
   "dependencies": {
     "colors": "~1.1.2",
     "inquirer": "~1.0.3",
