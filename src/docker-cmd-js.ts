@@ -2,21 +2,21 @@ import * as Q from 'q';
 import { Opts, run, runSync, resToJSON } from './base';
 import { RunResult } from './childProcessHelpers';
 import { setEnvironment } from './environment';
-import { Machine } from './machine';
-import { Image } from './image';
-import { Container } from './container';
+import { machine, MachineStatic } from './machine';
+import { image, ImageStatic } from './image';
+import { container, ContainerStatic } from './container';
 
 export class Cmd {
-    machine: Machine;
-    image: Image;
-    container: Container;
+    machine: MachineStatic;
+    image: ImageStatic;
+    container: ContainerStatic;
 
-    constructor(public machineName?: string) {
-        if (!this.machineName) this.machineName = 'default';
-        setEnvironment(this.machineName);
-        this.container = new Container();
-        this.machine = new Machine();
-        this.image = new Image();
+    constructor(machineName?: string) {
+        if (!machineName) { Opts.machineName = 'default'; }
+        setEnvironment(Opts.machineName);
+        this.container = container;
+        this.machine = machine;
+        this.image = image;
     }
 
     debug(debugging?: boolean) {

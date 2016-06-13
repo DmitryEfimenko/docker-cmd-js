@@ -4,8 +4,9 @@ export function setEnvironment(machineName) {
     let envTxt = spawnSync(`docker-machine env ${machineName} --shell cmd`, process.env, false).stdOut;
     let lines = envTxt.split('\n');
     for (let i = 0; i < lines.length; i++) {
-        if (!isEnvironmentVariableLine(lines[i]))
+        if (!isEnvironmentVariableLine(lines[i])) {
             continue;
+        }
         addEnvironmentKeyValueToObject(lines[i]);
     }
 }

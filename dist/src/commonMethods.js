@@ -4,7 +4,7 @@ var base_1 = require('./base');
 var CommonMethods = (function () {
     function CommonMethods() {
     }
-    CommonMethods.runWithoutDebugOnce = function (promise) {
+    CommonMethods.prototype.runWithoutDebugOnce = function (promise) {
         return Q.Promise(function (resolve, reject) {
             var _d = base_1.Opts.debug;
             base_1.Opts.debug = false;

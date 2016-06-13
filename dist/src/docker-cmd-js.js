@@ -6,13 +6,13 @@ var image_1 = require('./image');
 var container_1 = require('./container');
 var Cmd = (function () {
     function Cmd(machineName) {
-        this.machineName = machineName;
-        if (!this.machineName)
-            this.machineName = 'default';
-        environment_1.setEnvironment(this.machineName);
-        this.container = new container_1.Container();
-        this.machine = new machine_1.Machine();
-        this.image = new image_1.Image();
+        if (!machineName) {
+            base_1.Opts.machineName = 'default';
+        }
+        environment_1.setEnvironment(base_1.Opts.machineName);
+        this.container = container_1.container;
+        this.machine = machine_1.machine;
+        this.image = image_1.image;
     }
     Cmd.prototype.debug = function (debugging) {
         base_1.Opts.debug = (debugging === undefined || debugging === true) ? true : false;

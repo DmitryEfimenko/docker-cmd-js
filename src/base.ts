@@ -7,36 +7,49 @@ export class Opts {
     static machineName: string;
 }
 
+
+
 export function run(command: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string> {
     _debug = _debug !== undefined ? _debug : Opts.debug;
-    if (_debug) Log.info('Running:', command);
+    if (_debug) {
+        Log.info('Running:', command);
+    }
 
     let deferred = Q.defer<string>();
     spawn(command, process.env, _debug, (result) => {
         if (_debug) {
             if (result.stdErr) {
-                Log.err('command finnished with errors.')
+                Log.err('command finnished with errors.');
                 if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
                     this.checkForDanglingImages(() => {
-                        if (result.stdErr) deferred.reject(result.stdErr);
-                        else deferred.resolve(result.stdOut);
+                        if (result.stdErr) {
+                            deferred.reject(result.stdErr);
+                        } else {
+                            deferred.resolve(result.stdOut);
+                        }
                     });
                 } else {
                     deferred.reject(result.stdErr);
                 }
-            } else
+            } else {
                 deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
+            }
         } else {
-            if (result.stdErr) deferred.reject(result.stdErr);
-            else deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
+            if (result.stdErr) {
+                deferred.reject(result.stdErr);
+            } else {
+                deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
+            }
         }
     });
     return deferred.promise;
 }
 
-export function runSync(command: string, _debug: boolean) { 
-    if (_debug) Log.info('Running:', command);
-    
+export function runSync(command: string, _debug: boolean) {
+    if (_debug) {
+        Log.info('Running:', command);
+    }
+
     return spawnSync(command, process.env, _debug);
 }
 
@@ -48,7 +61,7 @@ export function runWithoutDebug(command: string, noNewLines?: boolean) {
 }
 
 export function addOpt(command: string, optionName: string, optionVal?: string|string[]|boolean) {
-    if (optionVal != undefined) {
+    if (optionVal !== undefined) {
         if (optionVal instanceof Array) {
             for (let i = 0, l = optionVal.length; i < l; i++) {
                 command += ` ${optionName} ${optionVal[i]}`;
@@ -66,11 +79,13 @@ export function addOpt(command: string, optionName: string, optionVal?: string|s
 
 export function addOpts(command: string, opts: any) {
     for (let prop in opts) {
-        let optName = getOptionName(prop);
-        if (opts[prop] != undefined) {
-            command = addOpt(command, optName, opts[prop]);
-        } else {
-            command = addOpt(command, optName);
+        if (opts.hasOwnProperty(prop)) {
+            let optName = getOptionName(prop);
+            if (opts[prop] !== undefined) {
+                command = addOpt(command, optName, opts[prop]);
+            } else {
+                command = addOpt(command, optName);
+            }
         }
     }
     return command;
@@ -78,19 +93,19 @@ export function addOpts(command: string, opts: any) {
 
 function getOptionName(opt: string) {
     let arr = opt.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1);
-    arr.forEach((v, i, arr) => { arr[i] = arr[i].toLowerCase() });
+    arr.forEach((v, i, arr) => { arr[i] = arr[i].toLowerCase(); });
     return '--' + arr.join('-');
 }
 
 export function resToJSON(s: string): any[] {
-    let lines = s.split('\n').filter((val) => val != '');
+    let lines = s.split('\n').filter((val) => val !== '');
     let headerLine = lines.shift();
     let arr = headerLine.split(' ');
     let cols: { name: string, length: number }[] = [];
     for (let i = 0, l = arr.length; i < l; i++) {
         if (arr[i] !== '') {
             let col = { name: arr[i], length: arr[i].length };
-            if (arr[i + 1] != undefined && arr[i + 1] != '') {
+            if (arr[i + 1] !== undefined && arr[i + 1] !== '') {
                 col.name = col.name + ' ' + arr[i + 1];
                 col.length = col.length + arr[i + 1].length + 1;
                 i = i + 1;
@@ -124,7 +139,7 @@ export class Log {
         this.newLine();
     }
 
-    static info(...message: string[]) { 
+    static info(...message: string[]) {
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
         this.newLine();
     }
@@ -135,11 +150,15 @@ export class Log {
 
         process.stdout.write(`${m} ${c}\r`);
         let interval = setInterval(() => {
-            if (c == '\\') c = '/';
-            else if (c == '/') c = '-';
-            else if (c == '-') c = '\\';
+            if (c === '\\') {
+                c = '/';
+            } else if (c === '/') {
+                c = '-';
+            } else if (c === '-') {
+                c = '\\';
+            }
             process.stdout.write(`${m} ${c}\r`);
-        }, 300)
+        }, 300);
         return { interval: interval, message: m };
     }
 
@@ -151,7 +170,7 @@ export class Log {
         return this;
     }
 
-    private static newLine() { 
+    private static newLine() {
         process.stdout.write(`\n`);
     }
 }

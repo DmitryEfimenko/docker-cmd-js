@@ -11,8 +11,9 @@ exports.Opts = Opts;
 function run(command, _debug, noNewLines) {
     var _this = this;
     _debug = _debug !== undefined ? _debug : Opts.debug;
-    if (_debug)
+    if (_debug) {
         Log.info('Running:', command);
+    }
     var deferred = Q.defer();
     childProcessHelpers_1.spawn(command, process.env, _debug, function (result) {
         if (_debug) {
@@ -20,32 +21,38 @@ function run(command, _debug, noNewLines) {
                 Log.err('command finnished with errors.');
                 if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
                     _this.checkForDanglingImages(function () {
-                        if (result.stdErr)
+                        if (result.stdErr) {
                             deferred.reject(result.stdErr);
-                        else
+                        }
+                        else {
                             deferred.resolve(result.stdOut);
+                        }
                     });
                 }
                 else {
                     deferred.reject(result.stdErr);
                 }
             }
-            else
+            else {
                 deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
+            }
         }
         else {
-            if (result.stdErr)
+            if (result.stdErr) {
                 deferred.reject(result.stdErr);
-            else
+            }
+            else {
                 deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
+            }
         }
     });
     return deferred.promise;
 }
 exports.run = run;
 function runSync(command, _debug) {
-    if (_debug)
+    if (_debug) {
         Log.info('Running:', command);
+    }
     return childProcessHelpers_1.spawnSync(command, process.env, _debug);
 }
 exports.runSync = runSync;
@@ -57,7 +64,7 @@ function runWithoutDebug(command, noNewLines) {
 }
 exports.runWithoutDebug = runWithoutDebug;
 function addOpt(command, optionName, optionVal) {
-    if (optionVal != undefined) {
+    if (optionVal !== undefined) {
         if (optionVal instanceof Array) {
             for (var i = 0, l = optionVal.length; i < l; i++) {
                 command += " " + optionName + " " + optionVal[i];
@@ -78,12 +85,14 @@ function addOpt(command, optionName, optionVal) {
 exports.addOpt = addOpt;
 function addOpts(command, opts) {
     for (var prop in opts) {
-        var optName = getOptionName(prop);
-        if (opts[prop] != undefined) {
-            command = addOpt(command, optName, opts[prop]);
-        }
-        else {
-            command = addOpt(command, optName);
+        if (opts.hasOwnProperty(prop)) {
+            var optName = getOptionName(prop);
+            if (opts[prop] !== undefined) {
+                command = addOpt(command, optName, opts[prop]);
+            }
+            else {
+                command = addOpt(command, optName);
+            }
         }
     }
     return command;
@@ -95,14 +104,14 @@ function getOptionName(opt) {
     return '--' + arr.join('-');
 }
 function resToJSON(s) {
-    var lines = s.split('\n').filter(function (val) { return val != ''; });
+    var lines = s.split('\n').filter(function (val) { return val !== ''; });
     var headerLine = lines.shift();
     var arr = headerLine.split(' ');
     var cols = [];
     for (var i = 0, l = arr.length; i < l; i++) {
         if (arr[i] !== '') {
             var col = { name: arr[i], length: arr[i].length };
-            if (arr[i + 1] != undefined && arr[i + 1] != '') {
+            if (arr[i + 1] !== undefined && arr[i + 1] !== '') {
                 col.name = col.name + ' ' + arr[i + 1];
                 col.length = col.length + arr[i + 1].length + 1;
                 i = i + 1;
@@ -161,12 +170,15 @@ var Log = (function () {
         var m = colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' '));
         process.stdout.write(m + " " + c + "\r");
         var interval = setInterval(function () {
-            if (c == '\\')
+            if (c === '\\') {
                 c = '/';
-            else if (c == '/')
+            }
+            else if (c === '/') {
                 c = '-';
-            else if (c == '-')
+            }
+            else if (c === '-') {
                 c = '\\';
+            }
             process.stdout.write(m + " " + c + "\r");
         }, 300);
         return { interval: interval, message: m };

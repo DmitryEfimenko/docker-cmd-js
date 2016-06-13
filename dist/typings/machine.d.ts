@@ -1,13 +1,10 @@
 import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
-export declare class Machine extends CommonMethods {
-    status(): any;
-    static status(): Q.Promise<string>;
-    ipAddress(): any;
-    static ipAddress(): Q.Promise<string>;
-    start(opts?: IStartOpts): any;
-    static start(opts?: IStartOpts): Q.Promise<{}>;
-    private static runStartMachine(opts?);
+export declare class MachineStatic extends CommonMethods {
+    status(): Q.Promise<string>;
+    ipAddress(): Q.Promise<string>;
+    start(opts?: IStartOpts): Q.Promise<{}>;
+    private runStartMachine(opts?);
 }
 export interface IStartOpts {
     driver?: string;
@@ -40,3 +37,4 @@ export interface IStartOpts {
     virtualboxNoShare?: boolean;
     virtualboxNoVtxCheck?: boolean;
 }
+export declare var machine: MachineStatic;

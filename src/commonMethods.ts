@@ -2,7 +2,7 @@ import * as Q from 'q';
 import { Opts } from './base';
 
 export abstract class CommonMethods {
-    protected static runWithoutDebugOnce(promise: Q.Promise<any>) {
+    protected runWithoutDebugOnce(promise: Q.Promise<any>) {
         return Q.Promise<string>((resolve, reject) => {
             let _d = Opts.debug;
             Opts.debug = false;
@@ -11,7 +11,7 @@ export abstract class CommonMethods {
                     Opts.debug = _d;
                     resolve(val);
                 },
-                (err) => { 
+                (err) => {
                     Opts.debug = _d;
                     reject(err);
                 }

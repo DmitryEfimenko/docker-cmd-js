@@ -4,8 +4,9 @@ function setEnvironment(machineName) {
     var envTxt = childProcessHelpers_1.spawnSync("docker-machine env " + machineName + " --shell cmd", process.env, false).stdOut;
     var lines = envTxt.split('\n');
     for (var i = 0; i < lines.length; i++) {
-        if (!isEnvironmentVariableLine(lines[i]))
+        if (!isEnvironmentVariableLine(lines[i])) {
             continue;
+        }
         addEnvironmentKeyValueToObject(lines[i]);
     }
 }

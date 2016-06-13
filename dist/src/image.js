@@ -8,19 +8,16 @@ var Q = require('q');
 var inquirer = require('inquirer');
 var base_1 = require('./base');
 var commonMethods_1 = require('./commonMethods');
-var Image = (function (_super) {
-    __extends(Image, _super);
-    function Image() {
+var ImageStatic = (function (_super) {
+    __extends(ImageStatic, _super);
+    function ImageStatic() {
         _super.apply(this, arguments);
     }
-    Image.prototype.build = function (imageName, opts) {
-        return this.build(imageName, opts);
-    };
-    Image.build = function (imageName, opts) {
+    ImageStatic.prototype.build = function (imageName, opts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             base_1.runWithoutDebug("docker images --format {{.Repository}} " + imageName, true).then(function (img) {
-                if (img == imageName) {
+                if (img === imageName) {
                     if (opts && opts.buildAndReplace) {
                         _this.remove(imageName).then(function () { _this.runBuildImage(imageName, opts).then(resolve, reject); }, reject);
                     }
@@ -32,13 +29,13 @@ var Image = (function (_super) {
                             choices: ['Build and replace old', 'Build and leave old one as dangling', 'Don not build']
                         };
                         inquirer.prompt(promptOpts).then(function (answers) {
-                            if (answers.opts == 'Build and replace old') {
+                            if (answers.opts === 'Build and replace old') {
                                 _this.remove(imageName).then(function () { _this.runBuildImage(imageName, opts).then(resolve, reject); }, reject);
                             }
-                            if (answers.opts == 'Build and leave old one as dangling') {
+                            if (answers.opts === 'Build and leave old one as dangling') {
                                 _this.runBuildImage(imageName, opts).then(resolve, reject);
                             }
-                            if (answers.opts == 'Don not build') {
+                            if (answers.opts === 'Don not build') {
                                 resolve(undefined);
                             }
                         });
@@ -50,16 +47,10 @@ var Image = (function (_super) {
             });
         });
     };
-    Image.prototype.remove = function (imageName) {
-        return this.remove(imageName);
-    };
-    Image.remove = function (imageName) {
+    ImageStatic.prototype.remove = function (imageName) {
         return base_1.run("docker rmi -f " + imageName, base_1.Opts.debug);
     };
-    Image.prototype.checkForDangling = function () {
-        return this.checkForDangling();
-    };
-    Image.checkForDangling = function () {
+    ImageStatic.prototype.checkForDangling = function () {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             base_1.runWithoutDebug('docker images --filter dangling=true').then(function (result) {
@@ -72,7 +63,7 @@ var Image = (function (_super) {
                         choices: ['Yes', 'No']
                     };
                     inquirer.prompt(promptOpts).then(function (answers) {
-                        if (answers.remove == 'Yes') {
+                        if (answers.remove === 'Yes') {
                             var promises = [];
                             for (var i = 0, l = images.length; i < l; i++) {
                                 var p = _this.remove(images[i]['IMAGE ID']);
@@ -94,7 +85,7 @@ var Image = (function (_super) {
             }, function (err) { err('could not check for dangling images:', err); });
         });
     };
-    Image.runBuildImage = function (imageName, opts) {
+    ImageStatic.prototype.runBuildImage = function (imageName, opts) {
         return Q.Promise(function (resolve, reject) {
             var c = "docker build -t " + imageName;
             c += (opts && opts.pathOrUrl) ? " " + opts.pathOrUrl : ' .';
@@ -104,7 +95,6 @@ var Image = (function (_super) {
                 resolve(true);
             }, function (err) {
                 if (err.indexOf('SECURITY WARNING:') > -1) {
-                    // issue when warning returns as a critical error: https://github.com/docker/docker/issues/22623
                     base_1.Log.terminateProgress(progress).info("Image " + imageName + " built");
                     resolve(true);
                 }
@@ -115,6 +105,7 @@ var Image = (function (_super) {
             });
         });
     };
-    return Image;
+    return ImageStatic;
 }(commonMethods_1.CommonMethods));
-exports.Image = Image;
+exports.ImageStatic = ImageStatic;
+exports.image = new ImageStatic();

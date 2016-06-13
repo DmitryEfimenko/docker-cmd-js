@@ -9,23 +9,22 @@ var base_1 = require('./base');
 var machine_1 = require('./machine');
 var commonMethods_1 = require('./commonMethods');
 var tcpPortUsed = require('tcp-port-used');
-var Container = (function (_super) {
-    __extends(Container, _super);
-    function Container() {
+var ContainerStatic = (function (_super) {
+    __extends(ContainerStatic, _super);
+    function ContainerStatic() {
         _super.apply(this, arguments);
     }
-    Container.prototype.waitForPort = function (opts) {
-        return this.waitForPort(opts);
-    };
-    Container.waitForPort = function (opts) {
+    ContainerStatic.prototype.waitForPort = function (opts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
-            if (!opts.retryIntervalMs)
+            if (!opts.retryIntervalMs) {
                 opts.retryIntervalMs = 100;
-            if (!opts.timeoutMs)
+            }
+            if (!opts.timeoutMs) {
                 opts.timeoutMs = 5000;
+            }
             if (!opts.host) {
-                machine_1.Machine.ipAddress().then(function (ipAddress) {
+                machine_1.machine.ipAddress().then(function (ipAddress) {
                     opts.host = ipAddress;
                     _this.runWaitForPort(opts).then(resolve, reject);
                 }, function (err) { reject(err); });
@@ -35,13 +34,10 @@ var Container = (function (_super) {
             }
         });
     };
-    Container.runWaitForPort = function (opts) {
+    ContainerStatic.prototype.runWaitForPort = function (opts) {
         return tcpPortUsed.waitUntilFreeOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
     };
-    Container.prototype.start = function (imageName, opts, command) {
-        return this.start(imageName, opts, command);
-    };
-    Container.start = function (imageName, opts, command) {
+    ContainerStatic.prototype.start = function (imageName, opts, command) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             var progress = base_1.Log.infoProgress('Checking if container needs to be started');
@@ -50,15 +46,17 @@ var Container = (function (_super) {
                 if (!status) {
                     progress = base_1.Log.terminateProgress(progress).infoProgress("Creating and starting container " + containerName + "...");
                     var c = "docker run -d";
-                    if (!opts)
+                    if (!opts) {
                         opts = {};
+                    }
                     c = base_1.addOpts(c, opts);
-                    // set sinsible defaults
-                    if (!opts.name)
+                    if (!opts.name) {
                         c = base_1.addOpt(c, '--name', containerName);
+                    }
                     c += " " + imageName;
-                    if (command)
+                    if (command) {
                         c += " " + command;
+                    }
                     base_1.run(c, base_1.Opts.debug).then(function () {
                         base_1.Log.terminateProgress(progress).info("Container " + containerName + " started.");
                         resolve(true);
@@ -67,11 +65,11 @@ var Container = (function (_super) {
                         reject(err);
                     });
                 }
-                else if (status.indexOf('Up') == 1) {
+                else if (status.indexOf('Up') === 1) {
                     base_1.Log.terminateProgress(progress).info("Container " + containerName + " already started.");
                     resolve(false);
                 }
-                else if (status.indexOf('Exited') == 1) {
+                else if (status.indexOf('Exited') === 1) {
                     base_1.Log.terminateProgress(progress).info("Container " + containerName + " exists but is not started. Starting now.");
                     base_1.runWithoutDebug("docker start " + containerName).then(function () { resolve(true); }, reject);
                 }
@@ -85,12 +83,10 @@ var Container = (function (_super) {
             });
         });
     };
-    Container.prototype.status = function (containerName) {
-        return this.status(containerName);
-    };
-    Container.status = function (containerName) {
+    ContainerStatic.prototype.status = function (containerName) {
         return base_1.run("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"", base_1.Opts.debug);
     };
-    return Container;
+    return ContainerStatic;
 }(commonMethods_1.CommonMethods));
-exports.Container = Container;
+exports.ContainerStatic = ContainerStatic;
+exports.container = new ContainerStatic();

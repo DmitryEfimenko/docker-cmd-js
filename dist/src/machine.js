@@ -7,31 +7,22 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Q = require('q');
 var base_1 = require('./base');
 var commonMethods_1 = require('./commonMethods');
-var Machine = (function (_super) {
-    __extends(Machine, _super);
-    function Machine() {
+var MachineStatic = (function (_super) {
+    __extends(MachineStatic, _super);
+    function MachineStatic() {
         _super.apply(this, arguments);
     }
-    Machine.prototype.status = function () {
-        return this.status();
-    };
-    Machine.status = function () {
+    MachineStatic.prototype.status = function () {
         return base_1.run('docker-machine status', base_1.Opts.debug, true);
     };
-    Machine.prototype.ipAddress = function () {
-        return this.ipAddress();
-    };
-    Machine.ipAddress = function () {
+    MachineStatic.prototype.ipAddress = function () {
         return base_1.run("docker-machine ip " + base_1.Opts.machineName, base_1.Opts.debug, true);
     };
-    Machine.prototype.start = function (opts) {
-        return this.start(opts);
-    };
-    Machine.start = function (opts) {
+    MachineStatic.prototype.start = function (opts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             _this.runWithoutDebugOnce(_this.status()).then(function (res) {
-                if (res != 'Running') {
+                if (res !== 'Running') {
                     _this.runStartMachine(opts).then(resolve, reject);
                 }
                 else {
@@ -43,23 +34,27 @@ var Machine = (function (_super) {
             });
         });
     };
-    Machine.runStartMachine = function (opts) {
+    MachineStatic.prototype.runStartMachine = function (opts) {
         return Q.Promise(function (resolve, reject) {
             var c = "docker-machine create";
-            if (!opts)
+            if (!opts) {
                 opts = {};
+            }
             c = base_1.addOpts(c, opts);
-            // set sinsible defaults
-            if (!opts.driver)
+            if (!opts.driver) {
                 c = base_1.addOpt(c, '--driver', 'virtualbox');
-            if (!opts.virtualboxMemory)
+            }
+            if (!opts.virtualboxMemory) {
                 c = base_1.addOpt(c, '--virtualbox-memory', '6144');
-            if (!opts.virtualboxNoVtxCheck)
+            }
+            if (!opts.virtualboxNoVtxCheck) {
                 c = base_1.addOpt(c, '--virtualbox-no-vtx-check');
+            }
             c += " " + base_1.Opts.machineName;
             base_1.run(c, base_1.Opts.debug).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
         });
     };
-    return Machine;
+    return MachineStatic;
 }(commonMethods_1.CommonMethods));
-exports.Machine = Machine;
+exports.MachineStatic = MachineStatic;
+exports.machine = new MachineStatic();

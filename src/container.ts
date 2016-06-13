@@ -1,42 +1,34 @@
 import * as Q from 'q';
 import { Opts, run, runWithoutDebug, addOpts, addOpt, Log, resToJSON } from './base';
-import { Machine } from './machine';
+import { machine } from './machine';
 import { CommonMethods } from './commonMethods';
 var tcpPortUsed = require('tcp-port-used');
 
-export class Container extends CommonMethods {
+export class ContainerStatic extends CommonMethods {
 
     waitForPort(opts: IWaitForPortOpts) {
-        return this.waitForPort(opts);
-    }
-
-    static waitForPort(opts: IWaitForPortOpts) {
         return Q.Promise((resolve, reject) => {
-            if (!opts.retryIntervalMs) opts.retryIntervalMs = 100;
-            if (!opts.timeoutMs) opts.timeoutMs = 5000;
+            if (!opts.retryIntervalMs) { opts.retryIntervalMs = 100; }
+            if (!opts.timeoutMs) { opts.timeoutMs = 5000; }
             if (!opts.host) {
-                Machine.ipAddress().then(
+                machine.ipAddress().then(
                     (ipAddress) => {
                         opts.host = ipAddress;
                         this.runWaitForPort(opts).then(resolve, reject);
                     },
                     (err) => { reject(err); }
-                )
+                );
             } else {
                 this.runWaitForPort(opts).then(resolve, reject);
             }
         });
     }
 
-    private static runWaitForPort(opts: IWaitForPortOpts) { 
+    private runWaitForPort(opts: IWaitForPortOpts) {
         return tcpPortUsed.waitUntilFreeOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
     }
 
     start(imageName, opts?: IStartDockerOpts, command?: string) {
-        return this.start(imageName, opts, command);
-    }
-
-    static start(imageName, opts?: IStartDockerOpts, command?: string) {
         return Q.Promise((resolve, reject) => {
             let progress = Log.infoProgress('Checking if container needs to be started');
             let containerName = (opts && opts.name) ? opts.name : imageName;
@@ -45,29 +37,29 @@ export class Container extends CommonMethods {
                     if (!status) {
                         progress = Log.terminateProgress(progress).infoProgress(`Creating and starting container ${containerName}...`);
                         let c = `docker run -d`;
-                        if (!opts) opts = {};
+                        if (!opts) { opts = {}; }
                         c = addOpts(c, opts);
                         // set sinsible defaults
-                        if (!opts.name) c = addOpt(c, '--name', containerName);
+                        if (!opts.name) { c = addOpt(c, '--name', containerName); }
                         c += ` ${imageName}`;
-                        if (command) c += ` ${command}`;
+                        if (command) { c += ` ${command}`; }
                         run(c, Opts.debug).then(
                             () => {
                                 Log.terminateProgress(progress).info(`Container ${containerName} started.`);
                                 resolve(true);
                             },
                             (err) => {
-                                Log.terminateProgress(progress)
+                                Log.terminateProgress(progress);
                                 reject(err);
                             }
                         );
-                    } else if (status.indexOf('Up') == 1) {
+                    } else if (status.indexOf('Up') === 1) {
                         Log.terminateProgress(progress).info(`Container ${containerName} already started.`);
-                        resolve(false)
-                    } else if (status.indexOf('Exited') == 1) {
+                        resolve(false);
+                    } else if (status.indexOf('Exited') === 1) {
                         Log.terminateProgress(progress).info(`Container ${containerName} exists but is not started. Starting now.`);
                         runWithoutDebug(`docker start ${containerName}`).then(
-                            () => { resolve(true) },
+                            () => { resolve(true); },
                             reject
                         );
                     } else {
@@ -75,7 +67,7 @@ export class Container extends CommonMethods {
                         reject(`Could not start container ${containerName()}. Status was ${status} Should never hit this.`);
                     }
                 },
-                (err) => { 
+                (err) => {
                     Log.terminateProgress(progress);
                     reject(err);
                 }
@@ -84,10 +76,6 @@ export class Container extends CommonMethods {
     }
 
     status(containerName: string) {
-        return this.status(containerName);
-    }
-
-    static status(containerName: string) { 
         return run(`docker ps -a --filter name=${containerName} --format "{{.Status}}"`, Opts.debug);
     }
 }
@@ -107,3 +95,5 @@ export interface IWaitForPortOpts {
     retryIntervalMs?: number;
     timeoutMs?: number;
 }
+
+export var container = new ContainerStatic();

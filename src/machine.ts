@@ -2,33 +2,21 @@ import * as Q from 'q';
 import { Opts, run, addOpts, addOpt, Log } from './base';
 import { CommonMethods } from './commonMethods';
 
-export class Machine extends CommonMethods {
+export class MachineStatic extends CommonMethods {
 
     status() {
-        return this.status();
-    }
-
-    static status() {
         return run('docker-machine status', Opts.debug, true);
     }
 
-    ipAddress() { 
-        return this.ipAddress();
-    }
-
-    static ipAddress() { 
+    ipAddress() {
         return run(`docker-machine ip ${Opts.machineName}`, Opts.debug, true);
     }
 
-    start(opts?: IStartOpts) { 
-        return this.start(opts);
-    }
-
-    static start(opts?: IStartOpts) {
+    start(opts?: IStartOpts) {
         return Q.Promise((resolve, reject) => {
             this.runWithoutDebugOnce(this.status()).then(
                 (res) => {
-                    if (res != 'Running') {
+                    if (res !== 'Running') {
                         this.runStartMachine(opts).then(resolve, reject);
                     } else {
                         Log.info('docker-machine status:', res);
@@ -42,15 +30,15 @@ export class Machine extends CommonMethods {
         });
     }
 
-    private static runStartMachine(opts?: IStartOpts) {
+    private runStartMachine(opts?: IStartOpts) {
         return Q.Promise((resolve, reject) => {
-            let c = `docker-machine create`; 
-            if (!opts) opts = {};
+            let c = `docker-machine create`;
+            if (!opts) { opts = {}; }
             c = addOpts(c, opts);
             // set sinsible defaults
-            if (!opts.driver) c = addOpt(c, '--driver', 'virtualbox');
-            if (!opts.virtualboxMemory) c = addOpt(c, '--virtualbox-memory', '6144');
-            if (!opts.virtualboxNoVtxCheck) c = addOpt(c, '--virtualbox-no-vtx-check');
+            if (!opts.driver) { c = addOpt(c, '--driver', 'virtualbox'); }
+            if (!opts.virtualboxMemory) { c = addOpt(c, '--virtualbox-memory', '6144'); }
+            if (!opts.virtualboxNoVtxCheck) { c = addOpt(c, '--virtualbox-no-vtx-check'); }
             c += ` ${Opts.machineName}`;
 
             run(c, Opts.debug).then(
@@ -93,3 +81,5 @@ export interface IStartOpts {
     virtualboxNoShare?: boolean;
     virtualboxNoVtxCheck?: boolean;
 }
+
+export var machine = new MachineStatic();
