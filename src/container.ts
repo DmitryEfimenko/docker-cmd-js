@@ -1,5 +1,5 @@
 import * as Q from 'q';
-import { Opts, run, runWithoutDebug, addOpts, addOpt, Log, resToJSON } from './base';
+import { Opts, run, runWithoutDebug, addOpts, addOpt, Log, IProgress, resToJSON } from './base';
 import { machine } from './machine';
 import { CommonMethods } from './commonMethods';
 var tcpPortUsed = require('tcp-port-used');
@@ -10,22 +10,23 @@ export class ContainerStatic extends CommonMethods {
         return Q.Promise((resolve, reject) => {
             if (!opts.retryIntervalMs) { opts.retryIntervalMs = 100; }
             if (!opts.timeoutMs) { opts.timeoutMs = 5000; }
+            let progress = Log.infoProgress('waiting for port', opts.port.toString());
             if (!opts.host) {
                 machine.ipAddress().then(
                     (ipAddress) => {
                         opts.host = ipAddress;
-                        this.runWaitForPort(opts).then(resolve, reject);
+                        this.runWaitForPort(opts, progress).then(resolve, reject);
                     },
                     (err) => { reject(err); }
                 );
             } else {
-                this.runWaitForPort(opts).then(resolve, reject);
+                this.runWaitForPort(opts, progress).then(resolve, reject);
             }
         });
     }
 
-    private runWaitForPort(opts: IWaitForPortOpts) {
-        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
+    private runWaitForPort(opts: IWaitForPortOpts, progress: IProgress) {
+        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(() => { Log.terminateProgress(progress); });
     }
 
     start(imageName, opts?: IStartDockerOpts, command?: string) {

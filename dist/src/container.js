@@ -23,19 +23,20 @@ var ContainerStatic = (function (_super) {
             if (!opts.timeoutMs) {
                 opts.timeoutMs = 5000;
             }
+            var progress = base_1.Log.infoProgress('waiting for port', opts.port.toString());
             if (!opts.host) {
                 machine_1.machine.ipAddress().then(function (ipAddress) {
                     opts.host = ipAddress;
-                    _this.runWaitForPort(opts).then(resolve, reject);
+                    _this.runWaitForPort(opts, progress).then(resolve, reject);
                 }, function (err) { reject(err); });
             }
             else {
-                _this.runWaitForPort(opts).then(resolve, reject);
+                _this.runWaitForPort(opts, progress).then(resolve, reject);
             }
         });
     };
-    ContainerStatic.prototype.runWaitForPort = function (opts) {
-        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
+    ContainerStatic.prototype.runWaitForPort = function (opts, progress) {
+        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(function () { base_1.Log.terminateProgress(progress); });
     };
     ContainerStatic.prototype.start = function (imageName, opts, command) {
         var _this = this;
