@@ -35,7 +35,7 @@ var ContainerStatic = (function (_super) {
         });
     };
     ContainerStatic.prototype.runWaitForPort = function (opts) {
-        return tcpPortUsed.waitUntilFreeOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
+        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
     };
     ContainerStatic.prototype.start = function (imageName, opts, command) {
         var _this = this;

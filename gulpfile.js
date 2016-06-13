@@ -37,6 +37,11 @@ gulp.task('compileTests', () => {
         .pipe(gulp.dest('./dist'));
 });
 
+gulp.task('copy-dockerfiles', function() {
+    return gulp.src(['./spec/**/*.sh', './spec/**/!(*.ts)'])
+        .pipe(gulp.dest('./dist/spec'));
+});
+
 gulp.task('test', () => {
     return gulp.src('./dist/spec/*.js')
         .pipe($.jasmine({ verbose: true }))
@@ -59,7 +64,7 @@ gulp.task('watch', () => {
 
 gulp.task('compile', gulp.parallel('compileSrc', 'compileTests'));
 
-gulp.task('build', gulp.series('clean', 'compile'));
+gulp.task('build', gulp.series('clean', 'compile', 'copy-dockerfiles'));
 
 gulp.task('default', gulp.series('build', 'test', 'ts-lint'));
 

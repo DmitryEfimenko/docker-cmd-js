@@ -126,8 +126,13 @@ function resToJSON(s) {
     for (var i = 0, l = lines.length; i < l; i++) {
         var obj = {};
         for (var c = 0, cl = cols.length; c < cl; c++) {
-            obj[cols[c].name] = lines[i].substring(0, cols[c].length + 1).trim();
-            lines[i] = lines[i].substring(cols[c].length + 1, lines[i].length - 1);
+            if (c === cols.length - 1) {
+                obj[cols[c].name] = lines[i].trim();
+            }
+            else {
+                obj[cols[c].name] = lines[i].substring(0, cols[c].length + 1).trim();
+                lines[i] = lines[i].substring(cols[c].length + 1, lines[i].length);
+            }
         }
         result.push(obj);
     }

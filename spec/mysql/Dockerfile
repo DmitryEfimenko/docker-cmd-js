@@ -1,0 +1,5 @@
+FROM mysql:5.7.10
+
+ENV MYSQL_ROOT_PASSWORD=rootPassword
+ENV MYSQL_USER=testUser
+ENV MYSQL_PASSWORD=password

@@ -25,7 +25,7 @@ export class ContainerStatic extends CommonMethods {
     }
 
     private runWaitForPort(opts: IWaitForPortOpts) {
-        return tcpPortUsed.waitUntilFreeOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
+        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
     }
 
     start(imageName, opts?: IStartDockerOpts, command?: string) {
