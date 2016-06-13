@@ -129,5 +129,20 @@ export interface IStartDockerOpts {
 Returns container's status.
 
 ---
+##### `cmd.container.waitForPort(opts: IWaitForPortOpts): Q.Promise;`
+Resolves when desired port becomes awailable.
+
+Useful for when container's services take time to start up after the container started. Ex: starting up container `FROM mysql`
+
+```javascript
+interface IWaitForPortOpts {
+    port: number;
+    host?: string;
+    retryIntervalMs?: number;
+    timeoutMs?: number;
+}
+```
+
+---
 ## Credits
 Thanks to [Matt Klein](https://github.com/mattklein999), who started out coding this lib.
