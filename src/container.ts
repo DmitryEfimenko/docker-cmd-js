@@ -77,7 +77,7 @@ export class ContainerStatic extends CommonMethods {
     }
 
     status(containerName: string) {
-        return run(`docker ps -a --filter name=${containerName} --format "{{.Status}}"`, Opts.debug);
+        return run(`docker ps -a --filter name=${containerName} --format "{{.Status}}"`, Opts.debug, true);
     }
 }
 

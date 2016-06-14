@@ -85,7 +85,7 @@ var ContainerStatic = (function (_super) {
         });
     };
     ContainerStatic.prototype.status = function (containerName) {
-        return base_1.run("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"", base_1.Opts.debug);
+        return base_1.run("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"", base_1.Opts.debug, true);
     };
     return ContainerStatic;
 }(commonMethods_1.CommonMethods));
