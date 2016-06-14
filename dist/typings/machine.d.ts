@@ -1,10 +1,12 @@
 import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
 export declare class MachineStatic extends CommonMethods {
+    _ipAddress: string;
     status(): Q.Promise<string>;
     ipAddress(): Q.Promise<string>;
     start(opts?: IStartOpts): Q.Promise<{}>;
     private runStartMachine(opts?);
+    remove(): Q.Promise<string>;
 }
 export interface IStartOpts {
     driver?: string;

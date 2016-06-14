@@ -15,15 +15,16 @@ function spawn(command, env, debug, cb) {
     r.stderr.on('data', function (data) {
         if (data.indexOf('SECURITY WARNING:') === -1) {
             result.stdErr = result.stdErr + data.toString();
-            process.stdout.write(colors.red("stderr: " + data.toString()));
+            base_1.Log.err("stderr: " + data.toString());
         }
     });
     r.on('error', function (err) {
-        process.stdout.write("Failed to start command: " + command);
+        base_1.Log.err("Failed to start command: " + command);
+        process.stdout.write(err);
     });
     r.on('close', function (code) {
         if (debug) {
-            console.log("command exited with code " + code);
+            base_1.Log.info("command exited with code " + code);
         }
         cb(result);
     });

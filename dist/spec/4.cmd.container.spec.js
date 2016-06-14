@@ -5,12 +5,13 @@ var tcpPortUsed = require('tcp-port-used');
 var docker_cmd_js_1 = require('../src/docker-cmd-js');
 describe('cmd.container', function () {
     var cmd;
+    var machineName = 'docker-cmd-js-test';
     beforeAll(function (done) {
-        cmd = new docker_cmd_js_1.Cmd();
+        cmd = new docker_cmd_js_1.Cmd(machineName);
         cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildAndReplace: true }).then(function () { done(); }, function (err) { done.fail(err); });
     }, 1 * 20 * 1000);
     afterAll(function (done) {
-        cmd.run('docker rm -f docker_cmd_js_mysql')
+        cmd.run("docker rm -f docker_cmd_js_mysql")
             .then(function () { return cmd.image.remove('docker_cmd_js_mysql'); })
             .catch(function (err) { done.fail(err); })
             .then(function () { done(); });

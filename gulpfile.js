@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var path = require('path');
 var del = require('del');
 var colors = require('colors');
+var failFast = require('jasmine-fail-fast');
 var $ = require('gulp-load-plugins')();
 
 gulp.task('clean', function (cb) {
@@ -43,6 +44,7 @@ gulp.task('copy-dockerfiles', function() {
 });
 
 gulp.task('test', () => {
+    $.jasmine.jasmine.getEnv().addReporter(failFast.init());
     return gulp.src('./dist/spec/*.js')
         .pipe($.jasmine({ verbose: true }))
         .on('error', swallowError)

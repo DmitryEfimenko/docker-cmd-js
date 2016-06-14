@@ -149,28 +149,38 @@ export class Log {
         this.newLine();
     }
 
+    static debug(...message: string[]) {
+        process.stdout.write(colors.bgBlue.white('VM-debug') + ' - ' + colors.yellow(message.join(' ')));
+        this.newLine();
+    }
+
     static infoProgress(...message: string[]): IProgress {
         let c = '\\';
         let m = `${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))}`;
 
-        process.stdout.write(`${m} ${c}\r`);
-        let interval = setInterval(() => {
-            if (c === '\\') {
-                c = '/';
-            } else if (c === '/') {
-                c = '-';
-            } else if (c === '-') {
-                c = '\\';
-            }
+        if (!Opts.debug) {
             process.stdout.write(`${m} ${c}\r`);
-        }, 300);
-        return { interval: interval, message: m };
+            let interval = setInterval(() => {
+                if (c === '\\') {
+                    c = '/';
+                } else if (c === '/') {
+                    c = '-';
+                } else if (c === '-') {
+                    c = '\\';
+                }
+                process.stdout.write(`${m} ${c}\r`);
+            }, 300);
+            return { interval: interval, message: m };
+        } else {
+            process.stdout.write(m);
+            return { interval: undefined, message: m };
+        }
     }
 
     static terminateProgress(progress: IProgress) {
-        clearInterval(progress.interval);
+        if (progress.interval) { clearInterval(progress.interval); }
         (<any>process.stdout).clearLine();
-        process.stdout.write(progress.message);
+        process.stdout.write(progress.message + ' - done');
         this.newLine();
         return this;
     }

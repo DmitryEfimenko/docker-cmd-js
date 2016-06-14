@@ -1,15 +1,37 @@
 import * as Q from 'q';
 import { Opts, run, addOpts, addOpt, Log } from './base';
 import { CommonMethods } from './commonMethods';
+import { setEnvironment } from './environment';
 
 export class MachineStatic extends CommonMethods {
+    _ipAddress: string;
 
     status() {
-        return run('docker-machine status', Opts.debug, true);
+        return Q.Promise<string>((resolve, reject) => { 
+            return run(`docker-machine status ${Opts.machineName}`, Opts.debug, true).then(
+                (status) => { resolve(status); },
+                (err) => {
+                    let validErr = `Host does not exist: "${Opts.machineName}"`;
+                    if (err === `${validErr}\n`) {
+                        resolve(validErr);
+                    } else {
+                        reject(err);
+                    }
+                }
+            );
+        });
     }
 
     ipAddress() {
-        return run(`docker-machine ip ${Opts.machineName}`, Opts.debug, true);
+        return Q.Promise<string>((resolve, reject) => {
+            run(`docker-machine ip ${Opts.machineName}`, Opts.debug, true).then(
+                (ip) => {
+                    this._ipAddress = ip;
+                    resolve(ip);
+                },
+                (err) => { reject(err); }
+            );
+        });
     }
 
     start(opts?: IStartOpts) {
@@ -19,7 +41,7 @@ export class MachineStatic extends CommonMethods {
                     if (res !== 'Running') {
                         this.runStartMachine(opts).then(resolve, reject);
                     } else {
-                        Log.info('docker-machine status:', res);
+                        Log.info(`docker-machine [${Opts.machineName}] status:`, res);
                         resolve(res);
                     }
                 },
@@ -41,11 +63,23 @@ export class MachineStatic extends CommonMethods {
             if (!opts.virtualboxNoVtxCheck) { c = addOpt(c, '--virtualbox-no-vtx-check'); }
             c += ` ${Opts.machineName}`;
 
+            let progress = Log.infoProgress(`Starting VM "${Opts.machineName}"`);            
             run(c, Opts.debug).then(
-                (resp) => { resolve(resp); },
-                (err) => { reject(err); }
+                (resp) => {
+                    setEnvironment(Opts.machineName);
+                    Log.terminateProgress(progress);
+                    resolve(resp);
+                },
+                (err) => {
+                    Log.terminateProgress(progress);
+                    reject(err);
+                }
             );
         });
+    }
+
+    remove() {
+        return run(`docker-machine rm -f ${Opts.machineName}`, Opts.debug);
     }
 }
 

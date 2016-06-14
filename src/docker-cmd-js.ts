@@ -12,7 +12,7 @@ export class Cmd {
     container: ContainerStatic;
 
     constructor(machineName?: string) {
-        if (!machineName) { Opts.machineName = 'default'; }
+        Opts.machineName = machineName !== undefined ? machineName : 'default'; 
         setEnvironment(Opts.machineName);
         this.container = container;
         this.machine = machine;

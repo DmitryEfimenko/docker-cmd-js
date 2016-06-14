@@ -83,6 +83,10 @@ Returns machine's IP address.
 Returns machine's status.
 
 ---
+##### `cmd.machine.remove(): Q.Promise<string>`
+Removes machine.
+
+---
 ##### `cmd.image.build(imageName: string, opts?: IBuildImageOpts): Q.Promise<{}>`
 Builds desired image.
 You can provide object with the following options:

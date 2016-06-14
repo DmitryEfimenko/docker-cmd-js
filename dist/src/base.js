@@ -166,6 +166,14 @@ var Log = (function () {
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
         this.newLine();
     };
+    Log.debug = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i - 0] = arguments[_i];
+        }
+        process.stdout.write(colors.bgBlue.white('VM-debug') + ' - ' + colors.yellow(message.join(' ')));
+        this.newLine();
+    };
     Log.infoProgress = function () {
         var message = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -173,25 +181,33 @@ var Log = (function () {
         }
         var c = '\\';
         var m = colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' '));
-        process.stdout.write(m + " " + c + "\r");
-        var interval = setInterval(function () {
-            if (c === '\\') {
-                c = '/';
-            }
-            else if (c === '/') {
-                c = '-';
-            }
-            else if (c === '-') {
-                c = '\\';
-            }
+        if (!Opts.debug) {
             process.stdout.write(m + " " + c + "\r");
-        }, 300);
-        return { interval: interval, message: m };
+            var interval = setInterval(function () {
+                if (c === '\\') {
+                    c = '/';
+                }
+                else if (c === '/') {
+                    c = '-';
+                }
+                else if (c === '-') {
+                    c = '\\';
+                }
+                process.stdout.write(m + " " + c + "\r");
+            }, 300);
+            return { interval: interval, message: m };
+        }
+        else {
+            process.stdout.write(m);
+            return { interval: undefined, message: m };
+        }
     };
     Log.terminateProgress = function (progress) {
-        clearInterval(progress.interval);
+        if (progress.interval) {
+            clearInterval(progress.interval);
+        }
         process.stdout.clearLine();
-        process.stdout.write(progress.message);
+        process.stdout.write(progress.message + ' - done');
         this.newLine();
         return this;
     };

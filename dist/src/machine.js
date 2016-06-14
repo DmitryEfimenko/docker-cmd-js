@@ -7,16 +7,33 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Q = require('q');
 var base_1 = require('./base');
 var commonMethods_1 = require('./commonMethods');
+var environment_1 = require('./environment');
 var MachineStatic = (function (_super) {
     __extends(MachineStatic, _super);
     function MachineStatic() {
         _super.apply(this, arguments);
     }
     MachineStatic.prototype.status = function () {
-        return base_1.run('docker-machine status', base_1.Opts.debug, true);
+        return Q.Promise(function (resolve, reject) {
+            return base_1.run("docker-machine status " + base_1.Opts.machineName, base_1.Opts.debug, true).then(function (status) { resolve(status); }, function (err) {
+                var validErr = "Host does not exist: \"" + base_1.Opts.machineName + "\"";
+                if (err === validErr + "\n") {
+                    resolve(validErr);
+                }
+                else {
+                    reject(err);
+                }
+            });
+        });
     };
     MachineStatic.prototype.ipAddress = function () {
-        return base_1.run("docker-machine ip " + base_1.Opts.machineName, base_1.Opts.debug, true);
+        var _this = this;
+        return Q.Promise(function (resolve, reject) {
+            base_1.run("docker-machine ip " + base_1.Opts.machineName, base_1.Opts.debug, true).then(function (ip) {
+                _this._ipAddress = ip;
+                resolve(ip);
+            }, function (err) { reject(err); });
+        });
     };
     MachineStatic.prototype.start = function (opts) {
         var _this = this;
@@ -26,7 +43,7 @@ var MachineStatic = (function (_super) {
                     _this.runStartMachine(opts).then(resolve, reject);
                 }
                 else {
-                    base_1.Log.info('docker-machine status:', res);
+                    base_1.Log.info("docker-machine [" + base_1.Opts.machineName + "] status:", res);
                     resolve(res);
                 }
             }, function (err) {
@@ -51,8 +68,19 @@ var MachineStatic = (function (_super) {
                 c = base_1.addOpt(c, '--virtualbox-no-vtx-check');
             }
             c += " " + base_1.Opts.machineName;
-            base_1.run(c, base_1.Opts.debug).then(function (resp) { resolve(resp); }, function (err) { reject(err); });
+            var progress = base_1.Log.infoProgress("Starting VM \"" + base_1.Opts.machineName + "\"");
+            base_1.run(c, base_1.Opts.debug).then(function (resp) {
+                environment_1.setEnvironment(base_1.Opts.machineName);
+                base_1.Log.terminateProgress(progress);
+                resolve(resp);
+            }, function (err) {
+                base_1.Log.terminateProgress(progress);
+                reject(err);
+            });
         });
+    };
+    MachineStatic.prototype.remove = function () {
+        return base_1.run("docker-machine rm -f " + base_1.Opts.machineName, base_1.Opts.debug);
     };
     return MachineStatic;
 }(commonMethods_1.CommonMethods));

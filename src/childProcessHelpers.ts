@@ -20,17 +20,18 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
     r.stderr.on('data', (data) => {
         if (data.indexOf('SECURITY WARNING:') === -1) {
             result.stdErr = result.stdErr + data.toString();
-            process.stdout.write(colors.red(`stderr: ${data.toString()}`));
+            Log.err(`stderr: ${data.toString()}`);
         }
     });
 
     r.on('error', (err) => {
-        process.stdout.write(`Failed to start command: ${command}`);
+        Log.err(`Failed to start command: ${command}`)
+        process.stdout.write(err);
     });
 
     r.on('close', (code) => {
         if (debug) {
-            console.log(`command exited with code ${code}`);
+            Log.info(`command exited with code ${code}`);
         }
         cb(result);
     });

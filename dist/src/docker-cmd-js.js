@@ -6,9 +6,7 @@ var image_1 = require('./image');
 var container_1 = require('./container');
 var Cmd = (function () {
     function Cmd(machineName) {
-        if (!machineName) {
-            base_1.Opts.machineName = 'default';
-        }
+        base_1.Opts.machineName = machineName !== undefined ? machineName : 'default';
         environment_1.setEnvironment(base_1.Opts.machineName);
         this.container = container_1.container;
         this.machine = machine_1.machine;

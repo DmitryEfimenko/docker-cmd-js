@@ -17,7 +17,8 @@
     "gulp-load-plugins": "~1.2.4",
     "gulp-tslint": "~5.0.0",
     "gulp-typescript": "2.13.6",
-    "typescript": "~1.8.10"
+    "typescript": "~1.8.10",
+    "jasmine-fail-fast": "~2.0.0"
   },
   "repository": {
     "type": "git",

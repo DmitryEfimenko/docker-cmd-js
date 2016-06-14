@@ -4,10 +4,11 @@ import { Cmd } from '../src/docker-cmd-js';
 
 describe('cmd.machine', () => {
     let cmd: Cmd;
+    let machineName = 'docker-cmd-js-test';
 
     beforeAll(() => {
-        cmd = new Cmd();
-    });  
+        cmd = new Cmd(machineName);
+    });
     
     it('status()', (done) => {
         cmd.machine.status().then(
@@ -25,6 +26,7 @@ describe('cmd.machine', () => {
         cmd.machine.ipAddress().then(
             (ipAddress) => {
                 expect(ipAddress).toBeDefined();
+                expect(cmd.machine._ipAddress).toBe(ipAddress);
                 done();
             },
             (err) => {

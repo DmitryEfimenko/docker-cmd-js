@@ -6,9 +6,10 @@ import { Cmd } from '../src/docker-cmd-js';
 
 describe('cmd.container', () => {
     let cmd: Cmd;
+    let machineName = 'docker-cmd-js-test';
 
     beforeAll((done) => {
-        cmd = new Cmd();
+        cmd = new Cmd(machineName);
         cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildAndReplace: true }).then(
             () => { done(); },
             (err) => { done.fail(err); }
@@ -16,7 +17,7 @@ describe('cmd.container', () => {
     }, 1 * 20 * 1000);
 
     afterAll((done) => {
-        cmd.run('docker rm -f docker_cmd_js_mysql')
+        cmd.run(`docker rm -f docker_cmd_js_mysql`)
             .then(() => cmd.image.remove('docker_cmd_js_mysql'))
             .catch((err) => { done.fail(err); })
             .then(() => { done(); });
