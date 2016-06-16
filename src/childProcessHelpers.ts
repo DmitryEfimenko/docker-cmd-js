@@ -5,8 +5,9 @@ import { Log } from './base';
 export function spawn(command: string, env, debug: boolean, cb: (result: RunResult) => void) {
     var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g); // in case we need to have quoted args
     items.forEach((val, i, arr) => {
-        if (val[0] === '"' && val[val.length - 1] === '"')
+        if (val[0] === '"' && val[val.length - 1] === '"') {
             arr[i] = val.substr(1, val.length - 2);
+        }
     });
 
     let r = child_process.spawn(items[0], items.slice(1), { env: env });
@@ -42,8 +43,9 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
 export function spawnSync(command: string, env, debug: boolean): RunResult {
     var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g); // in case we need to have quoted args
     items.forEach((val, i, arr) => {
-        if (val[0] === '"' && val[val.length - 1] === '"')
+        if (val[0] === '"' && val[val.length - 1] === '"') {
             arr[i] = val.substr(1, val.length - 2);
+        }
     });
 
     let r = child_process.spawnSync(items[0], items.slice(1), { env: env });

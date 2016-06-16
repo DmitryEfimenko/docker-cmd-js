@@ -9,5 +9,6 @@ export declare class ImageStatic extends CommonMethods {
 export interface IBuildImageOpts {
     pathOrUrl?: string;
     buildAndReplace?: boolean;
+    buildOnlyIfMissing?: boolean;
 }
 export declare var image: ImageStatic;

@@ -36,7 +36,9 @@ var ContainerStatic = (function (_super) {
         });
     };
     ContainerStatic.prototype.runWaitForPort = function (opts, progress) {
-        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(function () { base_1.Log.terminateProgress(progress); });
+        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(function () {
+            base_1.Log.terminateProgress(progress);
+        });
     };
     ContainerStatic.prototype.start = function (imageName, opts, command) {
         var _this = this;
@@ -44,7 +46,7 @@ var ContainerStatic = (function (_super) {
             var containerName = (opts && opts.name) ? opts.name : imageName;
             var progress = base_1.Log.infoProgress("Checking if container \"" + containerName + "\" needs to be started");
             _this.runWithoutDebugOnce(_this.status(containerName)).then(function (status) {
-                if (!status) {
+                if (status === undefined) {
                     progress = base_1.Log.terminateProgress(progress).infoProgress("Creating and starting container \"" + containerName + "\"");
                     var c = "docker run -d";
                     if (!opts) {
@@ -59,8 +61,8 @@ var ContainerStatic = (function (_super) {
                         c += " " + command;
                     }
                     base_1.run(c, base_1.Opts.debug).then(function () {
-                        base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\"\" started.");
-                        resolve(true);
+                        base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\" started.");
+                        resolve(false);
                     }, function (err) {
                         base_1.Log.terminateProgress(progress);
                         reject(err);
@@ -68,11 +70,11 @@ var ContainerStatic = (function (_super) {
                 }
                 else if (status.indexOf('Up') === 0) {
                     base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\"\" already started.");
-                    resolve(false);
+                    resolve(true);
                 }
                 else if (status.indexOf('Exited') === 0) {
                     base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\"\" exists but is not started. Starting now.");
-                    base_1.runWithoutDebug("docker start " + containerName).then(function () { resolve(true); }, reject);
+                    base_1.runWithoutDebug("docker start " + containerName).then(function () { resolve(false); }, reject);
                 }
                 else {
                     base_1.Log.terminateProgress(progress);

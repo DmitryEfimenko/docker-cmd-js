@@ -15,11 +15,17 @@ var ImageStatic = (function (_super) {
     }
     ImageStatic.prototype.build = function (imageName, opts) {
         var _this = this;
+        if (opts && opts.buildAndReplace && opts.buildOnlyIfMissing) {
+            throw new Error('can\'t use both optsions "buildAndReplace" and "buildOnlyIfMissing" at the same time');
+        }
         return Q.Promise(function (resolve, reject) {
             base_1.runWithoutDebug("docker images --format {{.Repository}} " + imageName, true).then(function (img) {
                 if (img === imageName) {
                     if (opts && opts.buildAndReplace) {
                         _this.remove(imageName).then(function () { _this.runBuildImage(imageName, opts).then(resolve, reject); }, reject);
+                    }
+                    else if (opts && opts.buildOnlyIfMissing) {
+                        resolve(undefined);
                     }
                     else {
                         var promptOpts = {

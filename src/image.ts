@@ -6,15 +6,21 @@ import { CommonMethods } from './commonMethods';
 export class ImageStatic extends CommonMethods {
 
     build(imageName: string, opts?: IBuildImageOpts) {
+        if (opts && opts.buildAndReplace && opts.buildOnlyIfMissing) {
+            throw new Error('can\'t use both optsions "buildAndReplace" and "buildOnlyIfMissing" at the same time');
+        }
         return Q.Promise((resolve, reject) => {
             runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, true).then(
                 (img) => {
                     if (img === imageName) {
+                        // image exists
                         if (opts && opts.buildAndReplace) {
                             this.remove(imageName).then(
                                 () => { this.runBuildImage(imageName, opts).then(resolve, reject); },
                                 reject
                             );
+                        } else if (opts && opts.buildOnlyIfMissing) {
+                            resolve(undefined);
                         } else {
                             let promptOpts = {
                                 type: 'list',
@@ -116,6 +122,7 @@ export class ImageStatic extends CommonMethods {
 export interface IBuildImageOpts {
     pathOrUrl?: string;
     buildAndReplace?: boolean;
+    buildOnlyIfMissing?: boolean;
 }
 
 export var image = new ImageStatic();

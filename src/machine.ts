@@ -7,7 +7,7 @@ export class MachineStatic extends CommonMethods {
     _ipAddress: string;
 
     status() {
-        return Q.Promise<string>((resolve, reject) => { 
+        return Q.Promise<string>((resolve, reject) => {
             return run(`docker-machine status ${Opts.machineName}`, Opts.debug, true).then(
                 (status) => { resolve(status); },
                 (err) => {
@@ -63,7 +63,7 @@ export class MachineStatic extends CommonMethods {
             if (!opts.virtualboxNoVtxCheck) { c = addOpt(c, '--virtualbox-no-vtx-check'); }
             c += ` ${Opts.machineName}`;
 
-            let progress = Log.infoProgress(`Starting VM "${Opts.machineName}"`);            
+            let progress = Log.infoProgress(`Starting VM "${Opts.machineName}"`);
             run(c, Opts.debug).then(
                 (resp) => {
                     setEnvironment(Opts.machineName);

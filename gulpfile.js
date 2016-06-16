@@ -46,7 +46,7 @@ gulp.task('copy-dockerfiles', function() {
 
 gulp.task('test', () => {
     //$.jasmine.jasmine.getEnv().addReporter(failFast.init());
-    var terminalReporter = new TerminalReporter({ isVerbose: true, showColors: true, includeStackTrace: true });
+    var terminalReporter = new TerminalReporter({ isVerbose: true, showColors: true, includeStackTrace: false });
     
     return gulp.src('./dist/spec/*.js')
         .pipe($.jasmine({ reporter: [terminalReporter/*, failFast.init()*/] }))

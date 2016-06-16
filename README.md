@@ -101,7 +101,11 @@ export interface IBuildImageOpts {
      * if not set to true and image already exists, it'll prompt you with options
      * letting you chose how you want to build the image
     */
-    buildAndReplace?: boolean;  
+    buildAndReplace?: boolean;
+    /*
+     * skips build the image if it already exists
+    */
+    buildOnlyIfMissing?: boolean;
 }
 ```
 
@@ -114,8 +118,9 @@ Removes desired image
 Checks for dangling images. If found, prompts with question whether to remove them or not.
 
 ---
-##### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>`
+##### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<boolean>`
 Starts container from desired image.
+Returns a Promise of boolean stating whether the container was already started.
 You can provide object with the following options. See docker docs for options' description:
 ```javascript
 export interface IStartDockerOpts {

@@ -26,7 +26,9 @@ export class ContainerStatic extends CommonMethods {
     }
 
     private runWaitForPort(opts: IWaitForPortOpts, progress: IProgress) {
-        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(() => { Log.terminateProgress(progress); });
+        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(() => {
+            Log.terminateProgress(progress);
+        });
     }
 
     start(imageName: string, opts?: IStartDockerOpts, command?: string) {
@@ -35,7 +37,7 @@ export class ContainerStatic extends CommonMethods {
             let progress = Log.infoProgress(`Checking if container "${containerName}" needs to be started`);
             this.runWithoutDebugOnce(this.status(containerName)).then(
                 (status) => {
-                    if (!status) {
+                    if (status === undefined) {
                         progress = Log.terminateProgress(progress).infoProgress(`Creating and starting container "${containerName}"`);
                         let c = `docker run -d`;
                         if (!opts) { opts = {}; }
@@ -46,8 +48,8 @@ export class ContainerStatic extends CommonMethods {
                         if (command) { c += ` ${command}`; }
                         run(c, Opts.debug).then(
                             () => {
-                                Log.terminateProgress(progress).info(`Container "${containerName}"" started.`);
-                                resolve(true);
+                                Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
+                                resolve(false);
                             },
                             (err) => {
                                 Log.terminateProgress(progress);
@@ -56,11 +58,11 @@ export class ContainerStatic extends CommonMethods {
                         );
                     } else if (status.indexOf('Up') === 0) {
                         Log.terminateProgress(progress).info(`Container "${containerName}"" already started.`);
-                        resolve(false);
+                        resolve(true);
                     } else if (status.indexOf('Exited') === 0) {
                         Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
                         runWithoutDebug(`docker start ${containerName}`).then(
-                            () => { resolve(true); },
+                            () => { resolve(false); },
                             reject
                         );
                     } else {

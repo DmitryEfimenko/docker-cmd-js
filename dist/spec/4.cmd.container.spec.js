@@ -8,7 +8,7 @@ describe('cmd.container', function () {
     var machineName = 'docker-cmd-js-test';
     beforeAll(function (done) {
         cmd = new docker_cmd_js_1.Cmd(machineName);
-        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildAndReplace: true }).then(function () { done(); }, function (err) { done.fail(err); });
+        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildOnlyIfMissing: true }).then(function () { done(); }, function (err) { done.fail(err); });
     }, 1 * 20 * 1000);
     afterAll(function (done) {
         cmd.run("docker rm -f docker_cmd_js_mysql")
@@ -17,13 +17,28 @@ describe('cmd.container', function () {
             .then(function () { done(); });
     });
     it('start()', function (done) {
-        cmd.container.start('docker_cmd_js_mysql', { publish: '3306:3306' }).then(function () {
+        cmd.container.start('docker_cmd_js_mysql', { publish: '3306:3306' }).then(function (wasStarted) {
+            expect(wasStarted).toBeFalsy();
             cmd.run('docker ps').then(function (res) {
                 var containers = cmd.resToJSON(res);
                 expect(containers.length).toBeGreaterThan(0);
                 expect(containers[0]['NAMES']).toBe('docker_cmd_js_mysql');
-                cmd.run('docker rm -f docker_cmd_js_mysql').then(function () { done(); }, function (err) { done.fail(err); });
+                done();
             });
+        }, function (err) {
+            done.fail(err);
+        });
+    });
+    it('status()', function (done) {
+        cmd.container.status('docker_cmd_js_mysql').then(function (status) {
+            expect(status.indexOf('Up') === 0).toBeTruthy();
+            done();
+        }, function (err) { done.fail(err); });
+    });
+    it('start() on running container', function (done) {
+        cmd.container.start('docker_cmd_js_mysql', { publish: '3306:3306' }).then(function (wasStarted) {
+            expect(wasStarted).toBeTruthy();
+            done();
         }, function (err) {
             done.fail(err);
         });

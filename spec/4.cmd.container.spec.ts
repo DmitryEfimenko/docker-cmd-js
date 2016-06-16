@@ -10,7 +10,7 @@ describe('cmd.container', () => {
 
     beforeAll((done) => {
         cmd = new Cmd(machineName);
-        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildAndReplace: true }).then(
+        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildOnlyIfMissing: true }).then(
             () => { done(); },
             (err) => { done.fail(err); }
         );
@@ -25,18 +25,38 @@ describe('cmd.container', () => {
     
     it('start()', (done) => {
         cmd.container.start('docker_cmd_js_mysql', { publish: '3306:3306' }).then(
-            () => {
+            (wasStarted) => {
+                expect(wasStarted).toBeFalsy();
                 cmd.run('docker ps').then(
                     (res) => {
                         let containers = cmd.resToJSON(res);
                         expect(containers.length).toBeGreaterThan(0);
                         expect(containers[0]['NAMES']).toBe('docker_cmd_js_mysql');
-                        cmd.run('docker rm -f docker_cmd_js_mysql').then(
-                            () => { done(); },
-                            (err) => { done.fail(err); }
-                        )
+                        done();
                     }
                 );
+            },
+            (err) => {
+                done.fail(err);
+            }
+        );
+    });
+
+    it('status()', (done) => {
+        cmd.container.status('docker_cmd_js_mysql').then(
+            (status) => {
+                expect(status.indexOf('Up') === 0).toBeTruthy();
+                done();
+            },
+            (err) => { done.fail(err); }
+        );
+    });
+
+    it('start() on running container', (done) => {
+        cmd.container.start('docker_cmd_js_mysql', { publish: '3306:3306' }).then(
+            (wasStarted) => {
+                expect(wasStarted).toBeTruthy();
+                done();
             },
             (err) => {
                 done.fail(err);

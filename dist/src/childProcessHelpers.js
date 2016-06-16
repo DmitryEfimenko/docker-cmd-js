@@ -5,8 +5,9 @@ var base_1 = require('./base');
 function spawn(command, env, debug, cb) {
     var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g);
     items.forEach(function (val, i, arr) {
-        if (val[0] === '"' && val[val.length - 1] === '"')
+        if (val[0] === '"' && val[val.length - 1] === '"') {
             arr[i] = val.substr(1, val.length - 2);
+        }
     });
     var r = child_process.spawn(items[0], items.slice(1), { env: env });
     var result = { stdOut: '', stdErr: '' };
@@ -37,8 +38,9 @@ exports.spawn = spawn;
 function spawnSync(command, env, debug) {
     var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g);
     items.forEach(function (val, i, arr) {
-        if (val[0] === '"' && val[val.length - 1] === '"')
+        if (val[0] === '"' && val[val.length - 1] === '"') {
             arr[i] = val.substr(1, val.length - 2);
+        }
     });
     var r = child_process.spawnSync(items[0], items.slice(1), { env: env });
     if (debug) {
