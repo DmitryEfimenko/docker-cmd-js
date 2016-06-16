@@ -3,7 +3,7 @@ import { CommonMethods } from './commonMethods';
 export declare class ContainerStatic extends CommonMethods {
     waitForPort(opts: IWaitForPortOpts): Q.Promise<{}>;
     private runWaitForPort(opts, progress);
-    start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>;
+    start(imageName: string, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>;
     status(containerName: string): Q.Promise<string>;
 }
 export interface IStartDockerOpts {
