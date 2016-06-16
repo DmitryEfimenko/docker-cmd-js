@@ -66,11 +66,11 @@ var ContainerStatic = (function (_super) {
                         reject(err);
                     });
                 }
-                else if (status.indexOf('Up') === 1) {
+                else if (status.indexOf('Up') === 0) {
                     base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\"\" already started.");
                     resolve(false);
                 }
-                else if (status.indexOf('Exited') === 1) {
+                else if (status.indexOf('Exited') === 0) {
                     base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\"\" exists but is not started. Starting now.");
                     base_1.runWithoutDebug("docker start " + containerName).then(function () { resolve(true); }, reject);
                 }
