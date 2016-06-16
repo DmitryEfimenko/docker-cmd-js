@@ -3,9 +3,11 @@ import colors = require('colors');
 import { Log } from './base';
 
 export function spawn(command: string, env, debug: boolean, cb: (result: RunResult) => void) {
-    let items = command.split(' ');
-    //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
-    //console.dir(items);
+    var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g); // in case we need to have quoted args
+    items.forEach((val, i, arr) => {
+        if (val[0] === '"' && val[val.length - 1] === '"')
+            arr[i] = val.substr(1, val.length - 2);
+    });
 
     let r = child_process.spawn(items[0], items.slice(1), { env: env });
     let result = { stdOut: '', stdErr: '' };
@@ -25,7 +27,7 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
     });
 
     r.on('error', (err) => {
-        Log.err(`Failed to start command: ${command}`)
+        Log.err(`Failed to start command: ${command}`);
         process.stdout.write(err);
     });
 
@@ -38,9 +40,11 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
 }
 
 export function spawnSync(command: string, env, debug: boolean): RunResult {
-    let items = command.split(' ');
-    //var items = command.match(/[\w-=:]+|"(?:\\"|[^"])+"/g); // in case we need to have quoted args
-    //console.dir(items);
+    var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g); // in case we need to have quoted args
+    items.forEach((val, i, arr) => {
+        if (val[0] === '"' && val[val.length - 1] === '"')
+            arr[i] = val.substr(1, val.length - 2);
+    });
 
     let r = child_process.spawnSync(items[0], items.slice(1), { env: env });
     if (debug) {

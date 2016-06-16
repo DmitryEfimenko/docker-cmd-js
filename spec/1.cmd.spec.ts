@@ -48,4 +48,11 @@ describe('Cmd()', () => {
         expect(status.stdOut).toBe('Running\n');
         expect(status.stdErr).toBe('');
     });
+
+    it('run() command with quotes', (done) => {
+        cmd.run('docker ps -a -f name=docker --format "table {{.Names}}\t{{.Status}}"').then(
+            (res) => { done(); },
+            (err) => { done.fail(err); }
+        );
+    });
 });

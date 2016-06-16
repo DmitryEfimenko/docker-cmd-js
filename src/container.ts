@@ -77,7 +77,24 @@ export class ContainerStatic extends CommonMethods {
     }
 
     status(containerName: string) {
-        return run(`docker ps -a --filter name=${containerName} --format "{{.Status}}"`, Opts.debug, true);
+        return Q.Promise<string>((resolve, reject) => {
+            let c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
+            run(c, Opts.debug).then(
+                (res) => {
+                    //console.dir(res);
+                    let json = resToJSON(res);
+                    let status;
+                    for (var i = 0, l = json.length; i < l; i++) {
+                        if (json[i]['NAMES'] === containerName) {
+                            status = json[i]['STATUS'];
+                            break;
+                        }
+                    }
+                    resolve(status);
+                },
+                (err) => { reject(err); }
+            );
+        });
     }
 }
 

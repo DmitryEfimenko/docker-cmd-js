@@ -18,6 +18,7 @@
     "gulp-tslint": "~5.0.0",
     "gulp-typescript": "2.13.6",
     "typescript": "~1.8.10",
+    "jasmine-terminal-reporter": "^1.0.2",
     "jasmine-fail-fast": "~2.0.0"
   },
   "repository": {

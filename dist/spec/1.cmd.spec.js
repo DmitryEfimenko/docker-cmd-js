@@ -32,4 +32,7 @@ describe('Cmd()', function () {
         expect(status.stdOut).toBe('Running\n');
         expect(status.stdErr).toBe('');
     });
+    it('run() command with quotes', function (done) {
+        cmd.run('docker ps -a -f name=docker --format "table {{.Names}}\t{{.Status}}"').then(function (res) { done(); }, function (err) { done.fail(err); });
+    });
 });

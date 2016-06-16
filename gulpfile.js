@@ -3,6 +3,7 @@ var path = require('path');
 var del = require('del');
 var colors = require('colors');
 var failFast = require('jasmine-fail-fast');
+var TerminalReporter = require('jasmine-terminal-reporter');
 var $ = require('gulp-load-plugins')();
 
 gulp.task('clean', function (cb) {
@@ -44,9 +45,11 @@ gulp.task('copy-dockerfiles', function() {
 });
 
 gulp.task('test', () => {
-    $.jasmine.jasmine.getEnv().addReporter(failFast.init());
+    //$.jasmine.jasmine.getEnv().addReporter(failFast.init());
+    var terminalReporter = new TerminalReporter({ isVerbose: true, showColors: true, includeStackTrace: true });
+    
     return gulp.src('./dist/spec/*.js')
-        .pipe($.jasmine({ verbose: true }))
+        .pipe($.jasmine({ reporter: [terminalReporter/*, failFast.init()*/] }))
         .on('error', swallowError)
         .on('end', addSpaces);
 });

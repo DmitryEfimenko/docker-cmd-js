@@ -85,7 +85,20 @@ var ContainerStatic = (function (_super) {
         });
     };
     ContainerStatic.prototype.status = function (containerName) {
-        return base_1.run("docker ps -a --filter name=" + containerName + " --format \"{{.Status}}\"", base_1.Opts.debug, true);
+        return Q.Promise(function (resolve, reject) {
+            var c = "docker ps -a --filter name=" + containerName + " --format \"table {{.Names}}\t{{.Status}}\"";
+            base_1.run(c, base_1.Opts.debug).then(function (res) {
+                var json = base_1.resToJSON(res);
+                var status;
+                for (var i = 0, l = json.length; i < l; i++) {
+                    if (json[i]['NAMES'] === containerName) {
+                        status = json[i]['STATUS'];
+                        break;
+                    }
+                }
+                resolve(status);
+            }, function (err) { reject(err); });
+        });
     };
     return ContainerStatic;
 }(commonMethods_1.CommonMethods));
