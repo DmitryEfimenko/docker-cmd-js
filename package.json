@@ -1,6 +1,6 @@
 {
   "name": "docker-cmd-js",
-  "version": "3.2.6",
+  "version": "3.3.0",
   "description": "run docker commands in javascript",
   "main": "dist/src/docker-cmd-js.js",
   "typings": "dist/typings/docker-cmd-js.d.ts",
