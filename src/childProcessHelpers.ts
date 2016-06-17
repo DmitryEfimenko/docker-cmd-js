@@ -23,7 +23,9 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
     r.stderr.on('data', (data) => {
         if (data.indexOf('SECURITY WARNING:') === -1) {
             result.stdErr = result.stdErr + data.toString();
-            Log.err(`stderr: ${data.toString()}`);
+            if (debug) {
+                Log.warn(`stderr: ${data.toString()}`);
+            }
         }
     });
 

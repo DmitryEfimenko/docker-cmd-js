@@ -166,6 +166,14 @@ var Log = (function () {
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
         this.newLine();
     };
+    Log.warn = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i - 0] = arguments[_i];
+        }
+        process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.yellow(message.join(' ')));
+        this.newLine();
+    };
     Log.debug = function () {
         var message = [];
         for (var _i = 0; _i < arguments.length; _i++) {

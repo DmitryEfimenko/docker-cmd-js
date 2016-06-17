@@ -5,11 +5,13 @@ import { setEnvironment } from './environment';
 import { machine, MachineStatic } from './machine';
 import { image, ImageStatic } from './image';
 import { container, ContainerStatic } from './container';
+import { volume, VolumeStatic } from './volume';
 
 export class Cmd {
     machine: MachineStatic;
     image: ImageStatic;
     container: ContainerStatic;
+    volume: VolumeStatic;
 
     constructor(machineName?: string) {
         Opts.machineName = machineName !== undefined ? machineName : 'default';
@@ -17,6 +19,7 @@ export class Cmd {
         this.container = container;
         this.machine = machine;
         this.image = image;
+        this.volume = volume;
     }
 
     debug(debugging?: boolean) {

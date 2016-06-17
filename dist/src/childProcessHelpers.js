@@ -20,7 +20,9 @@ function spawn(command, env, debug, cb) {
     r.stderr.on('data', function (data) {
         if (data.indexOf('SECURITY WARNING:') === -1) {
             result.stdErr = result.stdErr + data.toString();
-            base_1.Log.err("stderr: " + data.toString());
+            if (debug) {
+                base_1.Log.warn("stderr: " + data.toString());
+            }
         }
     });
     r.on('error', function (err) {

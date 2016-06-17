@@ -149,6 +149,11 @@ export class Log {
         this.newLine();
     }
 
+    static warn(...message: string[]) {
+        process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.yellow(message.join(' ')));
+        this.newLine();
+    }
+
     static debug(...message: string[]) {
         process.stdout.write(colors.bgBlue.white('VM-debug') + ' - ' + colors.yellow(message.join(' ')));
         this.newLine();

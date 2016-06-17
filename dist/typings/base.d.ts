@@ -14,6 +14,7 @@ export declare class Log {
     static success(...message: string[]): void;
     static err(...message: string[]): void;
     static info(...message: string[]): void;
+    static warn(...message: string[]): void;
     static debug(...message: string[]): void;
     static infoProgress(...message: string[]): IProgress;
     static terminateProgress(progress: IProgress): typeof Log;

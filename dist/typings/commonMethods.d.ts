@@ -1,4 +1,4 @@
 import * as Q from 'q';
 export declare abstract class CommonMethods {
-    protected runWithoutDebugOnce(promise: Q.Promise<any>): Q.Promise<string>;
+    protected runWithoutDebugOnce<T>(promise: Q.Promise<T>): Q.Promise<T>;
 }

@@ -25,7 +25,7 @@ export class ImageStatic extends CommonMethods {
                             let promptOpts = {
                                 type: 'list',
                                 name: 'opts',
-                                message: 'Image already exists. What would you like to do?',
+                                message: `Image "${imageName}" already exists. What would you like to do?`,
                                 choices: ['Build and replace old', 'Build and leave old one as dangling', 'Don not build']
                             };
                             inquirer.prompt(promptOpts).then((answers: any) => {
