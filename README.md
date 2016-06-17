@@ -71,6 +71,7 @@ cmd.run('docker images').then(
 ```
 
 ---
+### cmd.machine
 ##### `cmd.machine.start(opts: IStartOpts): Q.Promise<{}>`
 Starts machine. If it does not exist, it'll be created. Resolves even if machine is already started. 
 
@@ -87,6 +88,7 @@ Returns machine's status.
 Removes machine.
 
 ---
+### cmd.image
 ##### `cmd.image.build(imageName: string, opts?: IBuildImageOpts): Q.Promise<{}>`
 Builds desired image.
 You can provide object with the following options:
@@ -134,6 +136,7 @@ export interface IStartDockerOpts {
 ```
 
 ---
+### cmd.container
 ##### `cmd.container.status(containerName: string): Q.Promise<string>`
 Returns container's status.
 
@@ -151,6 +154,35 @@ interface IWaitForPortOpts {
     timeoutMs?: number;
 }
 ```
+
+---
+### cmd.volume
+##### `cmd.volume.create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Q.Promise<string>`
+Creates a volume
+
+Parameter `opts` - represents [docker options for this command](https://docs.docker.com/engine/reference/commandline/volume_create/)
+Parameter `advOpts`:
+```javascript
+interface ICreateVolumeAdvOpts {
+    // create volume only if it's missing. Otherwise resolve its name.
+    createOnlyIfMissing?: boolean;
+}
+```
+
+---
+##### `cmd.volume.inspect(volumeName: any): Q.Promise<IInspectVolumeItemResult[]>`
+Returns volumes's details.
+```javascript
+interface IInspectVolumeItemResult {
+    Name: string;
+    Driver: string;
+    Mountpoint: string;
+}
+```
+
+---
+##### `cmd.volume.remove(volumeName: string): Q.Promise<string>`
+Removes a volume with desired name.
 
 ---
 ## Credits
