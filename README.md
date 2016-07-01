@@ -123,6 +123,7 @@ Removes desired image
 Checks for dangling images. If found, prompts with question whether to remove them or not.
 
 ---
+### cmd.container
 ##### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<boolean>`
 Starts container from desired image.
 Returns a Promise of boolean stating whether the container was already started.
@@ -139,7 +140,6 @@ export interface IStartDockerOpts {
 ```
 
 ---
-### cmd.container
 ##### `cmd.container.status(containerName: string): Q.Promise<string>`
 Returns container's status.
 

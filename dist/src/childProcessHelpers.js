@@ -56,8 +56,8 @@ function spawnSync(command, env, debug) {
         }
     }
     return {
-        stdOut: r.stdout.toString(),
-        stdErr: r.stderr.toString()
+        stdOut: r.stdout ? r.stdout.toString() : r.stdout,
+        stdErr: r.stderr ? r.stderr.toString() : r.stderr
     };
 }
 exports.spawnSync = spawnSync;
