@@ -15,33 +15,41 @@ var ImageStatic = (function (_super) {
     }
     ImageStatic.prototype.build = function (imageName, opts) {
         var _this = this;
-        if (opts && opts.buildAndReplace && opts.buildOnlyIfMissing) {
-            throw new Error('can\'t use both optsions "buildAndReplace" and "buildOnlyIfMissing" at the same time');
+        if (opts && opts.freshBuild && opts.buildOnlyIfMissing) {
+            throw new Error('can\'t use both optsions "freshBuild" and "buildOnlyIfMissing" at the same time');
         }
         return Q.Promise(function (resolve, reject) {
             base_1.runWithoutDebug("docker images --format {{.Repository}} " + imageName, true).then(function (img) {
                 if (img === imageName) {
-                    if (opts && opts.buildAndReplace) {
+                    if (opts && opts.regularBuild) {
+                        _this.runBuildImage(imageName, opts).then(resolve, reject);
+                    }
+                    else if (opts && opts.freshBuild) {
                         _this.remove(imageName).then(function () { _this.runBuildImage(imageName, opts).then(resolve, reject); }, reject);
                     }
                     else if (opts && opts.buildOnlyIfMissing) {
                         resolve(undefined);
                     }
                     else {
+                        var promptChoices_1 = {
+                            regularBuild: 'Regular build (using cache)',
+                            freshBuild: 'Fresh build (remove cache)',
+                            noBuild: 'Don not build'
+                        };
                         var promptOpts = {
                             type: 'list',
                             name: 'opts',
                             message: "Image \"" + imageName + "\" already exists. What would you like to do?",
-                            choices: ['Build and replace old', 'Build and leave old one as dangling', 'Don not build']
+                            choices: [promptChoices_1.regularBuild, promptChoices_1.freshBuild, promptChoices_1.noBuild]
                         };
                         inquirer.prompt(promptOpts).then(function (answers) {
-                            if (answers.opts === 'Build and replace old') {
-                                _this.remove(imageName).then(function () { _this.runBuildImage(imageName, opts).then(resolve, reject); }, reject);
-                            }
-                            if (answers.opts === 'Build and leave old one as dangling') {
+                            if (answers.opts === promptChoices_1.regularBuild) {
                                 _this.runBuildImage(imageName, opts).then(resolve, reject);
                             }
-                            if (answers.opts === 'Don not build') {
+                            if (answers.opts === promptChoices_1.freshBuild) {
+                                _this.remove(imageName).then(function () { _this.runBuildImage(imageName, opts).then(resolve, reject); }, reject);
+                            }
+                            if (answers.opts === promptChoices_1.noBuild) {
                                 resolve(undefined);
                             }
                         });

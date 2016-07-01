@@ -6,15 +6,17 @@ import { CommonMethods } from './commonMethods';
 export class ImageStatic extends CommonMethods {
 
     build(imageName: string, opts?: IBuildImageOpts) {
-        if (opts && opts.buildAndReplace && opts.buildOnlyIfMissing) {
-            throw new Error('can\'t use both optsions "buildAndReplace" and "buildOnlyIfMissing" at the same time');
+        if (opts && opts.freshBuild && opts.buildOnlyIfMissing) {
+            throw new Error('can\'t use both optsions "freshBuild" and "buildOnlyIfMissing" at the same time');
         }
         return Q.Promise((resolve, reject) => {
             runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, true).then(
                 (img) => {
                     if (img === imageName) {
                         // image exists
-                        if (opts && opts.buildAndReplace) {
+                        if (opts && opts.regularBuild) {
+                            this.runBuildImage(imageName, opts).then(resolve, reject);
+                        } else if (opts && opts.freshBuild) {
                             this.remove(imageName).then(
                                 () => { this.runBuildImage(imageName, opts).then(resolve, reject); },
                                 reject
@@ -22,23 +24,28 @@ export class ImageStatic extends CommonMethods {
                         } else if (opts && opts.buildOnlyIfMissing) {
                             resolve(undefined);
                         } else {
+                            let promptChoices = {
+                                regularBuild: 'Regular build (using cache)',
+                                freshBuild: 'Fresh build (remove cache)',
+                                noBuild: 'Don not build'
+                            };
                             let promptOpts = {
                                 type: 'list',
                                 name: 'opts',
                                 message: `Image "${imageName}" already exists. What would you like to do?`,
-                                choices: ['Build and replace old', 'Build and leave old one as dangling', 'Don not build']
+                                choices: [promptChoices.regularBuild, promptChoices.freshBuild, promptChoices.noBuild]
                             };
                             inquirer.prompt(promptOpts).then((answers: any) => {
-                                if (answers.opts === 'Build and replace old') {
+                                if (answers.opts === promptChoices.regularBuild) {
+                                    this.runBuildImage(imageName, opts).then(resolve, reject);
+                                }
+                                if (answers.opts === promptChoices.freshBuild) {
                                     this.remove(imageName).then(
                                         () => { this.runBuildImage(imageName, opts).then(resolve, reject); },
                                         reject
                                     );
                                 }
-                                if (answers.opts === 'Build and leave old one as dangling') {
-                                    this.runBuildImage(imageName, opts).then(resolve, reject);
-                                }
-                                if (answers.opts === 'Don not build') {
+                                if (answers.opts === promptChoices.noBuild) {
                                     resolve(undefined);
                                 }
                             });
@@ -121,7 +128,8 @@ export class ImageStatic extends CommonMethods {
 
 export interface IBuildImageOpts {
     pathOrUrl?: string;
-    buildAndReplace?: boolean;
+    regularBuild?: boolean;
+    freshBuild?: boolean;
     buildOnlyIfMissing?: boolean;
 }
 

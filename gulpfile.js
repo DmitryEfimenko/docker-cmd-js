@@ -45,11 +45,13 @@ gulp.task('copy-dockerfiles', function() {
 });
 
 gulp.task('test', () => {
-    //$.jasmine.jasmine.getEnv().addReporter(failFast.init());
     var terminalReporter = new TerminalReporter({ isVerbose: true, showColors: true, includeStackTrace: false });
     
     return gulp.src('./dist/spec/*.js')
-        .pipe($.jasmine({ reporter: [terminalReporter/*, failFast.init()*/] }))
+        .pipe($.jasmine({
+            reporter: [terminalReporter],
+            config: { spec_dir: 'spec', helpers: ['./helpers/**/*.js'] }
+        }))
         .on('error', swallowError)
         .on('end', addSpaces);
 });

@@ -91,6 +91,7 @@ Removes machine.
 ### cmd.image
 ##### `cmd.image.build(imageName: string, opts?: IBuildImageOpts): Q.Promise<{}>`
 Builds desired image.
+Unless instructions on how to build are not provided via options, and an image with such name is found, it'll prompt you asking what you want to do.
 You can provide object with the following options:
 ```javascript
 export interface IBuildImageOpts {
@@ -98,12 +99,14 @@ export interface IBuildImageOpts {
      * set path or url to Dockerfile. If not specified assumes current directory.
     */
     pathOrUrl?: string;
-
     /*
-     * if not set to true and image already exists, it'll prompt you with options
-     * letting you chose how you want to build the image
+     * regular build using cache.
     */
-    buildAndReplace?: boolean;
+    regularBuild?: boolean; 
+    /*
+     * delete cache and previous image. Build from scratch.
+    */
+    freshBuild?: boolean;
     /*
      * skips build the image if it already exists
     */

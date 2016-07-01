@@ -16,7 +16,7 @@ describe('cmd.image', function () {
         });
     }, 2 * 60 * 1000);
     it('build() and replace', function (done) {
-        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildAndReplace: true }).then(function () {
+        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), freshBuild: true }).then(function () {
             done();
         }, function (err) {
             done.fail(err);
