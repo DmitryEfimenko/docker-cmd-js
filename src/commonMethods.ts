@@ -1,18 +1,26 @@
 import * as Q from 'q';
-import { Opts } from './base';
 
 export abstract class CommonMethods {
+    constructor(public machineName: string) { }
+
+    protected isDebug: boolean;
+
+    public debug(debugging?: boolean) {
+        this.isDebug = (debugging === undefined || debugging === true) ? true : false;
+        return this;
+    }
+
     protected runWithoutDebugOnce<T>(promise: Q.Promise<T>) {
         return Q.Promise<T>((resolve, reject) => {
-            let _d = Opts.debug;
-            Opts.debug = false;
+            let _d = this.isDebug;
+            this.isDebug = false;
             promise.then(
                 (val) => {
-                    Opts.debug = _d;
+                    this.isDebug = _d;
                     resolve(val);
                 },
                 (err) => {
-                    Opts.debug = _d;
+                    this.isDebug = _d;
                     reject(err);
                 }
             );

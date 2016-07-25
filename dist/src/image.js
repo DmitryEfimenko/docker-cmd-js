@@ -8,12 +8,12 @@ var Q = require('q');
 var inquirer = require('inquirer');
 var base_1 = require('./base');
 var commonMethods_1 = require('./commonMethods');
-var ImageStatic = (function (_super) {
-    __extends(ImageStatic, _super);
-    function ImageStatic() {
-        _super.apply(this, arguments);
+var Image = (function (_super) {
+    __extends(Image, _super);
+    function Image(machineName) {
+        _super.call(this, machineName);
     }
-    ImageStatic.prototype.build = function (imageName, opts) {
+    Image.prototype.build = function (imageName, opts) {
         var _this = this;
         if (opts && opts.freshBuild && opts.buildOnlyIfMissing) {
             throw new Error('can\'t use both optsions "freshBuild" and "buildOnlyIfMissing" at the same time');
@@ -61,13 +61,13 @@ var ImageStatic = (function (_super) {
             });
         });
     };
-    ImageStatic.prototype.remove = function (imageName) {
-        return base_1.run("docker rmi -f " + imageName, base_1.Opts.debug);
+    Image.prototype.remove = function (imageName) {
+        return base_1.run("docker rmi -f " + imageName, this.machineName, this.isDebug);
     };
-    ImageStatic.prototype.checkForDangling = function () {
+    Image.prototype.checkForDangling = function () {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
-            base_1.runWithoutDebug('docker images --filter dangling=true').then(function (result) {
+            base_1.runWithoutDebug('docker images --filter dangling=true', _this.machineName).then(function (result) {
                 var images = base_1.resToJSON(result);
                 if (images.length > 0) {
                     var promptOpts = {
@@ -99,12 +99,13 @@ var ImageStatic = (function (_super) {
             }, function (err) { err('could not check for dangling images:', err); });
         });
     };
-    ImageStatic.prototype.runBuildImage = function (imageName, opts) {
+    Image.prototype.runBuildImage = function (imageName, opts) {
+        var _this = this;
         return Q.Promise(function (resolve, reject) {
             var c = "docker build -t " + imageName;
             c += (opts && opts.pathOrUrl) ? " " + opts.pathOrUrl : ' .';
-            var progress = base_1.Log.infoProgress("Building image " + imageName);
-            base_1.run(c, base_1.Opts.debug).then(function () {
+            var progress = base_1.Log.infoProgress(_this.isDebug, "Building image " + imageName);
+            base_1.run(c, _this.machineName, _this.isDebug).then(function () {
                 base_1.Log.terminateProgress(progress).info("Image " + imageName + " built");
                 resolve(true);
             }, function (err) {
@@ -119,7 +120,6 @@ var ImageStatic = (function (_super) {
             });
         });
     };
-    return ImageStatic;
+    return Image;
 }(commonMethods_1.CommonMethods));
-exports.ImageStatic = ImageStatic;
-exports.image = new ImageStatic();
+exports.Image = Image;

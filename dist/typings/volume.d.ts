@@ -1,6 +1,7 @@
 import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
-export declare class VolumeStatic extends CommonMethods {
+export declare class Volume extends CommonMethods {
+    constructor(machineName: string);
     create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Q.Promise<string>;
     private runCreate(opts);
     inspect(volumeName: any): Q.Promise<IInspectVolumeItemResult[]>;
@@ -22,4 +23,3 @@ export interface ICreateVolumeOpts {
 export interface ICreateVolumeAdvOpts {
     createOnlyIfMissing?: boolean;
 }
-export declare var volume: VolumeStatic;

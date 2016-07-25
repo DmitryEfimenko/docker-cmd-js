@@ -1,9 +1,13 @@
 import * as Q from 'q';
-import { Opts, run, runWithoutDebug, addOpts, addOpt, Log } from './base';
+import { run, runWithoutDebug, addOpts, addOpt, Log } from './base';
 import { CommonMethods } from './commonMethods';
 import { setEnvironment } from './environment';
 
-export class VolumeStatic extends CommonMethods {
+export class Volume extends CommonMethods {
+    constructor(machineName: string) {
+        super(machineName);
+    }
+
     create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts) {
         return Q.Promise<string>((resolve, reject) => {
             if (advOpts && advOpts.createOnlyIfMissing) {
@@ -31,12 +35,12 @@ export class VolumeStatic extends CommonMethods {
         let c = 'docker volume create';
         if (!opts) { opts = {}; }
         c = addOpts(c, opts);
-        return run(c, Opts.debug);
+        return run(c, this.machineName, this.isDebug);
     }
 
     inspect(volumeName) {
         return Q.Promise<IInspectVolumeItemResult[]>((resolve, reject) => {
-            run(`docker volume inspect ${volumeName}`, Opts.debug).then(
+            run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug).then(
                 (res) => {
                     let json: IInspectVolumeItemResult[] = JSON.parse(res);
                     resolve(json);
@@ -53,7 +57,7 @@ export class VolumeStatic extends CommonMethods {
     }
 
     remove(volumeName: string) {
-        return run(`docker volume rm ${volumeName}`, Opts.debug);
+        return run(`docker volume rm ${volumeName}`, this.machineName, this.isDebug);
     }
 }
 
@@ -75,5 +79,3 @@ export interface ICreateVolumeOpts {
 export interface ICreateVolumeAdvOpts {
     createOnlyIfMissing?: boolean;
 }
-
-export var volume = new VolumeStatic();

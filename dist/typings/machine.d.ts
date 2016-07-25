@@ -1,7 +1,8 @@
 import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
-export declare class MachineStatic extends CommonMethods {
+export declare class Machine extends CommonMethods {
     _ipAddress: string;
+    constructor(machineName: string);
     status(): Q.Promise<string>;
     ipAddress(): Q.Promise<string>;
     start(opts?: IStartOpts): Q.Promise<{}>;
@@ -39,4 +40,3 @@ export interface IStartOpts {
     virtualboxNoShare?: boolean;
     virtualboxNoVtxCheck?: boolean;
 }
-export declare var machine: MachineStatic;

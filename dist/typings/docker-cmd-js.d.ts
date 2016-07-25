@@ -1,14 +1,16 @@
 import * as Q from 'q';
 import { RunResult } from './childProcessHelpers';
-import { MachineStatic } from './machine';
-import { ImageStatic } from './image';
-import { ContainerStatic } from './container';
-import { VolumeStatic } from './volume';
+import { Machine } from './machine';
+import { Image } from './image';
+import { Container } from './container';
+import { Volume } from './volume';
 export declare class Cmd {
-    machine: MachineStatic;
-    image: ImageStatic;
-    container: ContainerStatic;
-    volume: VolumeStatic;
+    machine: Machine;
+    image: Image;
+    container: Container;
+    volume: Volume;
+    isDebug: boolean;
+    machineName: string;
     constructor(machineName?: string);
     debug(debugging?: boolean): this;
     run(command: string, noNewLines?: boolean): Q.Promise<string>;

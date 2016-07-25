@@ -7,12 +7,12 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Q = require('q');
 var base_1 = require('./base');
 var commonMethods_1 = require('./commonMethods');
-var VolumeStatic = (function (_super) {
-    __extends(VolumeStatic, _super);
-    function VolumeStatic() {
-        _super.apply(this, arguments);
+var Volume = (function (_super) {
+    __extends(Volume, _super);
+    function Volume(machineName) {
+        _super.call(this, machineName);
     }
-    VolumeStatic.prototype.create = function (opts, advOpts) {
+    Volume.prototype.create = function (opts, advOpts) {
         var _this = this;
         return Q.Promise(function (resolve, reject) {
             if (advOpts && advOpts.createOnlyIfMissing) {
@@ -33,17 +33,18 @@ var VolumeStatic = (function (_super) {
             }
         });
     };
-    VolumeStatic.prototype.runCreate = function (opts) {
+    Volume.prototype.runCreate = function (opts) {
         var c = 'docker volume create';
         if (!opts) {
             opts = {};
         }
         c = base_1.addOpts(c, opts);
-        return base_1.run(c, base_1.Opts.debug);
+        return base_1.run(c, this.machineName, this.isDebug);
     };
-    VolumeStatic.prototype.inspect = function (volumeName) {
+    Volume.prototype.inspect = function (volumeName) {
+        var _this = this;
         return Q.Promise(function (resolve, reject) {
-            base_1.run("docker volume inspect " + volumeName, base_1.Opts.debug).then(function (res) {
+            base_1.run("docker volume inspect " + volumeName, _this.machineName, _this.isDebug).then(function (res) {
                 var json = JSON.parse(res);
                 resolve(json);
             }, function (err) {
@@ -56,10 +57,9 @@ var VolumeStatic = (function (_super) {
             });
         });
     };
-    VolumeStatic.prototype.remove = function (volumeName) {
-        return base_1.run("docker volume rm " + volumeName, base_1.Opts.debug);
+    Volume.prototype.remove = function (volumeName) {
+        return base_1.run("docker volume rm " + volumeName, this.machineName, this.isDebug);
     };
-    return VolumeStatic;
+    return Volume;
 }(commonMethods_1.CommonMethods));
-exports.VolumeStatic = VolumeStatic;
-exports.volume = new VolumeStatic();
+exports.Volume = Volume;

@@ -1,17 +1,21 @@
 import * as Q from 'q';
-import { Opts, run, addOpts, addOpt, Log } from './base';
+import { run, addOpts, addOpt, Log } from './base';
 import { CommonMethods } from './commonMethods';
 import { setEnvironment } from './environment';
 
-export class MachineStatic extends CommonMethods {
+export class Machine extends CommonMethods {
     _ipAddress: string;
+
+    constructor(machineName: string) {
+        super(machineName);
+    }
 
     status() {
         return Q.Promise<string>((resolve, reject) => {
-            return run(`docker-machine status ${Opts.machineName}`, Opts.debug, true).then(
+            return run(`docker-machine status ${this.machineName}`, this.machineName, this.isDebug, true).then(
                 (status) => { resolve(status); },
                 (err) => {
-                    let validErr = `Host does not exist: "${Opts.machineName}"`;
+                    let validErr = `Host does not exist: "${this.machineName}"`;
                     if (err === `${validErr}\n`) {
                         resolve(validErr);
                     } else {
@@ -24,7 +28,7 @@ export class MachineStatic extends CommonMethods {
 
     ipAddress() {
         return Q.Promise<string>((resolve, reject) => {
-            run(`docker-machine ip ${Opts.machineName}`, Opts.debug, true).then(
+            run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true).then(
                 (ip) => {
                     this._ipAddress = ip;
                     resolve(ip);
@@ -41,7 +45,7 @@ export class MachineStatic extends CommonMethods {
                     if (res !== 'Running') {
                         this.runStartMachine(opts).then(resolve, reject);
                     } else {
-                        Log.info(`docker-machine [${Opts.machineName}] status:`, res);
+                        Log.info(`docker-machine [${this.machineName}] status:`, res);
                         resolve(res);
                     }
                 },
@@ -61,12 +65,12 @@ export class MachineStatic extends CommonMethods {
             if (!opts.driver) { c = addOpt(c, '--driver', 'virtualbox'); }
             if (!opts.virtualboxMemory) { c = addOpt(c, '--virtualbox-memory', '6144'); }
             if (!opts.virtualboxNoVtxCheck) { c = addOpt(c, '--virtualbox-no-vtx-check'); }
-            c += ` ${Opts.machineName}`;
+            c += ` ${this.machineName}`;
 
-            let progress = Log.infoProgress(`Starting VM "${Opts.machineName}"`);
-            run(c, Opts.debug).then(
+            let progress = Log.infoProgress(this.isDebug, `Starting VM "${this.machineName}"`);
+            run(c, this.machineName, this.isDebug).then(
                 (resp) => {
-                    setEnvironment(Opts.machineName);
+                    setEnvironment(this.machineName);
                     Log.terminateProgress(progress);
                     resolve(resp);
                 },
@@ -79,7 +83,7 @@ export class MachineStatic extends CommonMethods {
     }
 
     remove() {
-        return run(`docker-machine rm -f ${Opts.machineName}`, Opts.debug);
+        return run(`docker-machine rm -f ${this.machineName}`, this.machineName, this.isDebug);
     }
 }
 
@@ -115,5 +119,3 @@ export interface IStartOpts {
     virtualboxNoShare?: boolean;
     virtualboxNoVtxCheck?: boolean;
 }
-
-export var machine = new MachineStatic();

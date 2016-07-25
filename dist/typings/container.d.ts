@@ -1,6 +1,7 @@
 import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
-export declare class ContainerStatic extends CommonMethods {
+export declare class Container extends CommonMethods {
+    constructor(machineName: string);
     waitForPort(opts: IWaitForPortOpts): Q.Promise<{}>;
     private runWaitForPort(opts, progress);
     start(imageName: string, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>;
@@ -20,4 +21,3 @@ export interface IWaitForPortOpts {
     retryIntervalMs?: number;
     timeoutMs?: number;
 }
-export declare var container: ContainerStatic;

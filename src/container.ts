@@ -1,17 +1,21 @@
 import * as Q from 'q';
-import { Opts, run, runWithoutDebug, addOpts, addOpt, Log, IProgress, resToJSON } from './base';
-import { machine } from './machine';
+import { run, runWithoutDebug, addOpts, addOpt, Log, IProgress, resToJSON } from './base';
+import { Machine } from './machine';
 import { CommonMethods } from './commonMethods';
 var tcpPortUsed = require('tcp-port-used');
 
-export class ContainerStatic extends CommonMethods {
+export class Container extends CommonMethods {
+    constructor(machineName: string) {
+        super(machineName);
+    }
 
     waitForPort(opts: IWaitForPortOpts) {
         return Q.Promise((resolve, reject) => {
             if (!opts.retryIntervalMs) { opts.retryIntervalMs = 100; }
             if (!opts.timeoutMs) { opts.timeoutMs = 5000; }
-            let progress = Log.infoProgress('waiting for port', opts.port.toString());
+            let progress = Log.infoProgress(this.isDebug, 'waiting for port', opts.port.toString());
             if (!opts.host) {
+                let machine = new Machine(this.machineName);
                 machine.ipAddress().then(
                     (ipAddress) => {
                         opts.host = ipAddress;
@@ -34,11 +38,12 @@ export class ContainerStatic extends CommonMethods {
     start(imageName: string, opts?: IStartDockerOpts, command?: string) {
         return Q.Promise((resolve, reject) => {
             let containerName = (opts && opts.name) ? opts.name : imageName;
-            let progress = Log.infoProgress(`Checking if container "${containerName}" needs to be started`);
+            let progress = Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
             this.runWithoutDebugOnce(this.status(containerName)).then(
                 (status) => {
                     if (status === undefined) {
-                        progress = Log.terminateProgress(progress).infoProgress(`Creating and starting container "${containerName}"`);
+                        progress = Log.terminateProgress(progress)
+                            .infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
                         let c = `docker run -d`;
                         if (!opts) { opts = {}; }
                         c = addOpts(c, opts);
@@ -46,7 +51,7 @@ export class ContainerStatic extends CommonMethods {
                         if (!opts.name) { c = addOpt(c, '--name', containerName); }
                         c += ` ${imageName}`;
                         if (command) { c += ` ${command}`; }
-                        run(c, Opts.debug).then(
+                        run(c, this.machineName, this.isDebug).then(
                             () => {
                                 Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
                                 resolve(false);
@@ -61,7 +66,7 @@ export class ContainerStatic extends CommonMethods {
                         resolve(true);
                     } else if (status.indexOf('Exited') === 0) {
                         Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
-                        runWithoutDebug(`docker start ${containerName}`).then(
+                        runWithoutDebug(`docker start ${containerName}`, this.machineName).then(
                             () => { resolve(false); },
                             reject
                         );
@@ -81,7 +86,7 @@ export class ContainerStatic extends CommonMethods {
     status(containerName: string) {
         return Q.Promise<string>((resolve, reject) => {
             let c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
-            run(c, Opts.debug).then(
+            run(c, this.machineName, this.isDebug).then(
                 (res) => {
                     //console.dir(res);
                     let json = resToJSON(res);
@@ -115,5 +120,3 @@ export interface IWaitForPortOpts {
     retryIntervalMs?: number;
     timeoutMs?: number;
 }
-
-export var container = new ContainerStatic();

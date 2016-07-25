@@ -2,19 +2,15 @@
 var Q = require('q');
 var colors = require('colors');
 var childProcessHelpers_1 = require('./childProcessHelpers');
-var Opts = (function () {
-    function Opts() {
-    }
-    return Opts;
-}());
-exports.Opts = Opts;
-function run(command, _debug, noNewLines) {
+var environment_1 = require('./environment');
+function run(command, machineName, _debug, noNewLines) {
     var _this = this;
-    _debug = _debug !== undefined ? _debug : Opts.debug;
+    _debug = _debug !== undefined ? _debug : false;
     if (_debug) {
         Log.info('Running:', command);
     }
     var deferred = Q.defer();
+    environment_1.setEnvironment(machineName);
     childProcessHelpers_1.spawn(command, process.env, _debug, function (result) {
         if (_debug) {
             if (result.stdErr) {
@@ -49,16 +45,16 @@ function run(command, _debug, noNewLines) {
     return deferred.promise;
 }
 exports.run = run;
-function runSync(command, _debug) {
+function runSync(command, machineName, _debug) {
     if (_debug) {
         Log.info('Running:', command);
     }
     return childProcessHelpers_1.spawnSync(command, process.env, _debug);
 }
 exports.runSync = runSync;
-function runWithoutDebug(command, noNewLines) {
+function runWithoutDebug(command, machineName, noNewLines) {
     return Q.Promise(function (resolve, reject) {
-        run(command, false, noNewLines)
+        run(command, machineName, false, noNewLines)
             .then(resolve, reject);
     });
 }
@@ -182,14 +178,14 @@ var Log = (function () {
         process.stdout.write(colors.bgBlue.white('VM-debug') + ' - ' + colors.yellow(message.join(' ')));
         this.newLine();
     };
-    Log.infoProgress = function () {
+    Log.infoProgress = function (debug) {
         var message = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            message[_i - 0] = arguments[_i];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            message[_i - 1] = arguments[_i];
         }
         var c = '\\';
         var m = colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' '));
-        if (!Opts.debug) {
+        if (!debug) {
             process.stdout.write(m + " " + c + "\r");
             var interval = setInterval(function () {
                 if (c === '\\') {

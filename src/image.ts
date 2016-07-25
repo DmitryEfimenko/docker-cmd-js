@@ -1,9 +1,13 @@
 import * as Q from 'q';
 import inquirer = require('inquirer');
-import { Opts, run, runWithoutDebug, Log, resToJSON } from './base';
+import { run, runWithoutDebug, Log, resToJSON } from './base';
 import { CommonMethods } from './commonMethods';
 
-export class ImageStatic extends CommonMethods {
+export class Image extends CommonMethods {
+
+    constructor(machineName) {
+        super(machineName);
+    }
 
     build(imageName: string, opts?: IBuildImageOpts) {
         if (opts && opts.freshBuild && opts.buildOnlyIfMissing) {
@@ -59,12 +63,12 @@ export class ImageStatic extends CommonMethods {
     }
 
     remove(imageName: string) {
-        return run(`docker rmi -f ${imageName}`, Opts.debug);
+        return run(`docker rmi -f ${imageName}`, this.machineName, this.isDebug);
     }
 
     checkForDangling() {
         return Q.Promise((resolve, reject) => {
-            runWithoutDebug('docker images --filter dangling=true').then(
+            runWithoutDebug('docker images --filter dangling=true', this.machineName).then(
                 (result) => {
                     var images = resToJSON(result);
                     if (images.length > 0) {
@@ -105,8 +109,8 @@ export class ImageStatic extends CommonMethods {
         return Q.Promise((resolve, reject) => {
             let c = `docker build -t ${imageName}`;
             c += (opts && opts.pathOrUrl) ? ` ${opts.pathOrUrl}` : ' .';
-            let progress = Log.infoProgress(`Building image ${imageName}`);
-            run(c, Opts.debug).then(
+            let progress = Log.infoProgress(this.isDebug, `Building image ${imageName}`);
+            run(c, this.machineName, this.isDebug).then(
                 () => {
                     Log.terminateProgress(progress).info(`Image ${imageName} built`);
                     resolve(true);
@@ -132,5 +136,3 @@ export interface IBuildImageOpts {
     freshBuild?: boolean;
     buildOnlyIfMissing?: boolean;
 }
-
-export var image = new ImageStatic();

@@ -1,21 +1,17 @@
 import * as Q from 'q';
 import colors = require('colors');
 import { spawn, spawnSync, RunResult } from './childProcessHelpers';
+import { setEnvironment } from './environment';
 
-export class Opts {
-    static debug: boolean;
-    static machineName: string;
-}
-
-
-
-export function run(command: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string> {
-    _debug = _debug !== undefined ? _debug : Opts.debug;
+export function run(command: string, machineName: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string> {
+    _debug = _debug !== undefined ? _debug : false;
     if (_debug) {
         Log.info('Running:', command);
     }
 
     let deferred = Q.defer<string>();
+    setEnvironment(machineName);
+
     spawn(command, process.env, _debug, (result) => {
         if (_debug) {
             if (result.stdErr) {
@@ -45,7 +41,7 @@ export function run(command: string, _debug: boolean, noNewLines?: boolean): Q.P
     return deferred.promise;
 }
 
-export function runSync(command: string, _debug: boolean) {
+export function runSync(command: string, machineName: string, _debug: boolean) {
     if (_debug) {
         Log.info('Running:', command);
     }
@@ -53,9 +49,9 @@ export function runSync(command: string, _debug: boolean) {
     return spawnSync(command, process.env, _debug);
 }
 
-export function runWithoutDebug(command: string, noNewLines?: boolean) {
+export function runWithoutDebug(command: string, machineName, noNewLines?: boolean) {
     return Q.Promise<string>((resolve, reject) => {
-        run(command, false, noNewLines)
+        run(command, machineName, false, noNewLines)
             .then(resolve, reject);
     });
 }
@@ -159,11 +155,11 @@ export class Log {
         this.newLine();
     }
 
-    static infoProgress(...message: string[]): IProgress {
+    static infoProgress(debug: boolean, ...message: string[]): IProgress {
         let c = '\\';
         let m = `${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))}`;
 
-        if (!Opts.debug) {
+        if (!debug) {
             process.stdout.write(`${m} ${c}\r`);
             let interval = setInterval(() => {
                 if (c === '\\') {

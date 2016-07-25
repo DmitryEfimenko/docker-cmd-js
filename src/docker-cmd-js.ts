@@ -1,38 +1,40 @@
 import * as Q from 'q';
-import { Opts, run, runSync, resToJSON } from './base';
+import { run, runSync, resToJSON } from './base';
 import { RunResult } from './childProcessHelpers';
 import { setEnvironment } from './environment';
-import { machine, MachineStatic } from './machine';
-import { image, ImageStatic } from './image';
-import { container, ContainerStatic } from './container';
-import { volume, VolumeStatic } from './volume';
+import { Machine } from './machine';
+import { Image } from './image';
+import { Container } from './container';
+import { Volume } from './volume';
 
 export class Cmd {
-    machine: MachineStatic;
-    image: ImageStatic;
-    container: ContainerStatic;
-    volume: VolumeStatic;
+    machine: Machine;
+    image: Image;
+    container: Container;
+    volume: Volume;
+    isDebug: boolean;
+    machineName: string;
 
     constructor(machineName?: string) {
-        Opts.machineName = machineName !== undefined ? machineName : 'default';
-        setEnvironment(Opts.machineName);
-        this.container = container;
-        this.machine = machine;
-        this.image = image;
-        this.volume = volume;
+        this.machineName = machineName !== undefined ? machineName : 'default';
+        this.container = new Container(this.machineName);
+        this.machine = new Machine(this.machineName);
+        this.image = new Image(this.machineName);
+        this.volume = new Volume(this.machineName);
     }
 
     debug(debugging?: boolean) {
-        Opts.debug = (debugging === undefined || debugging === true) ? true : false;
+        this.isDebug = (debugging === undefined || debugging === true) ? true : false;
+        this.container.debug(this.isDebug);
         return this;
     }
 
     run(command: string, noNewLines?: boolean) {
-        return run(command, Opts.debug, noNewLines);
+        return run(command, this.machineName, this.isDebug, noNewLines);
     }
 
     runSync(command: string) {
-        return runSync(command, Opts.debug);
+        return runSync(command, this.machineName, this.isDebug);
     }
 
     resToJSON(s: string): any[] {

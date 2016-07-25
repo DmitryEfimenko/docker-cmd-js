@@ -1,18 +1,23 @@
 "use strict";
 var Q = require('q');
-var base_1 = require('./base');
 var CommonMethods = (function () {
-    function CommonMethods() {
+    function CommonMethods(machineName) {
+        this.machineName = machineName;
     }
+    CommonMethods.prototype.debug = function (debugging) {
+        this.isDebug = (debugging === undefined || debugging === true) ? true : false;
+        return this;
+    };
     CommonMethods.prototype.runWithoutDebugOnce = function (promise) {
+        var _this = this;
         return Q.Promise(function (resolve, reject) {
-            var _d = base_1.Opts.debug;
-            base_1.Opts.debug = false;
+            var _d = _this.isDebug;
+            _this.isDebug = false;
             promise.then(function (val) {
-                base_1.Opts.debug = _d;
+                _this.isDebug = _d;
                 resolve(val);
             }, function (err) {
-                base_1.Opts.debug = _d;
+                _this.isDebug = _d;
                 reject(err);
             });
         });
