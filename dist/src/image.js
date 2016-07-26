@@ -19,7 +19,7 @@ var Image = (function (_super) {
             throw new Error('can\'t use both optsions "freshBuild" and "buildOnlyIfMissing" at the same time');
         }
         return Q.Promise(function (resolve, reject) {
-            base_1.runWithoutDebug("docker images --format {{.Repository}} " + imageName, true).then(function (img) {
+            base_1.runWithoutDebug("docker images --format {{.Repository}} " + imageName, _this.machineName, true).then(function (img) {
                 if (img === imageName) {
                     if (opts && opts.regularBuild) {
                         _this.runBuildImage(imageName, opts).then(resolve, reject);
