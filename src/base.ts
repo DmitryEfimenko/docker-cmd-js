@@ -49,7 +49,7 @@ export function runSync(command: string, machineName: string, _debug: boolean) {
     return spawnSync(command, process.env, _debug);
 }
 
-export function runWithoutDebug(command: string, machineName, noNewLines?: boolean) {
+export function runWithoutDebug(command: string, machineName: string, noNewLines?: boolean) {
     return Q.Promise<string>((resolve, reject) => {
         run(command, machineName, false, noNewLines)
             .then(resolve, reject);

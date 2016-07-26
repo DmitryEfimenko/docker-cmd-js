@@ -14,7 +14,7 @@ export class Image extends CommonMethods {
             throw new Error('can\'t use both optsions "freshBuild" and "buildOnlyIfMissing" at the same time');
         }
         return Q.Promise((resolve, reject) => {
-            runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, true).then(
+            runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, this.machineName, true).then(
                 (img) => {
                     if (img === imageName) {
                         // image exists
