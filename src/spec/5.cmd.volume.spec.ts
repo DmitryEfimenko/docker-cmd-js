@@ -1,6 +1,6 @@
-delete require.cache[require.resolve('../src/docker-cmd-js')];
+delete require.cache[require.resolve('../docker-cmd-js')];
 
-import { Cmd } from '../src/docker-cmd-js';
+import { Cmd } from '../docker-cmd-js';
 
 describe('cmd.volume', () => {
     let cmd: Cmd;
@@ -9,8 +9,8 @@ describe('cmd.volume', () => {
 
     beforeAll(() => {
         cmd = new Cmd(machineName);
-    });  
-    
+    });
+
     it('create()', (done) => {
         cmd.volume.create({ name: testVolName }).then(
             () => {

@@ -1,3 +1,5 @@
+/// <reference types="q" />
+/// <reference types="node" />
 import * as Q from 'q';
 import { RunResult } from './childProcessHelpers';
 export declare function run(command: string, machineName: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string>;

@@ -1,6 +1,6 @@
-delete require.cache[require.resolve('../src/docker-cmd-js')];
+delete require.cache[require.resolve('../docker-cmd-js')];
 
-import { Cmd } from '../src/docker-cmd-js';
+import { Cmd } from '../docker-cmd-js';
 
 describe('Cmd()', () => {
     let cmd: Cmd;

@@ -1,3 +1,4 @@
+/// <reference types="q" />
 import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
 export declare class Machine extends CommonMethods {

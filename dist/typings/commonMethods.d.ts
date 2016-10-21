@@ -1,3 +1,4 @@
+/// <reference types="q" />
 import * as Q from 'q';
 export declare abstract class CommonMethods {
     machineName: string;

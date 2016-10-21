@@ -1,3 +1,4 @@
+/// <reference types="q" />
 import * as Q from 'q';
 import { RunResult } from './childProcessHelpers';
 import { Machine } from './machine';

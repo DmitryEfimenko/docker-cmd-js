@@ -21,7 +21,7 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
     });
 
     r.stderr.on('data', (data) => {
-        if (data.indexOf('SECURITY WARNING:') === -1) {
+        if (data.toString().indexOf('SECURITY WARNING:') === -1) {
             result.stdErr = result.stdErr + data.toString();
             if (debug) {
                 Log.warn(`stderr: ${data.toString()}`);

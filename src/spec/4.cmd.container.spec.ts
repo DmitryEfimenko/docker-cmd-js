@@ -1,8 +1,8 @@
-delete require.cache[require.resolve('../src/docker-cmd-js')];
+delete require.cache[require.resolve('../docker-cmd-js')];
 import * as path from 'path';
 var tcpPortUsed = require('tcp-port-used');
 
-import { Cmd } from '../src/docker-cmd-js';
+import { Cmd } from '../docker-cmd-js';
 
 describe('cmd.container', () => {
     let cmd: Cmd;
@@ -22,7 +22,7 @@ describe('cmd.container', () => {
             .catch((err) => { done.fail(err); })
             .then(() => { done(); });
     });
-    
+
     it('start()', (done) => {
         cmd.container.start('docker_cmd_js_mysql', { publish: '3306:3306' }).then(
             (wasStarted) => {
@@ -81,13 +81,12 @@ describe('cmd.container', () => {
                                                 },
                                                 (err) => { done.fail(err); }
                                             );
-                                        
                                         },
                                         (err) => { done.fail(err); }
                                     );
                                 } else {
                                     done.fail('port is unexpectedly awailable too fast. Was container already started?');
-                                }    
+                                }
                             },
                             (err) => { done.fail(err); }
                         );

@@ -1,7 +1,7 @@
-delete require.cache[require.resolve('../src/docker-cmd-js')];
+delete require.cache[require.resolve('../docker-cmd-js')];
 import * as path from 'path';
 
-import { Cmd } from '../src/docker-cmd-js';
+import { Cmd } from '../docker-cmd-js';
 
 describe('cmd.image', () => {
     let cmd: Cmd;
@@ -9,8 +9,8 @@ describe('cmd.image', () => {
 
     beforeAll(() => {
         cmd = new Cmd(machineName);
-    });  
-    
+    });
+
     it('build()', (done) => {
         cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql') }).then(
             () => {
@@ -38,11 +38,11 @@ describe('cmd.image', () => {
             (res) => {
                 let images = cmd.resToJSON(res);
                 expect(images.length).toBeGreaterThan(0);
-                expect(images[0]['REPOSITORY']).toBeDefined()
-                expect(images[0]['TAG']).toBeDefined()
-                expect(images[0]['IMAGE ID']).toBeDefined()
-                expect(images[0]['CREATED']).toBeDefined()
-                expect(images[0]['SIZE']).toBeDefined()
+                expect(images[0]['REPOSITORY']).toBeDefined();
+                expect(images[0]['TAG']).toBeDefined();
+                expect(images[0]['IMAGE ID']).toBeDefined();
+                expect(images[0]['CREATED']).toBeDefined();
+                expect(images[0]['SIZE']).toBeDefined();
                 done();
             },
             (err) => { done.fail(err); }

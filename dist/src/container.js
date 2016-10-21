@@ -1,56 +1,48 @@
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var Q = require('q');
-var base_1 = require('./base');
-var machine_1 = require('./machine');
-var commonMethods_1 = require('./commonMethods');
+const Q = require('q');
+const base_1 = require('./base');
+const machine_1 = require('./machine');
+const commonMethods_1 = require('./commonMethods');
 var tcpPortUsed = require('tcp-port-used');
-var Container = (function (_super) {
-    __extends(Container, _super);
-    function Container(machineName) {
-        _super.call(this, machineName);
+class Container extends commonMethods_1.CommonMethods {
+    constructor(machineName) {
+        super(machineName);
     }
-    Container.prototype.waitForPort = function (opts) {
-        var _this = this;
-        return Q.Promise(function (resolve, reject) {
+    waitForPort(opts) {
+        return Q.Promise((resolve, reject) => {
             if (!opts.retryIntervalMs) {
                 opts.retryIntervalMs = 100;
             }
             if (!opts.timeoutMs) {
                 opts.timeoutMs = 5000;
             }
-            var progress = base_1.Log.infoProgress(_this.isDebug, 'waiting for port', opts.port.toString());
+            let progress = base_1.Log.infoProgress(this.isDebug, 'waiting for port', opts.port.toString());
             if (!opts.host) {
-                var machine = new machine_1.Machine(_this.machineName);
-                machine.ipAddress().then(function (ipAddress) {
+                let machine = new machine_1.Machine(this.machineName);
+                machine.ipAddress().then((ipAddress) => {
                     opts.host = ipAddress;
-                    _this.runWaitForPort(opts, progress).then(resolve, reject);
-                }, function (err) { reject(err); });
+                    this.runWaitForPort(opts, progress).then(resolve, reject);
+                }, (err) => { reject(err); });
             }
             else {
-                _this.runWaitForPort(opts, progress).then(resolve, reject);
+                this.runWaitForPort(opts, progress).then(resolve, reject);
             }
         });
-    };
-    Container.prototype.runWaitForPort = function (opts, progress) {
-        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(function () {
+    }
+    runWaitForPort(opts, progress) {
+        return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(() => {
             base_1.Log.terminateProgress(progress);
         });
-    };
-    Container.prototype.start = function (imageName, opts, command) {
-        var _this = this;
-        return Q.Promise(function (resolve, reject) {
-            var containerName = (opts && opts.name) ? opts.name : imageName;
-            var progress = base_1.Log.infoProgress(_this.isDebug, "Checking if container \"" + containerName + "\" needs to be started");
-            _this.runWithoutDebugOnce(_this.status(containerName)).then(function (status) {
+    }
+    start(imageName, opts, command) {
+        return Q.Promise((resolve, reject) => {
+            let containerName = (opts && opts.name) ? opts.name : imageName;
+            let progress = base_1.Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
+            this.runWithoutDebugOnce(this.status(containerName)).then((status) => {
                 if (status === undefined) {
                     progress = base_1.Log.terminateProgress(progress)
-                        .infoProgress(_this.isDebug, "Creating and starting container \"" + containerName + "\"");
-                    var c = "docker run -d";
+                        .infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
+                    let c = `docker run -d`;
                     if (!opts) {
                         opts = {};
                     }
@@ -58,43 +50,42 @@ var Container = (function (_super) {
                     if (!opts.name) {
                         c = base_1.addOpt(c, '--name', containerName);
                     }
-                    c += " " + imageName;
+                    c += ` ${imageName}`;
                     if (command) {
-                        c += " " + command;
+                        c += ` ${command}`;
                     }
-                    base_1.run(c, _this.machineName, _this.isDebug).then(function () {
-                        base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\" started.");
+                    base_1.run(c, this.machineName, this.isDebug).then(() => {
+                        base_1.Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
                         resolve(false);
-                    }, function (err) {
+                    }, (err) => {
                         base_1.Log.terminateProgress(progress);
                         reject(err);
                     });
                 }
                 else if (status.indexOf('Up') === 0) {
-                    base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\"\" already started.");
+                    base_1.Log.terminateProgress(progress).info(`Container "${containerName}"" already started.`);
                     resolve(true);
                 }
                 else if (status.indexOf('Exited') === 0) {
-                    base_1.Log.terminateProgress(progress).info("Container \"" + containerName + "\"\" exists but is not started. Starting now.");
-                    base_1.runWithoutDebug("docker start " + containerName, _this.machineName).then(function () { resolve(false); }, reject);
+                    base_1.Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
+                    base_1.runWithoutDebug(`docker start ${containerName}`, this.machineName).then(() => { resolve(false); }, reject);
                 }
                 else {
                     base_1.Log.terminateProgress(progress);
-                    reject("Could not start container " + containerName + ". Status was " + status + " Should never hit this.");
+                    reject(`Could not start container ${containerName}. Status was ${status} Should never hit this.`);
                 }
-            }, function (err) {
+            }, (err) => {
                 base_1.Log.terminateProgress(progress);
                 reject(err);
             });
         });
-    };
-    Container.prototype.status = function (containerName) {
-        var _this = this;
-        return Q.Promise(function (resolve, reject) {
-            var c = "docker ps -a --filter name=" + containerName + " --format \"table {{.Names}}\t{{.Status}}\"";
-            base_1.run(c, _this.machineName, _this.isDebug).then(function (res) {
-                var json = base_1.resToJSON(res);
-                var status;
+    }
+    status(containerName) {
+        return Q.Promise((resolve, reject) => {
+            let c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
+            base_1.run(c, this.machineName, this.isDebug).then((res) => {
+                let json = base_1.resToJSON(res);
+                let status;
                 for (var i = 0, l = json.length; i < l; i++) {
                     if (json[i]['NAMES'] === containerName) {
                         status = json[i]['STATUS'];
@@ -102,9 +93,8 @@ var Container = (function (_super) {
                     }
                 }
                 resolve(status);
-            }, function (err) { reject(err); });
+            }, (err) => { reject(err); });
         });
-    };
-    return Container;
-}(commonMethods_1.CommonMethods));
+    }
+}
 exports.Container = Container;
