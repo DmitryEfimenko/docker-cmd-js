@@ -1,5 +1,3 @@
-import * as Q from 'q';
-
 export abstract class CommonMethods {
     constructor(public machineName: string) { }
 
@@ -10,8 +8,8 @@ export abstract class CommonMethods {
         return this;
     }
 
-    protected runWithoutDebugOnce<T>(promise: Q.Promise<T>) {
-        return Q.Promise<T>((resolve, reject) => {
+    protected runWithoutDebugOnce<T>(promise: Promise<T>) {
+        return new Promise<T>((resolve, reject) => {
             let _d = this.isDebug;
             this.isDebug = false;
             promise.then(

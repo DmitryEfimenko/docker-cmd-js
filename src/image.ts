@@ -1,4 +1,3 @@
-import * as Q from 'q';
 import inquirer = require('inquirer');
 import { run, runWithoutDebug, Log, resToJSON } from './base';
 import { CommonMethods } from './commonMethods';
@@ -13,7 +12,7 @@ export class Image extends CommonMethods {
         if (opts && opts.freshBuild && opts.buildOnlyIfMissing) {
             throw new Error('can\'t use both optsions "freshBuild" and "buildOnlyIfMissing" at the same time');
         }
-        return Q.Promise((resolve, reject) => {
+        return new Promise<boolean | undefined>((resolve, reject) => {
             runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, this.machineName, true).then(
                 (img) => {
                     if (img === imageName) {
@@ -67,7 +66,7 @@ export class Image extends CommonMethods {
     }
 
     checkForDangling() {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             runWithoutDebug('docker images --filter dangling=true', this.machineName).then(
                 (result) => {
                     var images = resToJSON(result);
@@ -85,7 +84,7 @@ export class Image extends CommonMethods {
                                     let p = this.remove(images[i]['IMAGE ID']);
                                     promises.push(p);
                                 }
-                                Q.all(promises).then(
+                                Promise.all(promises).then(
                                     () => {
                                         Log.success('Cleaned up dangling images.');
                                         resolve(true);
@@ -106,7 +105,7 @@ export class Image extends CommonMethods {
     }
 
     private runBuildImage(imageName: string, opts?: IBuildImageOpts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             let c = `docker build -t ${imageName}`;
             c += (opts && opts.pathOrUrl) ? ` ${opts.pathOrUrl}` : ' .';
             let progress = Log.infoProgress(this.isDebug, `Building image ${imageName}`);

@@ -1,5 +1,4 @@
 "use strict";
-const Q = require('q');
 const base_1 = require('./base');
 const commonMethods_1 = require('./commonMethods');
 const environment_1 = require('./environment');
@@ -8,7 +7,7 @@ class Machine extends commonMethods_1.CommonMethods {
         super(machineName);
     }
     status() {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             return base_1.run(`docker-machine status ${this.machineName}`, this.machineName, this.isDebug, true).then((status) => { resolve(status); }, (err) => {
                 let validErr = `Host does not exist: "${this.machineName}"`;
                 if (err === `${validErr}\n`) {
@@ -21,7 +20,7 @@ class Machine extends commonMethods_1.CommonMethods {
         });
     }
     ipAddress() {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             base_1.run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true).then((ip) => {
                 this._ipAddress = ip;
                 resolve(ip);
@@ -29,7 +28,7 @@ class Machine extends commonMethods_1.CommonMethods {
         });
     }
     start(opts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             this.runWithoutDebugOnce(this.status()).then((res) => {
                 if (res !== 'Running') {
                     this.runStartMachine(opts).then(resolve, reject);
@@ -44,7 +43,7 @@ class Machine extends commonMethods_1.CommonMethods {
         });
     }
     runStartMachine(opts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let c = `docker-machine create`;
             if (!opts) {
                 opts = {};

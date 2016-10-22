@@ -1,5 +1,4 @@
 "use strict";
-const Q = require('q');
 const inquirer = require('inquirer');
 const base_1 = require('./base');
 const commonMethods_1 = require('./commonMethods');
@@ -11,7 +10,7 @@ class Image extends commonMethods_1.CommonMethods {
         if (opts && opts.freshBuild && opts.buildOnlyIfMissing) {
             throw new Error('can\'t use both optsions "freshBuild" and "buildOnlyIfMissing" at the same time');
         }
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             base_1.runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, this.machineName, true).then((img) => {
                 if (img === imageName) {
                     if (opts && opts.regularBuild) {
@@ -58,7 +57,7 @@ class Image extends commonMethods_1.CommonMethods {
         return base_1.run(`docker rmi -f ${imageName}`, this.machineName, this.isDebug);
     }
     checkForDangling() {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             base_1.runWithoutDebug('docker images --filter dangling=true', this.machineName).then((result) => {
                 var images = base_1.resToJSON(result);
                 if (images.length > 0) {
@@ -75,7 +74,7 @@ class Image extends commonMethods_1.CommonMethods {
                                 let p = this.remove(images[i]['IMAGE ID']);
                                 promises.push(p);
                             }
-                            Q.all(promises).then(() => {
+                            Promise.all(promises).then(() => {
                                 base_1.Log.success('Cleaned up dangling images.');
                                 resolve(true);
                             }, (err) => { err('could not clean up dangling images:', err); });
@@ -92,7 +91,7 @@ class Image extends commonMethods_1.CommonMethods {
         });
     }
     runBuildImage(imageName, opts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let c = `docker build -t ${imageName}`;
             c += (opts && opts.pathOrUrl) ? ` ${opts.pathOrUrl}` : ' .';
             let progress = base_1.Log.infoProgress(this.isDebug, `Building image ${imageName}`);

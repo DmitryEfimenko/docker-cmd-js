@@ -1,5 +1,4 @@
 "use strict";
-const Q = require('q');
 const base_1 = require('./base');
 const machine_1 = require('./machine');
 const commonMethods_1 = require('./commonMethods');
@@ -9,7 +8,7 @@ class Container extends commonMethods_1.CommonMethods {
         super(machineName);
     }
     waitForPort(opts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (!opts.retryIntervalMs) {
                 opts.retryIntervalMs = 100;
             }
@@ -35,7 +34,7 @@ class Container extends commonMethods_1.CommonMethods {
         });
     }
     start(imageName, opts, command) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let containerName = (opts && opts.name) ? opts.name : imageName;
             let progress = base_1.Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
             this.runWithoutDebugOnce(this.status(containerName)).then((status) => {
@@ -81,7 +80,7 @@ class Container extends commonMethods_1.CommonMethods {
         });
     }
     status(containerName) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
             base_1.run(c, this.machineName, this.isDebug).then((res) => {
                 let json = base_1.resToJSON(res);

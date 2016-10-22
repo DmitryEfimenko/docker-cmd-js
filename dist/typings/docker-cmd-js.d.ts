@@ -1,5 +1,3 @@
-/// <reference types="q" />
-import * as Q from 'q';
 import { RunResult } from './childProcessHelpers';
 import { Machine } from './machine';
 import { Image } from './image';
@@ -14,7 +12,7 @@ export declare class Cmd {
     machineName: string;
     constructor(machineName?: string);
     debug(debugging?: boolean): this;
-    run(command: string, noNewLines?: boolean): Q.Promise<string>;
+    run(command: string, noNewLines?: boolean): Promise<string>;
     runSync(command: string): RunResult;
     resToJSON(s: string): any[];
 }

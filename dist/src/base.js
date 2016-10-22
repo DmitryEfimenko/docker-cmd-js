@@ -1,5 +1,4 @@
 "use strict";
-const Q = require('q');
 const colors = require('colors');
 const childProcessHelpers_1 = require('./childProcessHelpers');
 const environment_1 = require('./environment');
@@ -8,40 +7,40 @@ function run(command, machineName, _debug, noNewLines) {
     if (_debug) {
         Log.info('Running:', command);
     }
-    let deferred = Q.defer();
-    environment_1.setEnvironment(machineName);
-    childProcessHelpers_1.spawn(command, process.env, _debug, (result) => {
-        if (_debug) {
-            if (result.stdErr) {
-                Log.err('command finnished with errors.');
-                if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
-                    this.checkForDanglingImages(() => {
-                        if (result.stdErr) {
-                            deferred.reject(result.stdErr);
-                        }
-                        else {
-                            deferred.resolve(result.stdOut);
-                        }
-                    });
+    return new Promise((resolve, reject) => {
+        environment_1.setEnvironment(machineName);
+        childProcessHelpers_1.spawn(command, process.env, _debug, (result) => {
+            if (_debug) {
+                if (result.stdErr) {
+                    Log.err('command finnished with errors.');
+                    if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
+                        this.checkForDanglingImages(() => {
+                            if (result.stdErr) {
+                                reject(result.stdErr);
+                            }
+                            else {
+                                resolve(result.stdOut);
+                            }
+                        });
+                    }
+                    else {
+                        reject(result.stdErr);
+                    }
                 }
                 else {
-                    deferred.reject(result.stdErr);
+                    resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
                 }
             }
             else {
-                deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
+                if (result.stdErr) {
+                    reject(result.stdErr);
+                }
+                else {
+                    resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
+                }
             }
-        }
-        else {
-            if (result.stdErr) {
-                deferred.reject(result.stdErr);
-            }
-            else {
-                deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
-            }
-        }
+        });
     });
-    return deferred.promise;
 }
 exports.run = run;
 function runSync(command, machineName, _debug) {
@@ -52,7 +51,7 @@ function runSync(command, machineName, _debug) {
 }
 exports.runSync = runSync;
 function runWithoutDebug(command, machineName, noNewLines) {
-    return Q.Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         run(command, machineName, false, noNewLines)
             .then(resolve, reject);
     });

@@ -1,44 +1,44 @@
-import * as Q from 'q';
 import colors = require('colors');
 import { spawn, spawnSync, RunResult } from './childProcessHelpers';
 import { setEnvironment } from './environment';
 
-export function run(command: string, machineName: string, _debug: boolean, noNewLines?: boolean): Q.Promise<string> {
-    _debug = _debug !== undefined ? _debug : false;
-    if (_debug) {
-        Log.info('Running:', command);
-    }
+export function run(command: string, machineName: string, _debug: boolean, noNewLines?: boolean): Promise<string> {
+  _debug = _debug !== undefined ? _debug : false;
+  if (_debug) {
+    Log.info('Running:', command);
+  }
 
-    let deferred = Q.defer<string>();
+  return new Promise<string>((resolve, reject) => {
+
     setEnvironment(machineName);
 
     spawn(command, process.env, _debug, (result) => {
-        if (_debug) {
-            if (result.stdErr) {
-                Log.err('command finnished with errors.');
-                if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
-                    this.checkForDanglingImages(() => {
-                        if (result.stdErr) {
-                            deferred.reject(result.stdErr);
-                        } else {
-                            deferred.resolve(result.stdOut);
-                        }
-                    });
-                } else {
-                    deferred.reject(result.stdErr);
-                }
-            } else {
-                deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
-            }
+      if (_debug) {
+        if (result.stdErr) {
+          Log.err('command finnished with errors.');
+          if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
+            this.checkForDanglingImages(() => {
+              if (result.stdErr) {
+                reject(result.stdErr);
+              } else {
+                resolve(result.stdOut);
+              }
+            });
+          } else {
+            reject(result.stdErr);
+          }
         } else {
-            if (result.stdErr) {
-                deferred.reject(result.stdErr);
-            } else {
-                deferred.resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
-            }
+          resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
         }
+      } else {
+        if (result.stdErr) {
+          reject(result.stdErr);
+        } else {
+          resolve(noNewLines ? result.stdOut.replace(/(\r\n|\n|\r)/gm, '') : result.stdOut);
+        }
+      }
     });
-    return deferred.promise;
+  });
 }
 
 export function runSync(command: string, machineName: string, _debug: boolean) {
@@ -50,7 +50,7 @@ export function runSync(command: string, machineName: string, _debug: boolean) {
 }
 
 export function runWithoutDebug(command: string, machineName: string, noNewLines?: boolean) {
-    return Q.Promise<string>((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
         run(command, machineName, false, noNewLines)
             .then(resolve, reject);
     });

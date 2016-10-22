@@ -1,12 +1,10 @@
-/// <reference types="q" />
-import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
 export declare class Container extends CommonMethods {
     constructor(machineName: string);
-    waitForPort(opts: IWaitForPortOpts): Q.Promise<{}>;
+    waitForPort(opts: IWaitForPortOpts): Promise<{}>;
     private runWaitForPort(opts, progress);
-    start(imageName: string, opts?: IStartDockerOpts, command?: string): Q.Promise<{}>;
-    status(containerName: string): Q.Promise<string>;
+    start(imageName: string, opts?: IStartDockerOpts, command?: string): Promise<{}>;
+    status(containerName: string): Promise<string>;
 }
 export interface IStartDockerOpts {
     name?: string;

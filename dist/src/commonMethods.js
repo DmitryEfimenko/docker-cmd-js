@@ -1,5 +1,4 @@
 "use strict";
-const Q = require('q');
 class CommonMethods {
     constructor(machineName) {
         this.machineName = machineName;
@@ -9,7 +8,7 @@ class CommonMethods {
         return this;
     }
     runWithoutDebugOnce(promise) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let _d = this.isDebug;
             this.isDebug = false;
             promise.then((val) => {

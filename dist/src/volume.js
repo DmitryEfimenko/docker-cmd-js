@@ -1,5 +1,4 @@
 "use strict";
-const Q = require('q');
 const base_1 = require('./base');
 const commonMethods_1 = require('./commonMethods');
 class Volume extends commonMethods_1.CommonMethods {
@@ -7,7 +6,7 @@ class Volume extends commonMethods_1.CommonMethods {
         super(machineName);
     }
     create(opts, advOpts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (advOpts && advOpts.createOnlyIfMissing) {
                 if (!opts || !opts.name) {
                     throw new Error('You must specify name when using "createOnlyIfMissing" option.');
@@ -35,7 +34,7 @@ class Volume extends commonMethods_1.CommonMethods {
         return base_1.run(c, this.machineName, this.isDebug);
     }
     inspect(volumeName) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             base_1.run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug).then((res) => {
                 let json = JSON.parse(res);
                 resolve(json);

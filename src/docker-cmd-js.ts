@@ -1,4 +1,3 @@
-import * as Q from 'q';
 import { run, runSync, resToJSON } from './base';
 import { RunResult } from './childProcessHelpers';
 import { setEnvironment } from './environment';

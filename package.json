@@ -6,8 +6,7 @@
   "typings": "dist/typings/docker-cmd-js.d.ts",
   "dependencies": {
     "colors": "~1.1.2",
-    "inquirer": "~1.0.3",
-    "q": "~1.4.1",
+    "inquirer": "~1.2.2",
     "tcp-port-used": "0.1.2"
   },
   "devDependencies": {

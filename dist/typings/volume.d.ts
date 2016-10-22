@@ -1,12 +1,10 @@
-/// <reference types="q" />
-import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
 export declare class Volume extends CommonMethods {
     constructor(machineName: string);
-    create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Q.Promise<string>;
+    create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Promise<string>;
     private runCreate(opts);
-    inspect(volumeName: any): Q.Promise<IInspectVolumeItemResult[]>;
-    remove(volumeName: string): Q.Promise<string>;
+    inspect(volumeName: any): Promise<IInspectVolumeItemResult[]>;
+    remove(volumeName: string): Promise<string>;
 }
 export interface IInspectVolumeItemResult {
     Name: string;

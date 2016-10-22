@@ -1,4 +1,3 @@
-import * as Q from 'q';
 import { run, runWithoutDebug, addOpts, addOpt, Log, IProgress, resToJSON } from './base';
 import { Machine } from './machine';
 import { CommonMethods } from './commonMethods';
@@ -10,7 +9,7 @@ export class Container extends CommonMethods {
     }
 
     waitForPort(opts: IWaitForPortOpts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if (!opts.retryIntervalMs) { opts.retryIntervalMs = 100; }
             if (!opts.timeoutMs) { opts.timeoutMs = 5000; }
             let progress = Log.infoProgress(this.isDebug, 'waiting for port', opts.port.toString());
@@ -36,7 +35,7 @@ export class Container extends CommonMethods {
     }
 
     start(imageName: string, opts?: IStartDockerOpts, command?: string) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let containerName = (opts && opts.name) ? opts.name : imageName;
             let progress = Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
             this.runWithoutDebugOnce(this.status(containerName)).then(
@@ -84,7 +83,7 @@ export class Container extends CommonMethods {
     }
 
     status(containerName: string) {
-        return Q.Promise<string>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             let c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
             run(c, this.machineName, this.isDebug).then(
                 (res) => {

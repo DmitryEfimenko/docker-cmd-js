@@ -1,4 +1,3 @@
-import * as Q from 'q';
 import { run, runWithoutDebug, addOpts, addOpt, Log } from './base';
 import { CommonMethods } from './commonMethods';
 import { setEnvironment } from './environment';
@@ -9,7 +8,7 @@ export class Volume extends CommonMethods {
     }
 
     create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts) {
-        return Q.Promise<string>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             if (advOpts && advOpts.createOnlyIfMissing) {
                 if (!opts || !opts.name) {
                     throw new Error('You must specify name when using "createOnlyIfMissing" option.');
@@ -39,7 +38,7 @@ export class Volume extends CommonMethods {
     }
 
     inspect(volumeName) {
-        return Q.Promise<IInspectVolumeItemResult[]>((resolve, reject) => {
+        return new Promise<IInspectVolumeItemResult[]>((resolve, reject) => {
             run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug).then(
                 (res) => {
                     let json: IInspectVolumeItemResult[] = JSON.parse(res);

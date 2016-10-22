@@ -1,4 +1,3 @@
-import * as Q from 'q';
 import { run, addOpts, addOpt, Log } from './base';
 import { CommonMethods } from './commonMethods';
 import { setEnvironment } from './environment';
@@ -11,7 +10,7 @@ export class Machine extends CommonMethods {
     }
 
     status() {
-        return Q.Promise<string>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             return run(`docker-machine status ${this.machineName}`, this.machineName, this.isDebug, true).then(
                 (status) => { resolve(status); },
                 (err) => {
@@ -27,7 +26,7 @@ export class Machine extends CommonMethods {
     }
 
     ipAddress() {
-        return Q.Promise<string>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
             run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true).then(
                 (ip) => {
                     this._ipAddress = ip;
@@ -39,7 +38,7 @@ export class Machine extends CommonMethods {
     }
 
     start(opts?: IStartOpts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             this.runWithoutDebugOnce(this.status()).then(
                 (res) => {
                     if (res !== 'Running') {
@@ -57,7 +56,7 @@ export class Machine extends CommonMethods {
     }
 
     private runStartMachine(opts?: IStartOpts) {
-        return Q.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             let c = `docker-machine create`;
             if (!opts) { opts = {}; }
             c = addOpts(c, opts);

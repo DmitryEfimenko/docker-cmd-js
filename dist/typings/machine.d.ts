@@ -1,14 +1,12 @@
-/// <reference types="q" />
-import * as Q from 'q';
 import { CommonMethods } from './commonMethods';
 export declare class Machine extends CommonMethods {
     _ipAddress: string;
     constructor(machineName: string);
-    status(): Q.Promise<string>;
-    ipAddress(): Q.Promise<string>;
-    start(opts?: IStartOpts): Q.Promise<{}>;
+    status(): Promise<string>;
+    ipAddress(): Promise<string>;
+    start(opts?: IStartOpts): Promise<{}>;
     private runStartMachine(opts?);
-    remove(): Q.Promise<string>;
+    remove(): Promise<string>;
 }
 export interface IStartOpts {
     driver?: string;
