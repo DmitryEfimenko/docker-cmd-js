@@ -38,7 +38,14 @@ class Machine extends commonMethods_1.CommonMethods {
                     resolve(res);
                 }
             }, (err) => {
-                this.runStartMachine(opts).then(resolve, reject);
+                if (err.indexOf('machine does not exist') > -1) {
+                    this.remove().then(() => {
+                        this.runStartMachine(opts).then(resolve, reject);
+                    }, (err) => { reject(err); });
+                }
+                else {
+                    this.runStartMachine(opts).then(resolve, reject);
+                }
             });
         });
     }
@@ -66,7 +73,13 @@ class Machine extends commonMethods_1.CommonMethods {
                 resolve(resp);
             }, (err) => {
                 base_1.Log.terminateProgress(progress);
-                reject(err);
+                if (err.indexOf('Host already exists') === 0) {
+                    environment_1.setEnvironment(this.machineName);
+                    resolve();
+                }
+                else {
+                    reject(err);
+                }
             });
         });
     }

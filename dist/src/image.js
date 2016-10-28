@@ -6,20 +6,20 @@ class Image extends commonMethods_1.CommonMethods {
     constructor(machineName) {
         super(machineName);
     }
-    build(imageName, opts) {
-        if (opts && opts.freshBuild && opts.buildOnlyIfMissing) {
-            throw new Error('can\'t use both optsions "freshBuild" and "buildOnlyIfMissing" at the same time');
+    build(imageName, opts, pathOrUrl, buildType) {
+        if (!buildType) {
+            buildType = ImageBuildType.regularBuild;
         }
         return new Promise((resolve, reject) => {
             base_1.runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, this.machineName, true).then((img) => {
                 if (img === imageName) {
-                    if (opts && opts.regularBuild) {
-                        this.runBuildImage(imageName, opts).then(resolve, reject);
+                    if (buildType === ImageBuildType.regularBuild) {
+                        this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject);
                     }
-                    else if (opts && opts.freshBuild) {
-                        this.remove(imageName).then(() => { this.runBuildImage(imageName, opts).then(resolve, reject); }, reject);
+                    else if (buildType === ImageBuildType.freshBuild) {
+                        this.remove(imageName).then(() => { this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject); }, reject);
                     }
-                    else if (opts && opts.buildOnlyIfMissing) {
+                    else if (buildType === ImageBuildType.buildOnlyIfMissing) {
                         resolve(undefined);
                     }
                     else {
@@ -36,10 +36,10 @@ class Image extends commonMethods_1.CommonMethods {
                         };
                         inquirer.prompt(promptOpts).then((answers) => {
                             if (answers.opts === promptChoices.regularBuild) {
-                                this.runBuildImage(imageName, opts).then(resolve, reject);
+                                this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject);
                             }
                             if (answers.opts === promptChoices.freshBuild) {
-                                this.remove(imageName).then(() => { this.runBuildImage(imageName, opts).then(resolve, reject); }, reject);
+                                this.remove(imageName).then(() => { this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject); }, reject);
                             }
                             if (answers.opts === promptChoices.noBuild) {
                                 resolve(undefined);
@@ -48,7 +48,7 @@ class Image extends commonMethods_1.CommonMethods {
                     }
                 }
                 else {
-                    this.runBuildImage(imageName, opts).then(resolve, reject);
+                    this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject);
                 }
             });
         });
@@ -90,10 +90,14 @@ class Image extends commonMethods_1.CommonMethods {
             }, (err) => { err('could not check for dangling images:', err); });
         });
     }
-    runBuildImage(imageName, opts) {
+    runBuildImage(imageName, opts, pathOrUrl) {
         return new Promise((resolve, reject) => {
             let c = `docker build -t ${imageName}`;
-            c += (opts && opts.pathOrUrl) ? ` ${opts.pathOrUrl}` : ' .';
+            if (!opts) {
+                opts = {};
+            }
+            c = base_1.addOpts(c, opts);
+            c += pathOrUrl ? ` ${pathOrUrl}` : ' .';
             let progress = base_1.Log.infoProgress(this.isDebug, `Building image ${imageName}`);
             base_1.run(c, this.machineName, this.isDebug).then(() => {
                 base_1.Log.terminateProgress(progress).info(`Image ${imageName} built`);
@@ -112,3 +116,9 @@ class Image extends commonMethods_1.CommonMethods {
     }
 }
 exports.Image = Image;
+(function (ImageBuildType) {
+    ImageBuildType[ImageBuildType["regularBuild"] = 0] = "regularBuild";
+    ImageBuildType[ImageBuildType["freshBuild"] = 1] = "freshBuild";
+    ImageBuildType[ImageBuildType["buildOnlyIfMissing"] = 2] = "buildOnlyIfMissing";
+})(exports.ImageBuildType || (exports.ImageBuildType = {}));
+var ImageBuildType = exports.ImageBuildType;

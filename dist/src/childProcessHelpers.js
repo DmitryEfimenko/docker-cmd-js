@@ -26,8 +26,13 @@ function spawn(command, env, debug, cb) {
         }
     });
     r.on('error', (err) => {
-        base_1.Log.err(`Failed to start command: ${command}`);
-        process.stdout.write(err);
+        base_1.Log.err(`Failed to start command: ${command}. Error:`);
+        if (err && err.message) {
+            console.log(err);
+        }
+        else {
+            process.stdout.write(err);
+        }
     });
     r.on('close', (code) => {
         if (debug) {
@@ -56,8 +61,8 @@ function spawnSync(command, env, debug) {
         }
     }
     return {
-        stdOut: r.stdout.toString(),
-        stdErr: r.stderr.toString()
+        stdOut: r.stdout ? r.stdout.toString() : '',
+        stdErr: r.stderr ? r.stderr.toString() : ''
     };
 }
 exports.spawnSync = spawnSync;

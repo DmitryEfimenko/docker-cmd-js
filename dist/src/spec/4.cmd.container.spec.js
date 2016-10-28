@@ -3,12 +3,13 @@ delete require.cache[require.resolve('../docker-cmd-js')];
 const path = require('path');
 var tcpPortUsed = require('tcp-port-used');
 const docker_cmd_js_1 = require('../docker-cmd-js');
+const image_1 = require('../image');
 describe('cmd.container', () => {
     let cmd;
     let machineName = 'docker-cmd-js-test';
     beforeAll((done) => {
         cmd = new docker_cmd_js_1.Cmd(machineName);
-        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildOnlyIfMissing: true }).then(() => { done(); }, (err) => { done.fail(err); });
+        cmd.image.build('docker_cmd_js_mysql', { file: path.join(__dirname, 'mysql') }, undefined, image_1.ImageBuildType.buildOnlyIfMissing).then(() => { done(); }, (err) => { done.fail(err); });
     }, 1 * 20 * 1000);
     afterAll((done) => {
         cmd.run(`docker rm -f docker_cmd_js_mysql`)

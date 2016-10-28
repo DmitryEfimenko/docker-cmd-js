@@ -12,7 +12,7 @@ describe('cmd.image', () => {
     });
 
     it('build()', (done) => {
-        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql') }).then(
+        cmd.image.build('docker_cmd_js_mysql', { file: path.join(__dirname, 'mysql') }).then(
             () => {
                 done();
             },
@@ -23,7 +23,7 @@ describe('cmd.image', () => {
     }, 2 * 60 * 1000);
 
     it('build() and replace', (done) => {
-        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), freshBuild: true }).then(
+        cmd.image.build('docker_cmd_js_mysql', { file: path.join(__dirname, 'mysql') }).then(
             () => {
                 done();
             },

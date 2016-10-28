@@ -39,7 +39,7 @@ Instantiates object that'll run commands. Optionally you can set machine name ag
 Sets verbose output.
 
 ---
-##### `cmd.run(command: string, noNewLines?: boolean): Q.Promise<string>`
+##### `cmd.run(command: string, noNewLines?: boolean): Promise<string>`
 Takes any command as string. Parameter `noNewLines` set to true removes cariage returns from the output.
 
 Returns Promise.
@@ -72,24 +72,24 @@ cmd.run('docker images').then(
 
 ---
 ### cmd.machine
-##### `cmd.machine.start(opts: IStartOpts): Q.Promise<{}>`
+##### `cmd.machine.start(opts: IStartOpts): Promise<{}>`
 Starts machine. If it does not exist, it'll be created. Resolves even if machine is already started. 
 
 ---
-##### `cmd.machine.ipAddress(): Q.Promise<string>`
+##### `cmd.machine.ipAddress(): Promise<string>`
 Returns machine's IP address.
 
 ---
-##### `cmd.machine.status(): Q.Promise<string>`
+##### `cmd.machine.status(): Promise<string>`
 Returns machine's status.
 
 ---
-##### `cmd.machine.remove(): Q.Promise<string>`
+##### `cmd.machine.remove(): Promise<string>`
 Removes machine.
 
 ---
 ### cmd.image
-##### `cmd.image.build(imageName: string, opts?: IBuildImageOpts): Q.Promise<{}>`
+##### `cmd.image.build(imageName: string, opts?: IBuildImageOpts): Promise<{}>`
 Builds desired image.
 Unless instructions on how to build are not provided via options, and an image with such name is found, it'll prompt you asking what you want to do.
 You can provide object with the following options:
@@ -115,16 +115,16 @@ export interface IBuildImageOpts {
 ```
 
 ---
-##### `cmd.image.remove(imageName: any): Q.Promise<string>`
+##### `cmd.image.remove(imageName: any): Promise<string>`
 Removes desired image
 
 ---
-##### `cmd.image.checkForDangling(): Q.Promise<{}>`
+##### `cmd.image.checkForDangling(): Promise<{}>`
 Checks for dangling images. If found, prompts with question whether to remove them or not.
 
 ---
 ### cmd.container
-##### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string): Q.Promise<boolean>`
+##### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string): Promise<boolean>`
 Starts container from desired image.
 Returns a Promise of boolean stating whether the container was already started.
 You can provide object with the following options. See docker docs for options' description:
@@ -140,11 +140,11 @@ export interface IStartDockerOpts {
 ```
 
 ---
-##### `cmd.container.status(containerName: string): Q.Promise<string>`
+##### `cmd.container.status(containerName: string): Promise<string>`
 Returns container's status.
 
 ---
-##### `cmd.container.waitForPort(opts: IWaitForPortOpts): Q.Promise;`
+##### `cmd.container.waitForPort(opts: IWaitForPortOpts): Promise;`
 Resolves when desired port becomes awailable.
 
 Useful for when container's services take time to start up after the container started. Ex: starting up container `FROM mysql`
@@ -160,7 +160,7 @@ interface IWaitForPortOpts {
 
 ---
 ### cmd.volume
-##### `cmd.volume.create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Q.Promise<string>`
+##### `cmd.volume.create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Promise<string>`
 Creates a volume
 
 Parameter `opts` - represents [docker options for this command](https://docs.docker.com/engine/reference/commandline/volume_create/)
@@ -173,7 +173,7 @@ interface ICreateVolumeAdvOpts {
 ```
 
 ---
-##### `cmd.volume.inspect(volumeName: any): Q.Promise<IInspectVolumeItemResult[]>`
+##### `cmd.volume.inspect(volumeName: any): Promise<IInspectVolumeItemResult[]>`
 Returns volumes's details.
 ```javascript
 interface IInspectVolumeItemResult {
@@ -184,7 +184,7 @@ interface IInspectVolumeItemResult {
 ```
 
 ---
-##### `cmd.volume.remove(volumeName: string): Q.Promise<string>`
+##### `cmd.volume.remove(volumeName: string): Promise<string>`
 Removes a volume with desired name.
 
 ---

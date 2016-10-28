@@ -3,6 +3,7 @@ import * as path from 'path';
 var tcpPortUsed = require('tcp-port-used');
 
 import { Cmd } from '../docker-cmd-js';
+import { ImageBuildType } from '../image';
 
 describe('cmd.container', () => {
     let cmd: Cmd;
@@ -10,7 +11,7 @@ describe('cmd.container', () => {
 
     beforeAll((done) => {
         cmd = new Cmd(machineName);
-        cmd.image.build('docker_cmd_js_mysql', { pathOrUrl: path.join(__dirname, 'mysql'), buildOnlyIfMissing: true }).then(
+        cmd.image.build('docker_cmd_js_mysql', { file: path.join(__dirname, 'mysql') }, undefined, ImageBuildType.buildOnlyIfMissing).then(
             () => { done(); },
             (err) => { done.fail(err); }
         );

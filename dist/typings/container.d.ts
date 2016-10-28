@@ -3,7 +3,7 @@ export declare class Container extends CommonMethods {
     constructor(machineName: string);
     waitForPort(opts: IWaitForPortOpts): Promise<{}>;
     private runWaitForPort(opts, progress);
-    start(imageName: string, opts?: IStartDockerOpts, command?: string): Promise<{}>;
+    start(imageName: string, opts?: IStartDockerOpts, command?: string): Promise<boolean>;
     status(containerName: string): Promise<string>;
 }
 export interface IStartDockerOpts {
