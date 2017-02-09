@@ -34,7 +34,8 @@ export class Container extends CommonMethods {
     });
   }
 
-  start(imageName: string, opts?: IStartDockerOpts, command?: string) {
+  start(imageName: string, opts?: IStartDockerOpts, command?: string, extraOpts?: IStartExtraOpts) {
+    let self = this;
     return new Promise<boolean>((resolve, reject) => {
       let containerName = (opts && opts.name) ? opts.name : imageName;
       let progress = Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
@@ -43,41 +44,87 @@ export class Container extends CommonMethods {
           if (status === undefined) {
             progress = Log.terminateProgress(progress)
               .infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
-            let c = `docker run -d`;
-            if (!opts) { opts = {}; }
-            c = addOpts(c, opts);
-            // set sinsible defaults
-            if (!opts.name) { c = addOpt(c, '--name', containerName); }
-            c += ` ${imageName}`;
-            if (command) { c += ` ${command}`; }
-            run(c, this.machineName, this.isDebug).then(
-              () => {
-                Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
-                resolve(false);
-              },
-              (err) => {
-                Log.terminateProgress(progress);
-                reject(err);
-              }
-            );
+            startContainer(containerName, progress).then(resolve, reject);
+          } else if (status === 'Created') {
+            if (extraOpts && extraOpts.startFresh) {
+              progress = Log.terminateProgress(progress).infoProgress(this.isDebug, `Container needs to be re-created`);
+              removeAndStart(containerName, progress).then(resolve, reject);
+            } else {
+              progress = Log.terminateProgress(progress)
+                .infoProgress(this.isDebug, `Container "${containerName}" exists, but not started - starting now.`);
+              startContainer(containerName, progress).then(resolve, reject);
+            }
           } else if (status.indexOf('Up') === 0) {
-            Log.terminateProgress(progress).info(`Container "${containerName}"" already started.`);
-            resolve(true);
+            if (extraOpts && extraOpts.startFresh) {
+              progress = Log.terminateProgress(progress).infoProgress(this.isDebug, `Container needs to be re-created`);
+              removeAndStart(containerName, progress).then(resolve, reject);
+            } else {
+              Log.terminateProgress(progress).info(`Container "${containerName}"" already started.`);
+              resolve(true);
+            }
           } else if (status.indexOf('Exited') === 0) {
-            Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
-            runWithoutDebug(`docker start ${containerName}`, this.machineName).then(
-              () => { resolve(false); },
-              reject
-            );
+            if (extraOpts && extraOpts.startFresh) {
+              Log.terminateProgress(progress).info(`Container needs to be re-created`);
+              removeAndStart(containerName, progress).then(resolve, reject);
+            } else {
+              Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
+              runWithoutDebug(`docker start ${containerName}`, this.machineName).then(
+                () => { resolve(false); },
+                reject
+              );
+            }
           } else {
             Log.terminateProgress(progress);
-            reject(`Could not start container ${containerName}. Status was ${status} Should never hit this.`);
+            reject(`Could not start container ${containerName}. Status was "${status}". Should never hit this.`);
           }
         },
         (err) => {
           Log.terminateProgress(progress);
           reject(err);
         }
+      );
+    });
+
+    function removeAndStart(containerName: string, progress: IProgress) {
+      return new Promise<boolean>((resolve, reject) => {
+        self.remove(containerName).then(
+          () => {
+            startContainer(containerName, progress).then(resolve, reject);
+          },
+          (err) => { reject(err); }
+        );
+      });
+    }
+
+    function startContainer(containerName: string, progress: IProgress) {
+      return new Promise((resolve, reject) => {
+        let c = `docker run -d`;
+        if (!opts) { opts = {}; }
+        c = addOpts(c, opts);
+        // set sinsible defaults
+        if (!opts.name) { c = addOpt(c, '--name', containerName); }
+        c += ` ${imageName}`;
+        if (command) { c += ` ${command}`; }
+        run(c, self.machineName, self.isDebug).then(
+          () => {
+            Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
+            resolve(false);
+          },
+          (err) => {
+            Log.terminateProgress(progress);
+            reject(err);
+          }
+        );
+      });
+    }
+  }
+
+  remove(containerName: string) {
+    return new Promise<boolean>((resolve, reject) => {
+      let c = `docker rm -f ${containerName}`;
+      run(c, this.machineName, this.isDebug).then(
+        () => { resolve(true); },
+        (err) => { reject(err); }
       );
     });
   }
@@ -111,6 +158,11 @@ export interface IStartDockerOpts {
   volumesFrom?: string | string[];
   link?: string | string[];
   env?: string | string[];
+  tty?: boolean;
+}
+
+export interface IStartExtraOpts {
+  startFresh?: boolean;
 }
 
 export interface IWaitForPortOpts {

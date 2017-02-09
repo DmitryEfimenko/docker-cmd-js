@@ -124,7 +124,7 @@ Checks for dangling images. If found, prompts with question whether to remove th
 
 ---
 ### cmd.container
-##### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string): Promise<boolean>`
+##### `cmd.container.start(imageName: any, opts?: IStartDockerOpts, command?: string, extraOpts?: IStartExtraOpts): Promise<boolean>`
 Starts container from desired image.
 Returns a Promise of boolean stating whether the container was already started.
 You can provide object with the following options. See docker docs for options' description:
@@ -138,6 +138,18 @@ export interface IStartDockerOpts {
     env?: string[];
 }
 ```
+
+You can also provide additional options:
+```javascript
+export interface IStartExtraOpts {
+  startFresh?: boolean;
+}
+```
+Setting `startFresh` to true will remove container if it exists, build, and start it. 
+
+---
+##### `cmd.container.remove(containerName: string): Promise<boolean>`
+Removes container with option `--force`.
 
 ---
 ##### `cmd.container.status(containerName: string): Promise<string>`
