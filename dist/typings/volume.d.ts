@@ -1,9 +1,9 @@
 import { CommonMethods } from './commonMethods';
 export declare class Volume extends CommonMethods {
     constructor(machineName: string);
-    create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Promise<string>;
+    create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Promise<any>;
     private runCreate(opts);
-    inspect(volumeName: any): Promise<IInspectVolumeItemResult[]>;
+    inspect(volumeName: any): Promise<any[]>;
     remove(volumeName: string): Promise<string>;
 }
 export interface IInspectVolumeItemResult {

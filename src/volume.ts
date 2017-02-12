@@ -7,27 +7,24 @@ export class Volume extends CommonMethods {
     super(machineName);
   }
 
-  create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts) {
-    return new Promise<string>((resolve, reject) => {
+  async create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts) {
+    try {
       if (advOpts && advOpts.createOnlyIfMissing) {
         if (!opts || !opts.name) {
           throw new Error('You must specify name when using "createOnlyIfMissing" option.');
         }
-
-        this.runWithoutDebugOnce(this.inspect(opts.name)).then(
-          (res) => {
-            if (res.length > 0) {
-              resolve(res[0].Name);
-            } else {
-              this.runCreate(opts).then(resolve, reject);
-            }
-          },
-          (err) => { reject(err); }
-        );
+        let res = await this.runWithoutDebugOnce(this.inspect(opts.name));
+        if (res.length > 0) {
+          return res[0].Name;
+        } else {
+          return await this.runCreate(opts);
+        }
       } else {
-        this.runCreate(opts).then(resolve, reject);
+        return await this.runCreate(opts);
       }
-    });
+    } catch (ex) {
+      throw ex;
+    }
   }
 
   private runCreate(opts: ICreateVolumeOpts) {
@@ -37,22 +34,18 @@ export class Volume extends CommonMethods {
     return run(c, this.machineName, this.isDebug);
   }
 
-  inspect(volumeName) {
-    return new Promise<IInspectVolumeItemResult[]>((resolve, reject) => {
-      run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug).then(
-        (res) => {
-          let json: IInspectVolumeItemResult[] = JSON.parse(res);
-          resolve(json);
-        },
-        (err) => {
-          if (err === `Error: No such volume: ${volumeName}\n`) {
-            resolve([]);
-          } else {
-            reject(err);
-          }
-        }
-      );
-    });
+  async inspect(volumeName) {
+    try {
+      let res = await run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug);
+      let json: IInspectVolumeItemResult[] = JSON.parse(res);
+      return json;
+    } catch (ex) {
+      if (ex === `Error: No such volume: ${volumeName}\n`) {
+        return [];
+      } else {
+        throw ex;
+      }
+    }
   }
 
   remove(volumeName: string) {

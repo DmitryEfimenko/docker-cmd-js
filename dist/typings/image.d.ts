@@ -1,9 +1,9 @@
 import { CommonMethods } from './commonMethods';
 export declare class Image extends CommonMethods {
     constructor(machineName: any);
-    build(imageName: string, opts?: IBuildImageOpts, pathOrUrl?: string, buildType?: ImageBuildType): Promise<boolean>;
+    build(imageName: string, opts?: IBuildImageOpts, pathOrUrl?: string, buildType?: ImageBuildType): Promise<any>;
     remove(imageName: string): Promise<string>;
-    checkForDangling(): Promise<{}>;
+    checkForDangling(): Promise<void>;
     private runBuildImage(imageName, opts, pathOrUrl);
 }
 export interface IBuildImageOpts {

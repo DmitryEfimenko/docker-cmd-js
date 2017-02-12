@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
 const base_1 = require('./base');
 const commonMethods_1 = require('./commonMethods');
 const environment_1 = require('./environment');
@@ -7,50 +15,60 @@ class Machine extends commonMethods_1.CommonMethods {
         super(machineName);
     }
     status() {
-        return new Promise((resolve, reject) => {
-            return base_1.run(`docker-machine status ${this.machineName}`, this.machineName, this.isDebug, true).then((status) => { resolve(status); }, (err) => {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield base_1.run(`docker-machine status ${this.machineName}`, this.machineName, this.isDebug, true);
+            }
+            catch (ex) {
                 let validErr = `Host does not exist: "${this.machineName}"`;
-                if (err === `${validErr}\n`) {
-                    resolve(validErr);
+                if (ex === `${validErr}\n`) {
+                    return validErr;
                 }
                 else {
-                    reject(err);
+                    throw ex;
                 }
-            });
+            }
         });
     }
     ipAddress() {
-        return new Promise((resolve, reject) => {
-            base_1.run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true).then((ip) => {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let ip = yield base_1.run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true);
                 this._ipAddress = ip;
-                resolve(ip);
-            }, (err) => { reject(err); });
+                return ip;
+            }
+            catch (ex) {
+                throw ex;
+            }
         });
     }
     start(opts) {
-        return new Promise((resolve, reject) => {
-            this.runWithoutDebugOnce(this.status()).then((res) => {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let res = yield this.runWithoutDebugOnce(this.status());
                 if (res !== 'Running') {
-                    this.runStartMachine(opts).then(resolve, reject);
+                    return yield this.runStartMachine(opts);
                 }
                 else {
                     base_1.Log.info(`docker-machine [${this.machineName}] status:`, res);
-                    resolve(res);
+                    return res;
                 }
-            }, (err) => {
-                if (err.indexOf('machine does not exist') > -1) {
-                    this.remove().then(() => {
-                        this.runStartMachine(opts).then(resolve, reject);
-                    }, (err) => { reject(err); });
+            }
+            catch (ex) {
+                if (ex.indexOf('machine does not exist') > -1) {
+                    yield this.remove();
                 }
-                else {
-                    this.runStartMachine(opts).then(resolve, reject);
+                try {
+                    return yield this.runStartMachine(opts);
                 }
-            });
+                catch (ex) {
+                    throw ex;
+                }
+            }
         });
     }
     runStartMachine(opts) {
-        return new Promise((resolve, reject) => {
+        return __awaiter(this, void 0, void 0, function* () {
             let c = `docker-machine create`;
             if (!opts) {
                 opts = {};
@@ -67,20 +85,22 @@ class Machine extends commonMethods_1.CommonMethods {
             }
             c += ` ${this.machineName}`;
             let progress = base_1.Log.infoProgress(this.isDebug, `Starting VM "${this.machineName}"`);
-            base_1.run(c, this.machineName, this.isDebug).then((resp) => {
+            try {
+                let resp = yield base_1.run(c, this.machineName, this.isDebug);
                 environment_1.setEnvironment(this.machineName);
                 base_1.Log.terminateProgress(progress);
-                resolve(resp);
-            }, (err) => {
+                return resp;
+            }
+            catch (ex) {
                 base_1.Log.terminateProgress(progress);
-                if (err.indexOf('Host already exists') === 0) {
+                if (ex.indexOf('Host already exists') === 0) {
                     environment_1.setEnvironment(this.machineName);
-                    resolve();
+                    return;
                 }
                 else {
-                    reject(err);
+                    throw ex;
                 }
-            });
+            }
         });
     }
     remove() {

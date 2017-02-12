@@ -4,7 +4,7 @@ export declare class Machine extends CommonMethods {
     constructor(machineName: string);
     status(): Promise<string>;
     ipAddress(): Promise<string>;
-    start(opts?: IStartOpts): Promise<{}>;
+    start(opts?: IStartOpts): Promise<string>;
     private runStartMachine(opts?);
     remove(): Promise<string>;
 }

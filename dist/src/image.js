@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
 const inquirer = require('inquirer');
 const base_1 = require('./base');
 const commonMethods_1 = require('./commonMethods');
@@ -7,20 +15,22 @@ class Image extends commonMethods_1.CommonMethods {
         super(machineName);
     }
     build(imageName, opts, pathOrUrl, buildType) {
-        if (!buildType) {
-            buildType = ImageBuildType.regularBuild;
-        }
-        return new Promise((resolve, reject) => {
-            base_1.runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, this.machineName, true).then((img) => {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!buildType) {
+                buildType = ImageBuildType.regularBuild;
+            }
+            try {
+                let img = yield base_1.runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, this.machineName, true);
                 if (img === imageName) {
                     if (buildType === ImageBuildType.regularBuild) {
-                        this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject);
+                        return yield this.runBuildImage(imageName, opts, pathOrUrl);
                     }
                     else if (buildType === ImageBuildType.freshBuild) {
-                        this.remove(imageName).then(() => { this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject); }, reject);
+                        yield this.remove(imageName);
+                        return yield this.runBuildImage(imageName, opts, pathOrUrl);
                     }
                     else if (buildType === ImageBuildType.buildOnlyIfMissing) {
-                        resolve(undefined);
+                        return undefined;
                     }
                     else {
                         let promptChoices = {
@@ -34,31 +44,35 @@ class Image extends commonMethods_1.CommonMethods {
                             message: `Image "${imageName}" already exists. What would you like to do?`,
                             choices: [promptChoices.regularBuild, promptChoices.freshBuild, promptChoices.noBuild]
                         };
-                        inquirer.prompt(promptOpts).then((answers) => {
-                            if (answers.opts === promptChoices.regularBuild) {
-                                this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject);
-                            }
-                            if (answers.opts === promptChoices.freshBuild) {
-                                this.remove(imageName).then(() => { this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject); }, reject);
-                            }
-                            if (answers.opts === promptChoices.noBuild) {
-                                resolve(undefined);
-                            }
-                        });
+                        let answers = yield inquirer.prompt(promptOpts);
+                        if (answers.opts === promptChoices.regularBuild) {
+                            return yield this.runBuildImage(imageName, opts, pathOrUrl);
+                        }
+                        if (answers.opts === promptChoices.freshBuild) {
+                            yield this.remove(imageName);
+                            return yield this.runBuildImage(imageName, opts, pathOrUrl);
+                        }
+                        if (answers.opts === promptChoices.noBuild) {
+                            return undefined;
+                        }
                     }
                 }
                 else {
-                    this.runBuildImage(imageName, opts, pathOrUrl).then(resolve, reject);
+                    return yield this.runBuildImage(imageName, opts, pathOrUrl);
                 }
-            });
+            }
+            catch (ex) {
+                throw ex;
+            }
         });
     }
     remove(imageName) {
         return base_1.run(`docker rmi -f ${imageName}`, this.machineName, this.isDebug);
     }
     checkForDangling() {
-        return new Promise((resolve, reject) => {
-            base_1.runWithoutDebug('docker images --filter dangling=true', this.machineName).then((result) => {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let result = yield base_1.runWithoutDebug('docker images --filter dangling=true', this.machineName);
                 var images = base_1.resToJSON(result);
                 if (images.length > 0) {
                     let promptOpts = {
@@ -67,31 +81,25 @@ class Image extends commonMethods_1.CommonMethods {
                         message: 'Found dangling images. Would you like to remove them?',
                         choices: ['Yes', 'No']
                     };
-                    inquirer.prompt(promptOpts).then((answers) => {
-                        if (answers.remove === 'Yes') {
-                            let promises = [];
-                            for (var i = 0, l = images.length; i < l; i++) {
-                                let p = this.remove(images[i]['IMAGE ID']);
-                                promises.push(p);
-                            }
-                            Promise.all(promises).then(() => {
-                                base_1.Log.success('Cleaned up dangling images.');
-                                resolve(true);
-                            }, (err) => { err('could not clean up dangling images:', err); });
+                    let answers = yield inquirer.prompt(promptOpts);
+                    if (answers.remove === 'Yes') {
+                        let promises = [];
+                        for (var i = 0, l = images.length; i < l; i++) {
+                            let p = this.remove(images[i]['IMAGE ID']);
+                            promises.push(p);
                         }
-                        else {
-                            resolve(true);
-                        }
-                    });
+                        yield Promise.all(promises);
+                        base_1.Log.success('Cleaned up dangling images.');
+                    }
                 }
-                else {
-                    resolve(true);
-                }
-            }, (err) => { err('could not check for dangling images:', err); });
+            }
+            catch (ex) {
+                throw ex;
+            }
         });
     }
     runBuildImage(imageName, opts, pathOrUrl) {
-        return new Promise((resolve, reject) => {
+        return __awaiter(this, void 0, void 0, function* () {
             let c = `docker build -t ${imageName}`;
             if (!opts) {
                 opts = {};
@@ -99,19 +107,21 @@ class Image extends commonMethods_1.CommonMethods {
             c = base_1.addOpts(c, opts);
             c += pathOrUrl ? ` ${pathOrUrl}` : ' .';
             let progress = base_1.Log.infoProgress(this.isDebug, `Building image ${imageName}`);
-            base_1.run(c, this.machineName, this.isDebug).then(() => {
+            try {
+                yield base_1.run(c, this.machineName, this.isDebug);
                 base_1.Log.terminateProgress(progress).info(`Image ${imageName} built`);
-                resolve(true);
-            }, (err) => {
-                if (err.indexOf('SECURITY WARNING:') > -1) {
+                return true;
+            }
+            catch (ex) {
+                if (ex.indexOf('SECURITY WARNING:') > -1) {
                     base_1.Log.terminateProgress(progress).info(`Image ${imageName} built`);
-                    resolve(true);
+                    return true;
                 }
                 else {
                     base_1.Log.terminateProgress(progress);
-                    reject(err);
+                    throw ex;
                 }
-            });
+            }
         });
     }
 }

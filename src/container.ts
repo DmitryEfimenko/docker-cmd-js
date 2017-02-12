@@ -8,96 +8,78 @@ export class Container extends CommonMethods {
     super(machineName);
   }
 
-  waitForPort(opts: IWaitForPortOpts) {
-    return new Promise((resolve, reject) => {
+  async waitForPort(opts: IWaitForPortOpts) {
+    try {
       if (!opts.retryIntervalMs) { opts.retryIntervalMs = 100; }
       if (!opts.timeoutMs) { opts.timeoutMs = 5000; }
       let progress = Log.infoProgress(this.isDebug, 'waiting for port', opts.port.toString());
       if (!opts.host) {
         let machine = new Machine(this.machineName);
-        machine.ipAddress().then(
-          (ipAddress) => {
-            opts.host = ipAddress;
-            this.runWaitForPort(opts, progress).then(resolve, reject);
-          },
-          (err) => { reject(err); }
-        );
-      } else {
-        this.runWaitForPort(opts, progress).then(resolve, reject);
+        opts.host = await machine.ipAddress();
       }
-    });
-  }
-
-  private runWaitForPort(opts: IWaitForPortOpts, progress: IProgress) {
-    return tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs).finally(() => {
+      await tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
       Log.terminateProgress(progress);
-    });
+    } catch (ex) {
+      throw ex;
+    }
   }
 
-  start(imageName: string, opts?: IStartDockerOpts, command?: string, extraOpts?: IStartExtraOpts) {
+  async start(imageName: string, opts?: IStartDockerOpts, command?: string, extraOpts?: IStartExtraOpts) {
     let self = this;
-    return new Promise<boolean>((resolve, reject) => {
-      let containerName = (opts && opts.name) ? opts.name : imageName;
-      let progress = Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
-      this.runWithoutDebugOnce(this.status(containerName)).then(
-        (status) => {
-          if (status === undefined) {
-            progress = Log.terminateProgress(progress)
-              .infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
-            startContainer(containerName, progress).then(resolve, reject);
-          } else if (status === 'Created') {
-            if (extraOpts && extraOpts.startFresh) {
-              progress = Log.terminateProgress(progress).infoProgress(this.isDebug, `Container needs to be re-created`);
-              removeAndStart(containerName, progress).then(resolve, reject);
-            } else {
-              progress = Log.terminateProgress(progress)
-                .infoProgress(this.isDebug, `Container "${containerName}" exists, but not started - starting now.`);
-              startContainer(containerName, progress).then(resolve, reject);
-            }
-          } else if (status.indexOf('Up') === 0) {
-            if (extraOpts && extraOpts.startFresh) {
-              progress = Log.terminateProgress(progress).infoProgress(this.isDebug, `Container needs to be re-created`);
-              removeAndStart(containerName, progress).then(resolve, reject);
-            } else {
-              Log.terminateProgress(progress).info(`Container "${containerName}"" already started.`);
-              resolve(true);
-            }
-          } else if (status.indexOf('Exited') === 0) {
-            if (extraOpts && extraOpts.startFresh) {
-              Log.terminateProgress(progress).info(`Container needs to be re-created`);
-              removeAndStart(containerName, progress).then(resolve, reject);
-            } else {
-              Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
-              runWithoutDebug(`docker start ${containerName}`, this.machineName).then(
-                () => { resolve(false); },
-                reject
-              );
-            }
-          } else {
-            Log.terminateProgress(progress);
-            reject(`Could not start container ${containerName}. Status was "${status}". Should never hit this.`);
-          }
-        },
-        (err) => {
-          Log.terminateProgress(progress);
-          reject(err);
-        }
-      );
-    });
+    let containerName = (opts && opts.name) ? opts.name : imageName;
+    let progress = Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
 
-    function removeAndStart(containerName: string, progress: IProgress) {
-      return new Promise<boolean>((resolve, reject) => {
-        self.remove(containerName).then(
-          () => {
-            startContainer(containerName, progress).then(resolve, reject);
-          },
-          (err) => { reject(err); }
-        );
-      });
+    try {
+      let status = await this.runWithoutDebugOnce(this.status(containerName));
+      if (status === undefined) {
+        progress = Log.terminateProgress(progress).infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
+        return await startContainer(containerName, progress);
+      } else if (status === 'Created') {
+        if (extraOpts && extraOpts.startFresh) {
+          progress = Log.terminateProgress(progress).infoProgress(this.isDebug, `Container needs to be re-created`);
+          return await removeAndStart(containerName, progress);
+        } else {
+          progress = Log.terminateProgress(progress)
+            .infoProgress(this.isDebug, `Container "${containerName}" exists, but not started - starting now.`);
+          return await startContainer(containerName, progress);
+        }
+      } else if (status.indexOf('Up') === 0) {
+        if (extraOpts && extraOpts.startFresh) {
+          progress = Log.terminateProgress(progress).infoProgress(this.isDebug, `Container needs to be re-created`);
+          return await removeAndStart(containerName, progress);
+        } else {
+          Log.terminateProgress(progress).info(`Container "${containerName}"" already started.`);
+          return true;
+        }
+      } else if (status.indexOf('Exited') === 0) {
+        if (extraOpts && extraOpts.startFresh) {
+          Log.terminateProgress(progress).info(`Container needs to be re-created`);
+          return await removeAndStart(containerName, progress);
+        } else {
+          Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
+          await runWithoutDebug(`docker start ${containerName}`, this.machineName);
+          return false;
+        }
+      } else {
+        Log.terminateProgress(progress);
+        throw new Error(`Could not start container ${containerName}. Status was "${status}". Should never hit this.`);
+      }
+    } catch (ex) {
+      Log.terminateProgress(progress);
+      throw ex;
     }
 
-    function startContainer(containerName: string, progress: IProgress) {
-      return new Promise((resolve, reject) => {
+    async function removeAndStart(containerName: string, progress: IProgress) {
+      try {
+        await self.remove(containerName);
+        return await startContainer(containerName, progress);
+      } catch (ex) {
+        throw ex;
+      }
+    }
+
+    async function startContainer(containerName: string, progress: IProgress) {
+      try {
         let c = `docker run -d`;
         if (!opts) { opts = {}; }
         c = addOpts(c, opts);
@@ -105,49 +87,41 @@ export class Container extends CommonMethods {
         if (!opts.name) { c = addOpt(c, '--name', containerName); }
         c += ` ${imageName}`;
         if (command) { c += ` ${command}`; }
-        run(c, self.machineName, self.isDebug).then(
-          () => {
-            Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
-            resolve(false);
-          },
-          (err) => {
-            Log.terminateProgress(progress);
-            reject(err);
-          }
-        );
-      });
+        await run(c, self.machineName, self.isDebug);
+        Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
+        return false;
+      } catch (ex) {
+        Log.terminateProgress(progress);
+        throw ex;
+      }
     }
   }
 
-  remove(containerName: string) {
-    return new Promise<boolean>((resolve, reject) => {
+  async remove(containerName: string) {
+    try {
       let c = `docker rm -f ${containerName}`;
-      run(c, this.machineName, this.isDebug).then(
-        () => { resolve(true); },
-        (err) => { reject(err); }
-      );
-    });
+      await run(c, this.machineName, this.isDebug);
+    } catch (ex) {
+      throw ex;
+    }
   }
 
-  status(containerName: string) {
-    return new Promise<string>((resolve, reject) => {
+  async status(containerName: string) {
+    try {
       let c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
-      run(c, this.machineName, this.isDebug).then(
-        (res) => {
-          //console.dir(res);
-          let json = resToJSON(res);
-          let status;
-          for (var i = 0, l = json.length; i < l; i++) {
-            if (json[i]['NAMES'] === containerName) {
-              status = json[i]['STATUS'];
-              break;
-            }
-          }
-          resolve(status);
-        },
-        (err) => { reject(err); }
-      );
-    });
+      let res = await run(c, this.machineName, this.isDebug);
+      let json = resToJSON(res);
+      let status;
+      for (var i = 0, l = json.length; i < l; i++) {
+        if (json[i]['NAMES'] === containerName) {
+          status = json[i]['STATUS'];
+          break;
+        }
+      }
+      return status;
+    } catch (ex) {
+      throw ex;
+    }
   }
 }
 

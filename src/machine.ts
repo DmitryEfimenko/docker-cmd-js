@@ -9,91 +9,76 @@ export class Machine extends CommonMethods {
     super(machineName);
   }
 
-  status() {
-    return new Promise<string>((resolve, reject) => {
-      return run(`docker-machine status ${this.machineName}`, this.machineName, this.isDebug, true).then(
-        (status) => { resolve(status); },
-        (err) => {
-          let validErr = `Host does not exist: "${this.machineName}"`;
-          if (err === `${validErr}\n`) {
-            resolve(validErr);
-          } else {
-            reject(err);
-          }
-        }
-      );
-    });
+  async status() {
+    try {
+      return await run(`docker-machine status ${this.machineName}`, this.machineName, this.isDebug, true);
+    } catch (ex) {
+      let validErr = `Host does not exist: "${this.machineName}"`;
+      if (ex === `${validErr}\n`) {
+        return validErr;
+      } else {
+        throw ex;
+      }
+    }
   }
 
-  ipAddress() {
-    return new Promise<string>((resolve, reject) => {
-      run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true).then(
-        (ip) => {
-          this._ipAddress = ip;
-          resolve(ip);
-        },
-        (err) => { reject(err); }
-      );
-    });
+  async ipAddress() {
+    try {
+      let ip = await run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true);
+      this._ipAddress = ip;
+      return ip;
+    } catch (ex) {
+      throw ex;
+    }
   }
 
-  start(opts?: IStartOpts) {
-    return new Promise((resolve, reject) => {
-      this.runWithoutDebugOnce(this.status()).then(
-        (res) => {
-          if (res !== 'Running') {
-            this.runStartMachine(opts).then(resolve, reject);
-          } else {
-            Log.info(`docker-machine [${this.machineName}] status:`, res);
-            resolve(res);
-          }
-        },
-        (err) => {
-          if (err.indexOf('machine does not exist') > -1) {
-            // machine is in the list, but has error state. Try to remove and re-create it again
-            this.remove().then(
-              () => {
-                this.runStartMachine(opts).then(resolve, reject);
-              },
-              (err) => { reject(err); }
-            );
-          } else {
-            this.runStartMachine(opts).then(resolve, reject);
-          }
-        }
-      );
-    });
+  async start(opts?: IStartOpts) {
+    try {
+      let res = await this.runWithoutDebugOnce(this.status());
+      if (res !== 'Running') {
+        return await this.runStartMachine(opts);
+      } else {
+        Log.info(`docker-machine [${this.machineName}] status:`, res);
+        return res;
+      }
+    } catch (ex) {
+      if (ex.indexOf('machine does not exist') > -1) {
+        await this.remove();
+      }
+      try {
+        return await this.runStartMachine(opts);
+      } catch (ex) {
+        throw ex;
+      }
+    }
   }
 
-  private runStartMachine(opts?: IStartOpts) {
-    return new Promise((resolve, reject) => {
-      let c = `docker-machine create`;
-      if (!opts) { opts = {}; }
-      c = addOpts(c, opts);
-      // set sinsible defaults
-      if (!opts.driver) { c = addOpt(c, '--driver', 'virtualbox'); }
-      if (!opts.virtualboxMemory) { c = addOpt(c, '--virtualbox-memory', '6144'); }
-      if (!opts.virtualboxNoVtxCheck) { c = addOpt(c, '--virtualbox-no-vtx-check'); }
-      c += ` ${this.machineName}`;
+  private async runStartMachine(opts?: IStartOpts) {
+    let c = `docker-machine create`;
+    if (!opts) { opts = {}; }
+    c = addOpts(c, opts);
+    // set sinsible defaults
+    if (!opts.driver) { c = addOpt(c, '--driver', 'virtualbox'); }
+    if (!opts.virtualboxMemory) { c = addOpt(c, '--virtualbox-memory', '6144'); }
+    if (!opts.virtualboxNoVtxCheck) { c = addOpt(c, '--virtualbox-no-vtx-check'); }
+    c += ` ${this.machineName}`;
 
-      let progress = Log.infoProgress(this.isDebug, `Starting VM "${this.machineName}"`);
-      run(c, this.machineName, this.isDebug).then(
-        (resp) => {
-          setEnvironment(this.machineName);
-          Log.terminateProgress(progress);
-          resolve(resp);
-        },
-        (err) => {
-          Log.terminateProgress(progress);
-          if (err.indexOf('Host already exists') === 0) {
-            setEnvironment(this.machineName);
-            resolve();
-          } else {
-            reject(err);
-          }
-        }
-      );
-    });
+    let progress = Log.infoProgress(this.isDebug, `Starting VM "${this.machineName}"`);
+
+    try {
+      let resp = await run(c, this.machineName, this.isDebug);
+      setEnvironment(this.machineName);
+      Log.terminateProgress(progress);
+      return resp;
+    } catch (ex) {
+      Log.terminateProgress(progress);
+      if (ex.indexOf('Host already exists') === 0) {
+        setEnvironment(this.machineName);
+        return;
+      } else {
+        throw ex;
+      }
+    }
   }
 
   remove() {

@@ -1,11 +1,10 @@
 import { CommonMethods } from './commonMethods';
 export declare class Container extends CommonMethods {
     constructor(machineName: string);
-    waitForPort(opts: IWaitForPortOpts): Promise<{}>;
-    private runWaitForPort(opts, progress);
+    waitForPort(opts: IWaitForPortOpts): Promise<void>;
     start(imageName: string, opts?: IStartDockerOpts, command?: string, extraOpts?: IStartExtraOpts): Promise<boolean>;
-    remove(containerName: string): Promise<boolean>;
-    status(containerName: string): Promise<string>;
+    remove(containerName: string): Promise<void>;
+    status(containerName: string): Promise<any>;
 }
 export interface IStartDockerOpts {
     name?: string;

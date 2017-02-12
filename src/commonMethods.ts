@@ -8,20 +8,16 @@ export abstract class CommonMethods {
     return this;
   }
 
-  protected runWithoutDebugOnce<T>(promise: Promise<T>) {
-    return new Promise<T>((resolve, reject) => {
-      let _d = this.isDebug;
+  protected async runWithoutDebugOnce<T>(promise: Promise<T>) {
+    let _d = this.isDebug;
+    try {
       this.isDebug = false;
-      promise.then(
-        (val) => {
-          this.isDebug = _d;
-          resolve(val);
-        },
-        (err) => {
-          this.isDebug = _d;
-          reject(err);
-        }
-      );
-    });
+      let val = await promise;
+      this.isDebug = _d;
+      return val;
+    } catch (ex) {
+      this.isDebug = _d;
+      throw ex;
+    }
   }
 }

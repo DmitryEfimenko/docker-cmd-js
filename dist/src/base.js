@@ -51,10 +51,7 @@ function runSync(command, machineName, _debug) {
 }
 exports.runSync = runSync;
 function runWithoutDebug(command, machineName, noNewLines) {
-    return new Promise((resolve, reject) => {
-        run(command, machineName, false, noNewLines)
-            .then(resolve, reject);
-    });
+    return run(command, machineName, false, noNewLines);
 }
 exports.runWithoutDebug = runWithoutDebug;
 function addOpt(command, optionName, optionVal) {
