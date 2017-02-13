@@ -12,11 +12,11 @@ export class Container extends CommonMethods {
     try {
       if (!opts.retryIntervalMs) { opts.retryIntervalMs = 100; }
       if (!opts.timeoutMs) { opts.timeoutMs = 5000; }
-      let progress = Log.infoProgress(this.isDebug, 'waiting for port', opts.port.toString());
       if (!opts.host) {
         let machine = new Machine(this.machineName);
         opts.host = await machine.ipAddress();
       }
+      let progress = Log.infoProgress(this.isDebug, `waiting for port ${opts.host}:${opts.port} for ${opts.timeoutMs / 1000} s`);
       await tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
       Log.terminateProgress(progress);
     } catch (ex) {

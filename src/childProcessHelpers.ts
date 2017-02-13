@@ -21,7 +21,12 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
   });
 
   r.stderr.on('data', (data) => {
-    if (data.toString().indexOf('SECURITY WARNING:') === -1) {
+    const errorsToSkip = [
+      'SECURITY WARNING:',
+      'Unable to use system certificate pool: crypto/x509: system root pool is not available on Windows'
+    ];
+
+    if (errorsToSkip.every(e => data.toString().indexOf(e) === -1) ) {
       result.stdErr = result.stdErr + data.toString();
       if (debug) {
         Log.warn(`stderr: ${data.toString()}`);

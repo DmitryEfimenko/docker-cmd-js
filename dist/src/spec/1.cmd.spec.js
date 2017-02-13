@@ -1,11 +1,11 @@
 "use strict";
 delete require.cache[require.resolve('../docker-cmd-js')];
 const docker_cmd_js_1 = require('../docker-cmd-js');
+const const_1 = require('./helpers/const');
 describe('Cmd()', () => {
     let cmd;
-    let machineName = 'docker-cmd-js-test';
     beforeAll((done) => {
-        cmd = new docker_cmd_js_1.Cmd(machineName);
+        cmd = new docker_cmd_js_1.Cmd(const_1.machineName);
         cmd.machine.start().then(() => { done(); }, (err) => { done.fail(err); });
     }, 5 * 60 * 1000);
     it('should set up Env', () => {
@@ -13,22 +13,22 @@ describe('Cmd()', () => {
         expect(process.env['DOCKER_HOST']).toBeDefined();
         expect(process.env['DOCKER_CERT_PATH']).toBeDefined();
         expect(process.env['DOCKER_MACHINE_NAME']).toBeDefined();
-        expect(process.env['DOCKER_MACHINE_NAME']).toBe(machineName);
+        expect(process.env['DOCKER_MACHINE_NAME']).toBe(const_1.machineName);
     });
     it('run()', (done) => {
-        cmd.run(`docker-machine status ${machineName}`).then((status) => {
+        cmd.run(`docker-machine status ${const_1.machineName}`).then((status) => {
             expect(status).toBe(`Running\n`);
             done();
         }, (err) => { done.fail(err); });
     });
     it('run() without new lines', (done) => {
-        cmd.run(`docker-machine status ${machineName}`, true).then((status) => {
+        cmd.run(`docker-machine status ${const_1.machineName}`, true).then((status) => {
             expect(status).toBe('Running');
             done();
         }, (err) => { done.fail(err); });
     });
     it('runSync()', () => {
-        let status = cmd.runSync(`docker-machine status ${machineName}`);
+        let status = cmd.runSync(`docker-machine status ${const_1.machineName}`);
         expect(status.stdOut).toBe('Running\n');
         expect(status.stdErr).toBe('');
     });

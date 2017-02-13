@@ -24,11 +24,11 @@ class Container extends commonMethods_1.CommonMethods {
                 if (!opts.timeoutMs) {
                     opts.timeoutMs = 5000;
                 }
-                let progress = base_1.Log.infoProgress(this.isDebug, 'waiting for port', opts.port.toString());
                 if (!opts.host) {
                     let machine = new machine_1.Machine(this.machineName);
                     opts.host = yield machine.ipAddress();
                 }
+                let progress = base_1.Log.infoProgress(this.isDebug, `waiting for port ${opts.host}:${opts.port} for ${opts.timeoutMs / 1000} s`);
                 yield tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
                 base_1.Log.terminateProgress(progress);
             }

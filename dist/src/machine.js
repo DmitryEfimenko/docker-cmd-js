@@ -46,7 +46,11 @@ class Machine extends commonMethods_1.CommonMethods {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let res = yield this.runWithoutDebugOnce(this.status());
-                if (res !== 'Running') {
+                if (res === 'Stopped') {
+                    let c = `docker-machine start ${this.machineName}`;
+                    let resp = yield base_1.run(c, this.machineName, this.isDebug);
+                }
+                else if (res !== 'Running') {
                     return yield this.runStartMachine(opts);
                 }
                 else {
@@ -76,12 +80,12 @@ class Machine extends commonMethods_1.CommonMethods {
             c = base_1.addOpts(c, opts);
             if (!opts.driver) {
                 c = base_1.addOpt(c, '--driver', 'virtualbox');
-            }
-            if (!opts.virtualboxMemory) {
-                c = base_1.addOpt(c, '--virtualbox-memory', '6144');
-            }
-            if (!opts.virtualboxNoVtxCheck) {
-                c = base_1.addOpt(c, '--virtualbox-no-vtx-check');
+                if (!opts.virtualboxMemory) {
+                    c = base_1.addOpt(c, '--virtualbox-memory', '6144');
+                }
+                if (!opts.virtualboxNoVtxCheck) {
+                    c = base_1.addOpt(c, '--virtualbox-no-vtx-check');
+                }
             }
             c += ` ${this.machineName}`;
             let progress = base_1.Log.infoProgress(this.isDebug, `Starting VM "${this.machineName}"`);
