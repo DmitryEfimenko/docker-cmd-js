@@ -22,16 +22,14 @@ describe('cmd.machine', () => {
     );
   });
 
-  it('ipAddress()', (done) => {
-    cmd.machine.ipAddress().then(
-      (ipAddress) => {
-        expect(ipAddress).toBeDefined();
-        expect(cmd.machine._ipAddress).toBe(ipAddress);
-        done();
-      },
-      (err) => {
-        done.fail(err);
-      }
-    );
+  it('ipAddress()', async (done) => {
+    try {
+      const ipAddress = await cmd.machine.ipAddress();
+      expect(ipAddress).toBeDefined();
+      expect(cmd.machine._ipAddress).toBe(ipAddress);
+      done();
+    } catch (ex) {
+      done.fail(ex);
+    }
   });
 });

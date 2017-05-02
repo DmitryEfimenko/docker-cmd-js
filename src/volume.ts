@@ -13,7 +13,7 @@ export class Volume extends CommonMethods {
         if (!opts || !opts.name) {
           throw new Error('You must specify name when using "createOnlyIfMissing" option.');
         }
-        let res = await this.runWithoutDebugOnce(this.inspect(opts.name));
+        const res = await this.runWithoutDebugOnce(this.inspect(opts.name));
         if (res.length > 0) {
           return res[0].Name;
         } else {
@@ -27,17 +27,10 @@ export class Volume extends CommonMethods {
     }
   }
 
-  private runCreate(opts: ICreateVolumeOpts) {
-    let c = 'docker volume create';
-    if (!opts) { opts = {}; }
-    c = addOpts(c, opts);
-    return run(c, this.machineName, this.isDebug);
-  }
-
   async inspect(volumeName) {
     try {
-      let res = await run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug);
-      let json: IInspectVolumeItemResult[] = JSON.parse(res);
+      const res = await run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug);
+      const json: IInspectVolumeItemResult[] = JSON.parse(res);
       return json;
     } catch (ex) {
       if (ex === `Error: No such volume: ${volumeName}\n`) {
@@ -50,6 +43,13 @@ export class Volume extends CommonMethods {
 
   remove(volumeName: string) {
     return run(`docker volume rm ${volumeName}`, this.machineName, this.isDebug);
+  }
+
+  private runCreate(opts: ICreateVolumeOpts) {
+    let c = 'docker volume create';
+    if (!opts) { opts = {}; }
+    c = addOpts(c, opts);
+    return run(c, this.machineName, this.isDebug);
   }
 }
 

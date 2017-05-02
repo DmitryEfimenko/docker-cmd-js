@@ -5,8 +5,8 @@ export declare class Machine extends CommonMethods {
     status(): Promise<string>;
     ipAddress(): Promise<string>;
     start(opts?: IStartOpts): Promise<string>;
-    private runStartMachine(opts?);
     remove(): Promise<string>;
+    private runStartMachine(opts?);
 }
 export interface IStartOpts {
     driver?: string;

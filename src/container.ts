@@ -1,7 +1,7 @@
 import { run, runWithoutDebug, addOpts, addOpt, Log, IProgress, resToJSON } from './base';
 import { Machine } from './machine';
 import { CommonMethods } from './commonMethods';
-var tcpPortUsed = require('tcp-port-used');
+import * as tcpPortUsed from 'tcp-port-used';
 
 export class Container extends CommonMethods {
   constructor(machineName: string) {
@@ -13,10 +13,13 @@ export class Container extends CommonMethods {
       if (!opts.retryIntervalMs) { opts.retryIntervalMs = 100; }
       if (!opts.timeoutMs) { opts.timeoutMs = 5000; }
       if (!opts.host) {
-        let machine = new Machine(this.machineName);
+        const machine = new Machine(this.machineName);
         opts.host = await machine.ipAddress();
       }
-      let progress = Log.infoProgress(this.isDebug, `waiting for port ${opts.host}:${opts.port} for ${opts.timeoutMs / 1000} s`);
+
+      const progress = Log.infoProgress(
+        this.isDebug, `waiting for port ${opts.host}:${opts.port} for ${opts.timeoutMs / 1000} s`);
+
       await tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
       Log.terminateProgress(progress);
     } catch (ex) {
@@ -25,14 +28,16 @@ export class Container extends CommonMethods {
   }
 
   async start(imageName: string, opts?: IStartDockerOpts, command?: string, extraOpts?: IStartExtraOpts) {
-    let self = this;
-    let containerName = (opts && opts.name) ? opts.name : imageName;
+    const self = this;
+    const containerName = (opts && opts.name) ? opts.name : imageName;
     let progress = Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
 
     try {
-      let status = await this.runWithoutDebugOnce(this.status(containerName));
+      const status = await this.runWithoutDebugOnce(this.status(containerName));
       if (status === undefined) {
-        progress = Log.terminateProgress(progress).infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
+        progress = Log.terminateProgress(progress)
+          .infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
+
         return await startContainer(containerName, progress);
       } else if (status === 'Created') {
         if (extraOpts && extraOpts.startFresh) {
@@ -56,7 +61,8 @@ export class Container extends CommonMethods {
           Log.terminateProgress(progress).info(`Container needs to be re-created`);
           return await removeAndStart(containerName, progress);
         } else {
-          Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
+          Log.terminateProgress(progress)
+            .info(`Container "${containerName}"" exists but is not started. Starting now.`);
           await runWithoutDebug(`docker start ${containerName}`, this.machineName);
           return false;
         }
@@ -69,29 +75,29 @@ export class Container extends CommonMethods {
       throw ex;
     }
 
-    async function removeAndStart(containerName: string, progress: IProgress) {
+    async function removeAndStart(contName: string, pr: IProgress) {
       try {
-        await self.remove(containerName);
-        return await startContainer(containerName, progress);
+        await self.remove(contName);
+        return await startContainer(contName, pr);
       } catch (ex) {
         throw ex;
       }
     }
 
-    async function startContainer(containerName: string, progress: IProgress) {
+    async function startContainer(contName: string, pr: IProgress) {
       try {
         let c = `docker run -d`;
         if (!opts) { opts = {}; }
         c = addOpts(c, opts);
         // set sinsible defaults
-        if (!opts.name) { c = addOpt(c, '--name', containerName); }
+        if (!opts.name) { c = addOpt(c, '--name', contName); }
         c += ` ${imageName}`;
         if (command) { c += ` ${command}`; }
         await run(c, self.machineName, self.isDebug);
-        Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
+        Log.terminateProgress(pr).info(`Container "${contName}" started.`);
         return false;
       } catch (ex) {
-        Log.terminateProgress(progress);
+        Log.terminateProgress(pr);
         throw ex;
       }
     }
@@ -99,7 +105,7 @@ export class Container extends CommonMethods {
 
   async remove(containerName: string) {
     try {
-      let c = `docker rm -f ${containerName}`;
+      const c = `docker rm -f ${containerName}`;
       await run(c, this.machineName, this.isDebug);
     } catch (ex) {
       throw ex;
@@ -108,11 +114,11 @@ export class Container extends CommonMethods {
 
   async status(containerName: string) {
     try {
-      let c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
-      let res = await run(c, this.machineName, this.isDebug);
-      let json = resToJSON(res);
+      const c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
+      const res = await run(c, this.machineName, this.isDebug);
+      const json = resToJSON(res);
       let status;
-      for (var i = 0, l = json.length; i < l; i++) {
+      for (let i = 0, l = json.length; i < l; i++) {
         if (json[i]['NAMES'] === containerName) {
           status = json[i]['STATUS'];
           break;

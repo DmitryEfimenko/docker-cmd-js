@@ -1,4 +1,4 @@
-import { RunResult } from './childProcessHelpers';
+import { IRunResult } from './childProcessHelpers';
 import { Machine } from './machine';
 import { Image } from './image';
 import { Container } from './container';
@@ -13,6 +13,6 @@ export declare class Cmd {
     constructor(machineName?: string);
     debug(debugging?: boolean): this;
     run(command: string, noNewLines?: boolean): Promise<string>;
-    runSync(command: string): RunResult;
+    runSync(command: string): IRunResult;
     resToJSON(s: string): any[];
 }

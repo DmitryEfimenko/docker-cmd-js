@@ -2,13 +2,14 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const base_1 = require('./base');
-const commonMethods_1 = require('./commonMethods');
+Object.defineProperty(exports, "__esModule", { value: true });
+const base_1 = require("./base");
+const commonMethods_1 = require("./commonMethods");
 class Volume extends commonMethods_1.CommonMethods {
     constructor(machineName) {
         super(machineName);
@@ -20,7 +21,7 @@ class Volume extends commonMethods_1.CommonMethods {
                     if (!opts || !opts.name) {
                         throw new Error('You must specify name when using "createOnlyIfMissing" option.');
                     }
-                    let res = yield this.runWithoutDebugOnce(this.inspect(opts.name));
+                    const res = yield this.runWithoutDebugOnce(this.inspect(opts.name));
                     if (res.length > 0) {
                         return res[0].Name;
                     }
@@ -37,19 +38,11 @@ class Volume extends commonMethods_1.CommonMethods {
             }
         });
     }
-    runCreate(opts) {
-        let c = 'docker volume create';
-        if (!opts) {
-            opts = {};
-        }
-        c = base_1.addOpts(c, opts);
-        return base_1.run(c, this.machineName, this.isDebug);
-    }
     inspect(volumeName) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let res = yield base_1.run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug);
-                let json = JSON.parse(res);
+                const res = yield base_1.run(`docker volume inspect ${volumeName}`, this.machineName, this.isDebug);
+                const json = JSON.parse(res);
                 return json;
             }
             catch (ex) {
@@ -64,6 +57,14 @@ class Volume extends commonMethods_1.CommonMethods {
     }
     remove(volumeName) {
         return base_1.run(`docker volume rm ${volumeName}`, this.machineName, this.isDebug);
+    }
+    runCreate(opts) {
+        let c = 'docker volume create';
+        if (!opts) {
+            opts = {};
+        }
+        c = base_1.addOpts(c, opts);
+        return base_1.run(c, this.machineName, this.isDebug);
     }
 }
 exports.Volume = Volume;

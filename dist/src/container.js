@@ -2,15 +2,16 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const base_1 = require('./base');
-const machine_1 = require('./machine');
-const commonMethods_1 = require('./commonMethods');
-var tcpPortUsed = require('tcp-port-used');
+Object.defineProperty(exports, "__esModule", { value: true });
+const base_1 = require("./base");
+const machine_1 = require("./machine");
+const commonMethods_1 = require("./commonMethods");
+const tcpPortUsed = require("tcp-port-used");
 class Container extends commonMethods_1.CommonMethods {
     constructor(machineName) {
         super(machineName);
@@ -25,10 +26,10 @@ class Container extends commonMethods_1.CommonMethods {
                     opts.timeoutMs = 5000;
                 }
                 if (!opts.host) {
-                    let machine = new machine_1.Machine(this.machineName);
+                    const machine = new machine_1.Machine(this.machineName);
                     opts.host = yield machine.ipAddress();
                 }
-                let progress = base_1.Log.infoProgress(this.isDebug, `waiting for port ${opts.host}:${opts.port} for ${opts.timeoutMs / 1000} s`);
+                const progress = base_1.Log.infoProgress(this.isDebug, `waiting for port ${opts.host}:${opts.port} for ${opts.timeoutMs / 1000} s`);
                 yield tcpPortUsed.waitUntilUsedOnHost(opts.port, opts.host, opts.retryIntervalMs, opts.timeoutMs);
                 base_1.Log.terminateProgress(progress);
             }
@@ -39,13 +40,14 @@ class Container extends commonMethods_1.CommonMethods {
     }
     start(imageName, opts, command, extraOpts) {
         return __awaiter(this, void 0, void 0, function* () {
-            let self = this;
-            let containerName = (opts && opts.name) ? opts.name : imageName;
+            const self = this;
+            const containerName = (opts && opts.name) ? opts.name : imageName;
             let progress = base_1.Log.infoProgress(this.isDebug, `Checking if container "${containerName}" needs to be started`);
             try {
-                let status = yield this.runWithoutDebugOnce(this.status(containerName));
+                const status = yield this.runWithoutDebugOnce(this.status(containerName));
                 if (status === undefined) {
-                    progress = base_1.Log.terminateProgress(progress).infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
+                    progress = base_1.Log.terminateProgress(progress)
+                        .infoProgress(this.isDebug, `Creating and starting container "${containerName}"`);
                     return yield startContainer(containerName, progress);
                 }
                 else if (status === 'Created') {
@@ -75,7 +77,8 @@ class Container extends commonMethods_1.CommonMethods {
                         return yield removeAndStart(containerName, progress);
                     }
                     else {
-                        base_1.Log.terminateProgress(progress).info(`Container "${containerName}"" exists but is not started. Starting now.`);
+                        base_1.Log.terminateProgress(progress)
+                            .info(`Container "${containerName}"" exists but is not started. Starting now.`);
                         yield base_1.runWithoutDebug(`docker start ${containerName}`, this.machineName);
                         return false;
                     }
@@ -89,18 +92,18 @@ class Container extends commonMethods_1.CommonMethods {
                 base_1.Log.terminateProgress(progress);
                 throw ex;
             }
-            function removeAndStart(containerName, progress) {
+            function removeAndStart(contName, pr) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
-                        yield self.remove(containerName);
-                        return yield startContainer(containerName, progress);
+                        yield self.remove(contName);
+                        return yield startContainer(contName, pr);
                     }
                     catch (ex) {
                         throw ex;
                     }
                 });
             }
-            function startContainer(containerName, progress) {
+            function startContainer(contName, pr) {
                 return __awaiter(this, void 0, void 0, function* () {
                     try {
                         let c = `docker run -d`;
@@ -109,18 +112,18 @@ class Container extends commonMethods_1.CommonMethods {
                         }
                         c = base_1.addOpts(c, opts);
                         if (!opts.name) {
-                            c = base_1.addOpt(c, '--name', containerName);
+                            c = base_1.addOpt(c, '--name', contName);
                         }
                         c += ` ${imageName}`;
                         if (command) {
                             c += ` ${command}`;
                         }
                         yield base_1.run(c, self.machineName, self.isDebug);
-                        base_1.Log.terminateProgress(progress).info(`Container "${containerName}" started.`);
+                        base_1.Log.terminateProgress(pr).info(`Container "${contName}" started.`);
                         return false;
                     }
                     catch (ex) {
-                        base_1.Log.terminateProgress(progress);
+                        base_1.Log.terminateProgress(pr);
                         throw ex;
                     }
                 });
@@ -130,7 +133,7 @@ class Container extends commonMethods_1.CommonMethods {
     remove(containerName) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let c = `docker rm -f ${containerName}`;
+                const c = `docker rm -f ${containerName}`;
                 yield base_1.run(c, this.machineName, this.isDebug);
             }
             catch (ex) {
@@ -141,11 +144,11 @@ class Container extends commonMethods_1.CommonMethods {
     status(containerName) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
-                let res = yield base_1.run(c, this.machineName, this.isDebug);
-                let json = base_1.resToJSON(res);
+                const c = `docker ps -a --filter name=${containerName} --format "table {{.Names}}\t{{.Status}}"`;
+                const res = yield base_1.run(c, this.machineName, this.isDebug);
+                const json = base_1.resToJSON(res);
                 let status;
-                for (var i = 0, l = json.length; i < l; i++) {
+                for (let i = 0, l = json.length; i < l; i++) {
                     if (json[i]['NAMES'] === containerName) {
                         status = json[i]['STATUS'];
                         break;

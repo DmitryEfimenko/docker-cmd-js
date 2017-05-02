@@ -1,5 +1,5 @@
 import colors = require('colors');
-import { spawn, spawnSync, RunResult } from './childProcessHelpers';
+import { spawn, spawnSync, IRunResult } from './childProcessHelpers';
 import { setEnvironment } from './environment';
 
 export function run(command: string, machineName: string, _debug: boolean, noNewLines?: boolean): Promise<string> {
@@ -71,9 +71,9 @@ export function addOpt(command: string, optionName: string, optionVal?: string |
 }
 
 export function addOpts(command: string, opts: any) {
-  for (let prop in opts) {
+  for (const prop in opts) {
     if (opts.hasOwnProperty(prop)) {
-      let optName = getOptionName(prop);
+      const optName = getOptionName(prop);
       if (opts[prop] !== undefined) {
         command = addOpt(command, optName, opts[prop]);
       } else {
@@ -85,19 +85,19 @@ export function addOpts(command: string, opts: any) {
 }
 
 function getOptionName(opt: string) {
-    let arr = opt.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1);
-    arr.forEach((v, i, arr) => { arr[i] = arr[i].toLowerCase(); });
+    const arr = opt.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1);
+    arr.forEach((v, i, a) => { a[i] = a[i].toLowerCase(); });
     return '--' + arr.join('-');
 }
 
 export function resToJSON(s: string): any[] {
-  let lines = s.split('\n').filter((val) => val !== '');
-  let headerLine = lines.shift();
-  let arr = headerLine.split(' ');
-  let cols: { name: string, length: number }[] = [];
+  const lines = s.split('\n').filter((val) => val !== '');
+  const headerLine = lines.shift();
+  const arr = headerLine.split(' ');
+  const cols: { name: string, length: number }[] = [];
   for (let i = 0, l = arr.length; i < l; i++) {
     if (arr[i] !== '') {
-      let col = { name: arr[i], length: arr[i].length };
+      const col = { name: arr[i], length: arr[i].length };
       if (arr[i + 1] !== undefined && arr[i + 1] !== '') {
         col.name = col.name + ' ' + arr[i + 1];
         col.length = col.length + arr[i + 1].length + 1;
@@ -109,9 +109,9 @@ export function resToJSON(s: string): any[] {
     }
   }
 
-  let result = [];
+  const result = [];
   for (let i = 0, l = lines.length; i < l; i++) {
-    let obj = {};
+    const obj = {};
     for (let c = 0, cl = cols.length; c < cl; c++) {
       if (c === cols.length - 1) {
         // last col
@@ -154,11 +154,11 @@ export class Log {
 
   static infoProgress(debug: boolean, ...message: string[]): IProgress {
     let c = '\\';
-    let m = `${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))}`;
+    const m = `${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))}`;
 
     if (!debug) {
       process.stdout.write(`${m} ${c}\r`);
-      let interval = setInterval(() => {
+      const interval = setInterval(() => {
         if (c === '\\') {
           c = '/';
         } else if (c === '/') {
@@ -168,7 +168,7 @@ export class Log {
         }
         process.stdout.write(`${m} ${c}\r`);
       }, 300);
-      return { interval: interval, message: m };
+      return { interval, message: m };
     } else {
       process.stdout.write(m);
       return { interval: undefined, message: m };
@@ -177,7 +177,7 @@ export class Log {
 
   static terminateProgress(progress: IProgress) {
     if (progress.interval) { clearInterval(progress.interval); }
-    (<any>process.stdout).clearLine();
+    (process.stdout as any).clearLine();
     process.stdout.write(progress.message + ' - done');
     this.newLine();
     return this;

@@ -1,8 +1,8 @@
 import { spawnSync } from './childProcessHelpers';
 
 export function setEnvironment(machineName) {
-  let envTxt = spawnSync(`docker-machine env ${machineName} --shell cmd`, process.env, false).stdOut;
-  let lines = envTxt.split('\n');
+  const envTxt = spawnSync(`docker-machine env ${machineName} --shell cmd`, process.env, false).stdOut;
+  const lines = envTxt.split('\n');
   for (let i = 0; i < lines.length; i++) {
     if (!isEnvironmentVariableLine(lines[i])) {
       continue;
@@ -17,6 +17,6 @@ function isEnvironmentVariableLine(line: string): boolean {
 
 function addEnvironmentKeyValueToObject(line: string): void {
   line = line.substr(4);
-  let kvp = line.split('=');
+  const kvp = line.split('=');
   process.env[kvp[0]] = kvp[1];
 }

@@ -13,7 +13,7 @@ export class Machine extends CommonMethods {
     try {
       return await run(`docker-machine status ${this.machineName}`, this.machineName, this.isDebug, true);
     } catch (ex) {
-      let validErr = `Host does not exist: "${this.machineName}"`;
+      const validErr = `Host does not exist: "${this.machineName}"`;
       if (ex === `${validErr}\n`) {
         return validErr;
       } else {
@@ -24,7 +24,7 @@ export class Machine extends CommonMethods {
 
   async ipAddress() {
     try {
-      let ip = await run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true);
+      const ip = await run(`docker-machine ip ${this.machineName}`, this.machineName, this.isDebug, true);
       this._ipAddress = ip;
       return ip;
     } catch (ex) {
@@ -34,10 +34,10 @@ export class Machine extends CommonMethods {
 
   async start(opts?: IStartOpts) {
     try {
-      let res = await this.runWithoutDebugOnce(this.status());
+      const res = await this.runWithoutDebugOnce(this.status());
       if (res === 'Stopped') {
-        let c = `docker-machine start ${this.machineName}`;
-        let resp = await run(c, this.machineName, this.isDebug);
+        const c = `docker-machine start ${this.machineName}`;
+        const resp = await run(c, this.machineName, this.isDebug);
       } else if (res !== 'Running') {
         return await this.runStartMachine(opts);
       } else {
@@ -56,23 +56,31 @@ export class Machine extends CommonMethods {
     }
   }
 
+  remove() {
+    return run(`docker-machine rm -f ${this.machineName}`, this.machineName, this.isDebug);
+  }
+
   private async runStartMachine(opts?: IStartOpts) {
     let c = `docker-machine create`;
     if (!opts) { opts = {}; }
+    if (!opts.driver) {
+      opts.driver = 'hyperv'; // virtualbox
+      // opts.driver = 'virtualbox';
+    }
     c = addOpts(c, opts);
     // set sinsible defaults
-    if (!opts.driver) {
-      c = addOpt(c, '--driver', 'virtualbox'/*'hyperv'*/);
-    //} else if (opts.driver === 'virtualbox') {
+
+    if (opts.driver === 'virtualbox') {
       if (!opts.virtualboxMemory) { c = addOpt(c, '--virtualbox-memory', '6144'); }
       if (!opts.virtualboxNoVtxCheck) { c = addOpt(c, '--virtualbox-no-vtx-check'); }
     }
+
     c += ` ${this.machineName}`;
 
-    let progress = Log.infoProgress(this.isDebug, `Starting VM "${this.machineName}"`);
+    const progress = Log.infoProgress(this.isDebug, `Starting VM "${this.machineName}"`);
 
     try {
-      let resp = await run(c, this.machineName, this.isDebug);
+      const resp = await run(c, this.machineName, this.isDebug);
       setEnvironment(this.machineName);
       Log.terminateProgress(progress);
       return resp;
@@ -85,10 +93,6 @@ export class Machine extends CommonMethods {
         throw ex;
       }
     }
-  }
-
-  remove() {
-    return run(`docker-machine rm -f ${this.machineName}`, this.machineName, this.isDebug);
   }
 }
 

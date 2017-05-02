@@ -1,2 +1,3 @@
 "use strict";
-exports.machineName = 'default';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.machineName = 'test2';

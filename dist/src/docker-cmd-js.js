@@ -1,9 +1,10 @@
 "use strict";
-const base_1 = require('./base');
-const machine_1 = require('./machine');
-const image_1 = require('./image');
-const container_1 = require('./container');
-const volume_1 = require('./volume');
+Object.defineProperty(exports, "__esModule", { value: true });
+const base_1 = require("./base");
+const machine_1 = require("./machine");
+const image_1 = require("./image");
+const container_1 = require("./container");
+const volume_1 = require("./volume");
 class Cmd {
     constructor(machineName) {
         this.machineName = machineName !== undefined ? machineName : 'default';

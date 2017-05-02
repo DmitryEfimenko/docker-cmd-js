@@ -5,7 +5,7 @@ import { machineName } from './helpers/const';
 
 describe('cmd.volume', () => {
   let cmd: Cmd;
-  let testVolName = 'testVol';
+  const testVolName = 'testVol';
 
   beforeAll(() => {
     cmd = new Cmd(machineName);

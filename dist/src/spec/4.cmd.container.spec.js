@@ -2,22 +2,23 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 delete require.cache[require.resolve('../docker-cmd-js')];
-const path = require('path');
-const const_1 = require('./helpers/const');
-var tcpPortUsed = require('tcp-port-used');
-const docker_cmd_js_1 = require('../docker-cmd-js');
-const image_1 = require('../image');
+const path = require("path");
+const const_1 = require("./helpers/const");
+const tcpPortUsed = require("tcp-port-used");
+const docker_cmd_js_1 = require("../docker-cmd-js");
+const image_1 = require("../image");
 describe('cmd.container', () => {
     let cmd;
     beforeAll((done) => {
         cmd = new docker_cmd_js_1.Cmd(const_1.machineName);
-        let f = path.join(__dirname, 'mysql', 'Dockerfile');
+        const f = path.join(__dirname, 'mysql', 'Dockerfile');
         cmd.image.build('docker_cmd_js_mysql', { file: f }, undefined, image_1.ImageBuildType.buildOnlyIfMissing).then(() => { done(); }, (err) => { done.fail(err); });
     }, 2 * 60 * 1000);
     afterAll((done) => {
@@ -30,7 +31,7 @@ describe('cmd.container', () => {
         cmd.container.start('docker_cmd_js_mysql', { publish: '3306:3306' }).then((wasStarted) => {
             expect(wasStarted).toBeFalsy();
             cmd.run('docker ps').then((res) => {
-                let containers = cmd.resToJSON(res);
+                const containers = cmd.resToJSON(res);
                 expect(containers.length).toBeGreaterThan(0);
                 expect(containers[0]['NAMES']).toBe('docker_cmd_js_mysql');
                 done();
@@ -59,12 +60,11 @@ describe('cmd.container', () => {
             yield cmd.container.start('docker_cmd_js_mysql', { publish: '3306:3306' });
             const ip = yield cmd.machine.ipAddress();
             try {
-                let inUse = yield tcpPortUsed.check(3306, ip);
+                const inUse = yield tcpPortUsed.check(3306, ip);
                 done();
             }
             catch (ex) {
                 yield cmd.container.waitForPort({ port: 3306, timeoutMs: 1 * 60 * 1000 });
-                console.log('after waitForPort');
                 const inUse = yield tcpPortUsed.check(3306, ip);
                 expect(inUse).toBe(true);
                 done();

@@ -1,1 +1,1 @@
-export declare const machineName: string;
+export declare const machineName = "test2";

@@ -11,32 +11,32 @@ describe('cmd.image', () => {
     cmd = new Cmd(machineName);
   });
 
-  it('build()', (done) => {
-    cmd.image.build('docker_cmd_js_mysql', { file: path.join(__dirname, 'mysql', 'Dockerfile') }).then(
-      () => {
-        done();
-      },
-      (err) => {
-        done.fail(err);
-      }
-    );
+  it('build()', async (done) => {
+    try {
+      await cmd.image.build('docker_cmd_js_mysql', {
+        file: path.join(__dirname, 'mysql', 'Dockerfile')
+      });
+      done();
+    } catch (ex) {
+      done.fail(ex);
+    }
   }, 2 * 60 * 1000);
 
-  it('build() and replace', (done) => {
-    cmd.image.build('docker_cmd_js_mysql', { file: path.join(__dirname, 'mysql', 'Dockerfile') }).then(
-      () => {
-        done();
-      },
-      (err) => {
-        done.fail(err);
-      }
-    );
+  it('build() and replace', async (done) => {
+    try {
+      await cmd.image.build('docker_cmd_js_mysql', {
+        file: path.join(__dirname, 'mysql', 'Dockerfile')
+      });
+      done();
+    } catch (ex) {
+      done.fail(ex);
+    }
   });
 
   it('resToJSON()', (done) => {
     cmd.run('docker images').then(
       (res) => {
-        let images = cmd.resToJSON(res);
+        const images = cmd.resToJSON(res);
         expect(images.length).toBeGreaterThan(0);
         expect(images[0]['REPOSITORY']).toBeDefined();
         expect(images[0]['TAG']).toBeDefined();

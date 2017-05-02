@@ -1,16 +1,17 @@
 "use strict";
-const child_process = require('child_process');
-const colors = require('colors');
-const base_1 = require('./base');
+Object.defineProperty(exports, "__esModule", { value: true });
+const child_process = require("child_process");
+const colors = require("colors");
+const base_1 = require("./base");
 function spawn(command, env, debug, cb) {
-    var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g);
+    const items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g);
     items.forEach((val, i, arr) => {
         if (val[0] === '"' && val[val.length - 1] === '"') {
             arr[i] = val.substr(1, val.length - 2);
         }
     });
-    let r = child_process.spawn(items[0], items.slice(1), { env: env });
-    let result = { stdOut: '', stdErr: '' };
+    const r = child_process.spawn(items[0], items.slice(1), { env });
+    const result = { stdOut: '', stdErr: '' };
     r.stdout.on('data', (data) => {
         result.stdOut = result.stdOut + data.toString();
         if (debug) {
@@ -47,13 +48,13 @@ function spawn(command, env, debug, cb) {
 }
 exports.spawn = spawn;
 function spawnSync(command, env, debug) {
-    var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g);
+    const items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g);
     items.forEach((val, i, arr) => {
         if (val[0] === '"' && val[val.length - 1] === '"') {
             arr[i] = val.substr(1, val.length - 2);
         }
     });
-    let r = child_process.spawnSync(items[0], items.slice(1), { env: env });
+    const r = child_process.spawnSync(items[0], items.slice(1), { env });
     if (debug) {
         if (r.stdout) {
             base_1.Log.info('stdout:');
@@ -65,8 +66,8 @@ function spawnSync(command, env, debug) {
         }
     }
     return {
-        stdOut: r.stdout ? r.stdout.toString() : '',
-        stdErr: r.stderr ? r.stderr.toString() : ''
+        stdErr: r.stderr ? r.stderr.toString() : '',
+        stdOut: r.stdout ? r.stdout.toString() : ''
     };
 }
 exports.spawnSync = spawnSync;

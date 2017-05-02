@@ -1,24 +1,24 @@
 import * as gulp from 'gulp';
-import * as path  from 'path';
+import * as path from 'path';
 import * as del from 'del';
 import * as colors from 'colors';
-var failFast = require('jasmine-fail-fast');
-var TerminalReporter = require('jasmine-terminal-reporter');
-var $ = require('gulp-load-plugins')();
+import * as failFast from 'jasmine-fail-fast';
+import * as TerminalReporter from 'jasmine-terminal-reporter';
+import * as plugins from 'gulp-load-plugins';
+const $ = plugins();
 
-let typesPath = './node_modules/@types/**/*.d.ts';
+const typesPath = './node_modules/@types/**/*.d.ts';
 
-gulp.task('clean', function (cb) {
+gulp.task('clean', (cb) => {
   del(['dist/']).then(path => { cb(); });
 });
 
-
 gulp.task('compile', () => {
-  var tsProject = $.typescript.createProject('./tsconfig.json', {
+  const tsProject = $.typescript.createProject('./tsconfig.json', {
     removeComments: true
   });
 
-  var tsResult = gulp.src(['./src/**/*.ts'])
+  const tsResult = gulp.src(['./src/**/*.ts'])
     .pipe(tsProject());
 
   tsResult.dts
@@ -28,58 +28,63 @@ gulp.task('compile', () => {
     .pipe(gulp.dest('./dist/src'));
 });
 
-gulp.task('copy-dockerfiles', function () {
+gulp.task('copy-dockerfiles', () => {
   return gulp.src(['./src/spec/**/*.sh', './src/spec/**/!(*.ts)'])
     .pipe(gulp.dest('./dist/src/spec'));
 });
 
 gulp.task('test', () => {
-  var terminalReporter = new TerminalReporter({ isVerbose: true, showColors: true, includeStackTrace: false });
+  const terminalReporter = new TerminalReporter({ isVerbose: true, showColors: true, includeStackTrace: false });
 
   return gulp.src('./dist/src/spec/*.js')
     .pipe($.jasmine({
-      reporter: [terminalReporter],
-      config: { spec_dir: 'spec', helpers: ['./helpers/**/*.js'] }
+      config: { spec_dir: 'spec', helpers: ['./helpers/**/*.js'] },
+      reporter: [terminalReporter]
     }))
     .on('error', swallowError)
     .on('end', addSpaces);
 });
 
-gulp.task('ts-lint', function () {
+gulp.task('lint', () => {
   return gulp.src('./src/**/*.ts')
     .pipe($.tslint())
-    .pipe($.tslint.report('full', { emitError: false }));
+    .pipe($.tslint.report({ emitError: false }));
 });
 
 gulp.task('watch', () => {
-  (<any>gulp).watch('./src/**/*.ts').on('change', tsLintFile);
-  (<any>gulp).watch('./src/**/*.ts').on('change', compileFile);
-  (<any>gulp).watch('./dist/src/spec/**/*.js').on('change', runTestFile);
+  (gulp as any).watch('./src/**/*.ts').on('change', tsLintFile);
+  (gulp as any).watch('./src/**/*.ts').on('change', compileFile);
+  (gulp as any).watch('./dist/src/spec/**/*.js').on('change', runTestFile);
 });
 
-gulp.task('build', (<any>gulp).series('clean', 'compile', 'copy-dockerfiles'));
+gulp.task('build', (gulp as any).series('clean', 'compile', 'copy-dockerfiles'));
 
-gulp.task('default', (<any>gulp).series('build', 'test', 'ts-lint'));
+gulp.task('default', (gulp as any).series('build', 'test', 'lint'));
 
 function tsLintFile(file) {
   console.log(colors.yellow('[gulp watch - tsLint]' + ' ' + colors.cyan(file)));
   gulp.src(file)
     .pipe($.tslint())
-    .pipe($.tslint.report('full', { emitError: false }));
+    .pipe($.tslint.report({ emitError: false }));
 }
 
-function compileFile(file) {
+function compileFile(file: string) {
   console.log(colors.yellow('[gulp watch - compileFile]' + ' ' + colors.cyan(file)));
-  var tsProject = $.typescript.createProject('./tsconfig.json', {
+  const tsProject = $.typescript.createProject('./tsconfig.json', {
+    noResolve: false,
     removeComments: true,
-    noResolve: false
+    rootDir: path.join(__dirname)
   });
 
-  var tsResult = gulp.src([file, typesPath])
+  const tsResult = gulp.src([file, typesPath])
     .pipe(tsProject());
 
+  const sections = file.split('\\');
+  sections.pop();
+  const dest = sections.join('\\');
+
   return tsResult.js
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest(path.join(__dirname, 'dist', dest)));
 }
 
 function runTestFile(file) {
@@ -97,7 +102,7 @@ function swallowError(error) {
 
 function addSpaces() {
   console.log('################################################################################');
-  for (var i = 0; i < 5; i++) {
+  for (let i = 0; i < 5; i++) {
     console.log('');
   }
 }

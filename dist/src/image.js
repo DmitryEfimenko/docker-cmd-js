@@ -2,14 +2,15 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const inquirer = require('inquirer');
-const base_1 = require('./base');
-const commonMethods_1 = require('./commonMethods');
+Object.defineProperty(exports, "__esModule", { value: true });
+const inquirer = require("inquirer");
+const base_1 = require("./base");
+const commonMethods_1 = require("./commonMethods");
 class Image extends commonMethods_1.CommonMethods {
     constructor(machineName) {
         super(machineName);
@@ -20,7 +21,7 @@ class Image extends commonMethods_1.CommonMethods {
                 buildType = ImageBuildType.regularBuild;
             }
             try {
-                let img = yield base_1.runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, this.machineName, true);
+                const img = yield base_1.runWithoutDebug(`docker images --format {{.Repository}} ${imageName}`, this.machineName, true);
                 if (img === imageName) {
                     if (buildType === ImageBuildType.regularBuild) {
                         return yield this.runBuildImage(imageName, opts, pathOrUrl);
@@ -33,18 +34,18 @@ class Image extends commonMethods_1.CommonMethods {
                         return undefined;
                     }
                     else {
-                        let promptChoices = {
-                            regularBuild: 'Regular build (using cache)',
+                        const promptChoices = {
                             freshBuild: 'Fresh build (remove cache)',
-                            noBuild: 'Don not build'
+                            noBuild: 'Don not build',
+                            regularBuild: 'Regular build (using cache)'
                         };
-                        let promptOpts = {
-                            type: 'list',
-                            name: 'opts',
+                        const promptOpts = {
+                            choices: [promptChoices.regularBuild, promptChoices.freshBuild, promptChoices.noBuild],
                             message: `Image "${imageName}" already exists. What would you like to do?`,
-                            choices: [promptChoices.regularBuild, promptChoices.freshBuild, promptChoices.noBuild]
+                            name: 'opts',
+                            type: 'list',
                         };
-                        let answers = yield inquirer.prompt(promptOpts);
+                        const answers = yield inquirer.prompt(promptOpts);
                         if (answers.opts === promptChoices.regularBuild) {
                             return yield this.runBuildImage(imageName, opts, pathOrUrl);
                         }
@@ -72,20 +73,20 @@ class Image extends commonMethods_1.CommonMethods {
     checkForDangling() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let result = yield base_1.runWithoutDebug('docker images --filter dangling=true', this.machineName);
-                var images = base_1.resToJSON(result);
+                const result = yield base_1.runWithoutDebug('docker images --filter dangling=true', this.machineName);
+                const images = base_1.resToJSON(result);
                 if (images.length > 0) {
-                    let promptOpts = {
-                        type: 'list',
-                        name: 'remove',
+                    const promptOpts = {
+                        choices: ['Yes', 'No'],
                         message: 'Found dangling images. Would you like to remove them?',
-                        choices: ['Yes', 'No']
+                        name: 'remove',
+                        type: 'list'
                     };
-                    let answers = yield inquirer.prompt(promptOpts);
+                    const answers = yield inquirer.prompt(promptOpts);
                     if (answers.remove === 'Yes') {
-                        let promises = [];
-                        for (var i = 0, l = images.length; i < l; i++) {
-                            let p = this.remove(images[i]['IMAGE ID']);
+                        const promises = [];
+                        for (let i = 0, l = images.length; i < l; i++) {
+                            const p = this.remove(images[i]['IMAGE ID']);
                             promises.push(p);
                         }
                         yield Promise.all(promises);
@@ -106,7 +107,7 @@ class Image extends commonMethods_1.CommonMethods {
             }
             c = base_1.addOpts(c, opts);
             c += pathOrUrl ? ` ${pathOrUrl}` : ' .';
-            let progress = base_1.Log.infoProgress(this.isDebug, `Building image ${imageName}`);
+            const progress = base_1.Log.infoProgress(this.isDebug, `Building image ${imageName}`);
             try {
                 yield base_1.run(c, this.machineName, this.isDebug);
                 base_1.Log.terminateProgress(progress).info(`Image ${imageName} built`);
@@ -126,9 +127,9 @@ class Image extends commonMethods_1.CommonMethods {
     }
 }
 exports.Image = Image;
+var ImageBuildType;
 (function (ImageBuildType) {
     ImageBuildType[ImageBuildType["regularBuild"] = 0] = "regularBuild";
     ImageBuildType[ImageBuildType["freshBuild"] = 1] = "freshBuild";
     ImageBuildType[ImageBuildType["buildOnlyIfMissing"] = 2] = "buildOnlyIfMissing";
-})(exports.ImageBuildType || (exports.ImageBuildType = {}));
-var ImageBuildType = exports.ImageBuildType;
+})(ImageBuildType = exports.ImageBuildType || (exports.ImageBuildType = {}));

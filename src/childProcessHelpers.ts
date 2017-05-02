@@ -2,16 +2,16 @@ import child_process = require('child_process');
 import colors = require('colors');
 import { Log } from './base';
 
-export function spawn(command: string, env, debug: boolean, cb: (result: RunResult) => void) {
-  var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g); // in case we need to have quoted args
+export function spawn(command: string, env, debug: boolean, cb: (result: IRunResult) => void) {
+  const items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g); // in case we need to have quoted args
   items.forEach((val, i, arr) => {
     if (val[0] === '"' && val[val.length - 1] === '"') {
       arr[i] = val.substr(1, val.length - 2);
     }
   });
 
-  let r = child_process.spawn(items[0], items.slice(1), { env: env });
-  let result = { stdOut: '', stdErr: '' };
+  const r = child_process.spawn(items[0], items.slice(1), { env });
+  const result = { stdOut: '', stdErr: '' };
 
   r.stdout.on('data', (data) => {
     result.stdOut = result.stdOut + data.toString();
@@ -39,7 +39,7 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
     if (err && err.message) {
       console.log(err);
     } else {
-      process.stdout.write(err);
+      process.stdout.write(err as any);
     }
   });
 
@@ -51,15 +51,15 @@ export function spawn(command: string, env, debug: boolean, cb: (result: RunResu
   });
 }
 
-export function spawnSync(command: string, env, debug: boolean): RunResult {
-  var items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g); // in case we need to have quoted args
+export function spawnSync(command: string, env, debug: boolean): IRunResult {
+  const items = command.match(/[^\s"']+|"[^"]*"|'[^']*/g); // in case we need to have quoted args
   items.forEach((val, i, arr) => {
     if (val[0] === '"' && val[val.length - 1] === '"') {
       arr[i] = val.substr(1, val.length - 2);
     }
   });
 
-  let r = child_process.spawnSync(items[0], items.slice(1), { env: env });
+  const r = child_process.spawnSync(items[0], items.slice(1), { env });
   if (debug) {
     if (r.stdout) {
       Log.info('stdout:');
@@ -71,12 +71,12 @@ export function spawnSync(command: string, env, debug: boolean): RunResult {
     }
   }
   return {
-    stdOut: r.stdout ? r.stdout.toString() : '',
-    stdErr: r.stderr ? r.stderr.toString() : ''
+    stdErr: r.stderr ? r.stderr.toString() : '',
+    stdOut: r.stdout ? r.stdout.toString() : ''
   };
 }
 
-export interface RunResult {
+export interface IRunResult {
   stdOut: string;
   stdErr: string;
 }

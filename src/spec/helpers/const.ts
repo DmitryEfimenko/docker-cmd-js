@@ -1,1 +1,1 @@
-export const machineName = 'default'; // docker-cmd-js-test
+export const machineName = 'test2'; // docker-cmd-js-test

@@ -1,7 +1,7 @@
 export abstract class CommonMethods {
-  constructor(public machineName: string) { }
-
   protected isDebug: boolean;
+
+  constructor(public machineName: string) { }
 
   public debug(debugging?: boolean) {
     this.isDebug = (debugging === undefined || debugging === true) ? true : false;
@@ -9,10 +9,10 @@ export abstract class CommonMethods {
   }
 
   protected async runWithoutDebugOnce<T>(promise: Promise<T>) {
-    let _d = this.isDebug;
+    const _d = this.isDebug;
     try {
       this.isDebug = false;
-      let val = await promise;
+      const val = await promise;
       this.isDebug = _d;
       return val;
     } catch (ex) {

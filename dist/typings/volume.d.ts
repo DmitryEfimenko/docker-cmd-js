@@ -1,10 +1,10 @@
 import { CommonMethods } from './commonMethods';
 export declare class Volume extends CommonMethods {
     constructor(machineName: string);
-    create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Promise<any>;
-    private runCreate(opts);
-    inspect(volumeName: any): Promise<any[]>;
+    create(opts?: ICreateVolumeOpts, advOpts?: ICreateVolumeAdvOpts): Promise<string>;
+    inspect(volumeName: any): Promise<IInspectVolumeItemResult[]>;
     remove(volumeName: string): Promise<string>;
+    private runCreate(opts);
 }
 export interface IInspectVolumeItemResult {
     Name: string;

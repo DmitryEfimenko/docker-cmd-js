@@ -6,12 +6,17 @@ import { machineName } from './helpers/const';
 describe('Cmd()', () => {
   let cmd: Cmd;
 
-  beforeAll((done) => {
+  beforeAll(() => {
     cmd = new Cmd(machineName);
-    cmd.machine.start().then(
-      () => { done(); },
-      (err) => { done.fail(err); }
-    );
+  });
+
+  fit('machine.start()', async (done) => {
+    try {
+      await cmd.machine.start();
+      done();
+    } catch (ex) {
+      done.fail(ex);
+    }
   }, 5 * 60 * 1000); // 5 minutes
 
   it('should set up Env', () => {
@@ -44,7 +49,7 @@ describe('Cmd()', () => {
   });
 
   it('runSync()', () => {
-    let status = cmd.runSync(`docker-machine status ${machineName}`);
+    const status = cmd.runSync(`docker-machine status ${machineName}`);
     expect(status.stdOut).toBe('Running\n');
     expect(status.stdErr).toBe('');
   });

@@ -1,5 +1,5 @@
 import { run, runSync, resToJSON } from './base';
-import { RunResult } from './childProcessHelpers';
+import { IRunResult } from './childProcessHelpers';
 import { setEnvironment } from './environment';
 import { Machine } from './machine';
 import { Image } from './image';

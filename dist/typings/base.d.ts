@@ -1,7 +1,7 @@
 /// <reference types="node" />
-import { RunResult } from './childProcessHelpers';
+import { IRunResult } from './childProcessHelpers';
 export declare function run(command: string, machineName: string, _debug: boolean, noNewLines?: boolean): Promise<string>;
-export declare function runSync(command: string, machineName: string, _debug: boolean): RunResult;
+export declare function runSync(command: string, machineName: string, _debug: boolean): IRunResult;
 export declare function runWithoutDebug(command: string, machineName: string, noNewLines?: boolean): Promise<string>;
 export declare function addOpt(command: string, optionName: string, optionVal?: string | string[] | boolean): string;
 export declare function addOpts(command: string, opts: any): string;
