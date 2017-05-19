@@ -1,21 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const colors = require("colors");
-const childProcessHelpers_1 = require("./childProcessHelpers");
-const environment_1 = require("./environment");
+var colors = require("colors");
+var childProcessHelpers_1 = require("./childProcessHelpers");
+var environment_1 = require("./environment");
 function run(command, machineName, _debug, noNewLines) {
+    var _this = this;
     _debug = _debug !== undefined ? _debug : false;
     if (_debug) {
         Log.info('Running:', command);
     }
-    return new Promise((resolve, reject) => {
+    return new Promise(function (resolve, reject) {
         environment_1.setEnvironment(machineName);
-        childProcessHelpers_1.spawn(command, process.env, _debug, (result) => {
+        childProcessHelpers_1.spawn(command, process.env, _debug, function (result) {
             if (_debug) {
                 if (result.stdErr) {
                     Log.err('command finnished with errors.');
                     if (result.stdErr.toLowerCase().indexOf('no space left on device') > -1) {
-                        this.checkForDanglingImages(() => {
+                        _this.checkForDanglingImages(function () {
                             if (result.stdErr) {
                                 reject(result.stdErr);
                             }
@@ -58,27 +59,27 @@ exports.runWithoutDebug = runWithoutDebug;
 function addOpt(command, optionName, optionVal) {
     if (optionVal !== undefined) {
         if (optionVal instanceof Array) {
-            for (let i = 0, l = optionVal.length; i < l; i++) {
-                command += ` ${optionName} ${optionVal[i]}`;
+            for (var i = 0, l = optionVal.length; i < l; i++) {
+                command += " " + optionName + " " + optionVal[i];
             }
         }
         else if (typeof optionVal === 'boolean') {
-            command += ` ${optionName}`;
+            command += " " + optionName;
         }
         else {
-            command += ` ${optionName} ${optionVal}`;
+            command += " " + optionName + " " + optionVal;
         }
     }
     else {
-        command += ` ${optionName}`;
+        command += " " + optionName;
     }
     return command;
 }
 exports.addOpt = addOpt;
 function addOpts(command, opts) {
-    for (const prop in opts) {
+    for (var prop in opts) {
         if (opts.hasOwnProperty(prop)) {
-            const optName = getOptionName(prop);
+            var optName = getOptionName(prop);
             if (opts[prop] !== undefined) {
                 command = addOpt(command, optName, opts[prop]);
             }
@@ -91,18 +92,18 @@ function addOpts(command, opts) {
 }
 exports.addOpts = addOpts;
 function getOptionName(opt) {
-    const arr = opt.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1);
-    arr.forEach((v, i, a) => { a[i] = a[i].toLowerCase(); });
+    var arr = opt.match(/([A-Z]?[^A-Z]*)/g).slice(0, -1);
+    arr.forEach(function (v, i, a) { a[i] = a[i].toLowerCase(); });
     return '--' + arr.join('-');
 }
 function resToJSON(s) {
-    const lines = s.split('\n').filter((val) => val !== '');
-    const headerLine = lines.shift();
-    const arr = headerLine.split(' ');
-    const cols = [];
-    for (let i = 0, l = arr.length; i < l; i++) {
+    var lines = s.split('\n').filter(function (val) { return val !== ''; });
+    var headerLine = lines.shift();
+    var arr = headerLine.split(' ');
+    var cols = [];
+    for (var i = 0, l = arr.length; i < l; i++) {
         if (arr[i] !== '') {
-            const col = { name: arr[i], length: arr[i].length };
+            var col = { name: arr[i], length: arr[i].length };
             if (arr[i + 1] !== undefined && arr[i + 1] !== '') {
                 col.name = col.name + ' ' + arr[i + 1];
                 col.length = col.length + arr[i + 1].length + 1;
@@ -114,10 +115,10 @@ function resToJSON(s) {
             cols[cols.length - 1].length = cols[cols.length - 1].length + 1;
         }
     }
-    const result = [];
-    for (let i = 0, l = lines.length; i < l; i++) {
-        const obj = {};
-        for (let c = 0, cl = cols.length; c < cl; c++) {
+    var result = [];
+    for (var i = 0, l = lines.length; i < l; i++) {
+        var obj = {};
+        for (var c = 0, cl = cols.length; c < cl; c++) {
             if (c === cols.length - 1) {
                 obj[cols[c].name] = lines[i].trim();
             }
@@ -131,33 +132,59 @@ function resToJSON(s) {
     return result;
 }
 exports.resToJSON = resToJSON;
-class Log {
-    static success(...message) {
+var Log = (function () {
+    function Log() {
+    }
+    Log.success = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i] = arguments[_i];
+        }
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.green(message.join(' ')));
         this.newLine();
-    }
-    static err(...message) {
+    };
+    Log.err = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i] = arguments[_i];
+        }
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.red(message.join(' ')));
         this.newLine();
-    }
-    static info(...message) {
+    };
+    Log.info = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i] = arguments[_i];
+        }
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.cyan(message.join(' ')));
         this.newLine();
-    }
-    static warn(...message) {
+    };
+    Log.warn = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i] = arguments[_i];
+        }
         process.stdout.write(colors.bgBlue.white('VM') + ' - ' + colors.yellow(message.join(' ')));
         this.newLine();
-    }
-    static debug(...message) {
+    };
+    Log.debug = function () {
+        var message = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            message[_i] = arguments[_i];
+        }
         process.stdout.write(colors.bgBlue.white('VM-debug') + ' - ' + colors.yellow(message.join(' ')));
         this.newLine();
-    }
-    static infoProgress(debug, ...message) {
-        let c = '\\';
-        const m = `${colors.bgBlue.white('VM')} - ${colors.cyan(message.join(' '))}`;
+    };
+    Log.infoProgress = function (debug) {
+        var message = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            message[_i - 1] = arguments[_i];
+        }
+        var c = '\\';
+        var m = colors.bgBlue.white('VM') + " - " + colors.cyan(message.join(' '));
         if (!debug) {
-            process.stdout.write(`${m} ${c}\r`);
-            const interval = setInterval(() => {
+            process.stdout.write(m + " " + c + "\r");
+            var interval = setInterval(function () {
                 if (c === '\\') {
                     c = '/';
                 }
@@ -167,16 +194,16 @@ class Log {
                 else if (c === '-') {
                     c = '\\';
                 }
-                process.stdout.write(`${m} ${c}\r`);
+                process.stdout.write(m + " " + c + "\r");
             }, 300);
-            return { interval, message: m };
+            return { interval: interval, message: m };
         }
         else {
             process.stdout.write(m);
             return { interval: undefined, message: m };
         }
-    }
-    static terminateProgress(progress) {
+    };
+    Log.terminateProgress = function (progress) {
         if (progress.interval) {
             clearInterval(progress.interval);
         }
@@ -184,9 +211,10 @@ class Log {
         process.stdout.write(progress.message + ' - done');
         this.newLine();
         return this;
-    }
-    static newLine() {
-        process.stdout.write(`\n`);
-    }
-}
+    };
+    Log.newLine = function () {
+        process.stdout.write("\n");
+    };
+    return Log;
+}());
 exports.Log = Log;

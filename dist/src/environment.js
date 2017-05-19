@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const childProcessHelpers_1 = require("./childProcessHelpers");
+var childProcessHelpers_1 = require("./childProcessHelpers");
 function setEnvironment(machineName) {
-    const envTxt = childProcessHelpers_1.spawnSync(`docker-machine env ${machineName} --shell cmd`, process.env, false).stdOut;
-    const lines = envTxt.split('\n');
-    for (let i = 0; i < lines.length; i++) {
+    var envTxt = childProcessHelpers_1.spawnSync("docker-machine env " + machineName + " --shell cmd", process.env, false).stdOut;
+    var lines = envTxt.split('\n');
+    for (var i = 0; i < lines.length; i++) {
         if (!isEnvironmentVariableLine(lines[i])) {
             continue;
         }
@@ -17,6 +17,6 @@ function isEnvironmentVariableLine(line) {
 }
 function addEnvironmentKeyValueToObject(line) {
     line = line.substr(4);
-    const kvp = line.split('=');
+    var kvp = line.split('=');
     process.env[kvp[0]] = kvp[1];
 }

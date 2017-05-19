@@ -1,41 +1,41 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 delete require.cache[require.resolve('../docker-cmd-js')];
-const docker_cmd_js_1 = require("../docker-cmd-js");
-const const_1 = require("./helpers/const");
-describe('cmd.volume', () => {
-    let cmd;
-    const testVolName = 'testVol';
-    beforeAll(() => {
+var docker_cmd_js_1 = require("../docker-cmd-js");
+var const_1 = require("./helpers/const");
+describe('cmd.volume', function () {
+    var cmd;
+    var testVolName = 'testVol';
+    beforeAll(function () {
         cmd = new docker_cmd_js_1.Cmd(const_1.machineName);
     });
-    it('create()', (done) => {
-        cmd.volume.create({ name: testVolName }).then(() => {
-            cmd.volume.inspect(testVolName).then((res) => {
+    it('create()', function (done) {
+        cmd.volume.create({ name: testVolName }).then(function () {
+            cmd.volume.inspect(testVolName).then(function (res) {
                 expect(res.length).toBe(1);
                 expect(res[0].Name).toBe(testVolName);
                 done();
-            }, (err) => { done.fail(err); });
-        }, (err) => {
+            }, function (err) { done.fail(err); });
+        }, function (err) {
             done.fail(err);
         });
     });
-    it('create() only if missing', (done) => {
-        cmd.volume.create({ name: testVolName }, { createOnlyIfMissing: true }).then(() => {
-            cmd.volume.inspect(testVolName).then((res) => {
+    it('create() only if missing', function (done) {
+        cmd.volume.create({ name: testVolName }, { createOnlyIfMissing: true }).then(function () {
+            cmd.volume.inspect(testVolName).then(function (res) {
                 expect(res.length).toBe(1);
                 done();
-            }, (err) => { done.fail(err); });
-        }, (err) => {
+            }, function (err) { done.fail(err); });
+        }, function (err) {
             done.fail(err);
         });
     });
-    it('remove()', (done) => {
-        cmd.volume.remove(testVolName).then(() => {
-            cmd.volume.inspect(testVolName).then((res) => {
+    it('remove()', function (done) {
+        cmd.volume.remove(testVolName).then(function () {
+            cmd.volume.inspect(testVolName).then(function (res) {
                 expect(res.length).toBe(0);
                 done();
-            }, (err) => { done.fail(err); });
-        }, (err) => { done.fail(err); });
+            }, function (err) { done.fail(err); });
+        }, function (err) { done.fail(err); });
     });
 });
