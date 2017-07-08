@@ -51,7 +51,12 @@ var environment_1 = require("./environment");
 var Machine = (function (_super) {
     __extends(Machine, _super);
     function Machine(machineName) {
-        return _super.call(this, machineName) || this;
+        var _this = _super.call(this, machineName) || this;
+        _this.start = {
+            hyperv: _this.startHyperv.bind(_this),
+            virtualbox: _this.startVirtualbox.bind(_this)
+        };
+        return _this;
     }
     Machine.prototype.status = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -97,7 +102,24 @@ var Machine = (function (_super) {
             });
         });
     };
-    Machine.prototype.start = function (opts) {
+    Machine.prototype.startHyperv = function (opts) {
+        if (!opts) {
+            opts = {};
+        }
+        opts.driver = 'hyperv';
+        return this._start(opts);
+    };
+    Machine.prototype.startVirtualbox = function (opts) {
+        if (!opts) {
+            opts = {};
+        }
+        opts.driver = 'virtualbox';
+        return this._start(opts);
+    };
+    Machine.prototype.remove = function () {
+        return base_1.run("docker-machine rm -f " + this.machineName, this.machineName, this.isDebug);
+    };
+    Machine.prototype._start = function (opts) {
         return __awaiter(this, void 0, void 0, function () {
             var res, c, resp, ex_3, ex_4;
             return __generator(this, function (_a) {
@@ -115,7 +137,7 @@ var Machine = (function (_super) {
                         return [3, 6];
                     case 3:
                         if (!(res !== 'Running')) return [3, 5];
-                        return [4, this.runStartMachine(opts)];
+                        return [4, this.create(opts)];
                     case 4: return [2, _a.sent()];
                     case 5:
                         base_1.Log.info("docker-machine [" + this.machineName + "] status:", res);
@@ -130,7 +152,7 @@ var Machine = (function (_super) {
                         _a.label = 9;
                     case 9:
                         _a.trys.push([9, 11, , 12]);
-                        return [4, this.runStartMachine(opts)];
+                        return [4, this.create(opts)];
                     case 10: return [2, _a.sent()];
                     case 11:
                         ex_4 = _a.sent();
@@ -141,24 +163,15 @@ var Machine = (function (_super) {
             });
         });
     };
-    Machine.prototype.remove = function () {
-        return base_1.run("docker-machine rm -f " + this.machineName, this.machineName, this.isDebug);
-    };
-    Machine.prototype.runStartMachine = function (opts) {
+    Machine.prototype.create = function (opts) {
         return __awaiter(this, void 0, void 0, function () {
             var c, progress, resp, ex_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         c = "docker-machine create";
-                        if (!opts) {
-                            opts = {};
-                        }
-                        if (!opts.driver) {
-                            opts.driver = 'hyperv';
-                        }
                         c = base_1.addOpts(c, opts);
-                        if (opts.driver === 'virtualbox') {
+                        if (isVirtualBox(opts)) {
                             if (!opts.virtualboxMemory) {
                                 c = base_1.addOpt(c, '--virtualbox-memory', '6144');
                             }
@@ -196,3 +209,9 @@ var Machine = (function (_super) {
     return Machine;
 }(commonMethods_1.CommonMethods));
 exports.Machine = Machine;
+function isHyperV(opts) {
+    return opts.driver === 'hyperv';
+}
+function isVirtualBox(opts) {
+    return opts.driver === 'virtualbox';
+}

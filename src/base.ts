@@ -57,12 +57,12 @@ export function addOpt(command: string, optionName: string, optionVal?: string |
   if (optionVal !== undefined) {
     if (optionVal instanceof Array) {
       for (let i = 0, l = optionVal.length; i < l; i++) {
-        command += ` ${optionName} ${optionVal[i]}`;
+        command += ` ${optionName} "${optionVal[i]}"`;
       }
     } else if (typeof optionVal === 'boolean') {
       command += ` ${optionName}`;
     } else {
-      command += ` ${optionName} ${optionVal}`;
+      command += ` ${optionName} "${optionVal}"`;
     }
   } else {
     command += ` ${optionName}`;

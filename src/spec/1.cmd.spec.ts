@@ -7,12 +7,12 @@ describe('Cmd()', () => {
   let cmd: Cmd;
 
   beforeAll(() => {
-    cmd = new Cmd(machineName);
+    cmd = new Cmd(machineName).debug(true);
   });
 
-  fit('machine.start()', async (done) => {
+  it('machine.start()', async (done) => {
     try {
-      await cmd.machine.start();
+      await cmd.machine.start.hyperv({ hypervVirtualSwitch: 'Primary Virtual Switch' });
       done();
     } catch (ex) {
       done.fail(ex);

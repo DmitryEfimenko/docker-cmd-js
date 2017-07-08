@@ -72,8 +72,11 @@ cmd.run('docker images').then(
 
 ---
 ### cmd.machine
-##### `cmd.machine.start(opts: IStartOpts): Promise<{}>`
-Starts machine. If it does not exist, it'll be created. Resolves even if machine is already started. 
+##### `cmd.machine.start.hyperv(opts: IStartOpts): Promise<{}>`
+Starts machine. If it does not exist, it'll be created with `hyperv` driver. Resolves even if machine is already started. 
+
+##### `cmd.machine.start.virtualbox(opts: IStartOpts): Promise<{}>`
+Starts machine. If it does not exist, it'll be created with `virtualbox` driver. Resolves even if machine is already started. 
 
 ---
 ##### `cmd.machine.ipAddress(): Promise<string>`

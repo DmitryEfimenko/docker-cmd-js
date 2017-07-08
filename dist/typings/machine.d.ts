@@ -1,14 +1,20 @@
 import { CommonMethods } from './commonMethods';
 export declare class Machine extends CommonMethods {
     _ipAddress: string;
+    start: {
+        hyperv: (opts?: ICreateOpts & ICreateOptsHyperv) => Promise<string>;
+        virtualbox: (opts?: ICreateOpts & ICreateOptsVirtualbox) => Promise<string>;
+    };
     constructor(machineName: string);
     status(): Promise<string>;
     ipAddress(): Promise<string>;
-    start(opts?: IStartOpts): Promise<string>;
+    startHyperv(opts?: ICreateOpts & ICreateOptsHyperv): Promise<string>;
+    startVirtualbox(opts?: ICreateOpts & ICreateOptsVirtualbox): Promise<string>;
     remove(): Promise<string>;
-    private runStartMachine(opts?);
+    private _start<T>(opts?);
+    private create(opts);
 }
-export interface IStartOpts {
+export interface ICreateOpts {
     driver?: string;
     engineInstallUrl?: string;
     engineOpt?: string | string[];
@@ -26,6 +32,8 @@ export interface IStartOpts {
     swarmHost?: string;
     swarmAddr?: boolean;
     swarmExperimental?: boolean;
+}
+export interface ICreateOptsVirtualbox {
     virtualboxBoot2dockerUrl?: string;
     virtualboxCpuCount?: number;
     virtualboxDiskSize?: number;
@@ -38,4 +46,13 @@ export interface IStartOpts {
     virtualboxMemory?: number;
     virtualboxNoShare?: boolean;
     virtualboxNoVtxCheck?: boolean;
+}
+export interface ICreateOptsHyperv {
+    hypervBoot2dockerUrl?: string;
+    hypervVirtualSwitch?: string;
+    hypervDiskSize?: string;
+    hypervMemory?: string;
+    hypervCpuCount?: string;
+    hypervStaticMacaddress?: string;
+    hypervVlanId?: string;
 }

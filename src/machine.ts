@@ -5,6 +5,14 @@ import { setEnvironment } from './environment';
 export class Machine extends CommonMethods {
   _ipAddress: string;
 
+  start: {
+    hyperv: (opts?: ICreateOpts & ICreateOptsHyperv) => Promise<string>
+    virtualbox: (opts?: ICreateOpts & ICreateOptsVirtualbox) => Promise<string>
+  } = {
+    hyperv: this.startHyperv.bind(this),
+    virtualbox: this.startVirtualbox.bind(this)
+  };
+
   constructor(machineName: string) {
     super(machineName);
   }
@@ -32,14 +40,30 @@ export class Machine extends CommonMethods {
     }
   }
 
-  async start(opts?: IStartOpts) {
+  startHyperv(opts?: ICreateOpts & ICreateOptsHyperv) {
+    if (!opts) { opts = {}; }
+    opts.driver = 'hyperv';
+    return this._start(opts);
+  }
+
+  startVirtualbox(opts?: ICreateOpts & ICreateOptsVirtualbox) {
+    if (!opts) { opts = {}; }
+    opts.driver = 'virtualbox';
+    return this._start(opts);
+  }
+
+  remove() {
+    return run(`docker-machine rm -f ${this.machineName}`, this.machineName, this.isDebug);
+  }
+
+  private async _start<T extends (ICreateOptsVirtualbox | ICreateOptsHyperv)>(opts?: ICreateOpts) {
     try {
       const res = await this.runWithoutDebugOnce(this.status());
       if (res === 'Stopped') {
         const c = `docker-machine start ${this.machineName}`;
         const resp = await run(c, this.machineName, this.isDebug);
       } else if (res !== 'Running') {
-        return await this.runStartMachine(opts);
+        return await this.create(opts);
       } else {
         Log.info(`docker-machine [${this.machineName}] status:`, res);
         return res;
@@ -49,28 +73,20 @@ export class Machine extends CommonMethods {
         await this.remove();
       }
       try {
-        return await this.runStartMachine(opts);
+        return await this.create(opts);
       } catch (ex) {
         throw ex;
       }
     }
   }
 
-  remove() {
-    return run(`docker-machine rm -f ${this.machineName}`, this.machineName, this.isDebug);
-  }
-
-  private async runStartMachine(opts?: IStartOpts) {
+  private async create(opts: ICreateOpts & (ICreateOptsVirtualbox | ICreateOptsHyperv)) {
     let c = `docker-machine create`;
-    if (!opts) { opts = {}; }
-    if (!opts.driver) {
-      opts.driver = 'hyperv'; // virtualbox
-      // opts.driver = 'virtualbox';
-    }
-    c = addOpts(c, opts);
-    // set sinsible defaults
 
-    if (opts.driver === 'virtualbox') {
+    c = addOpts(c, opts);
+
+    if (isVirtualBox(opts)) {
+      // set sinsible defaults
       if (!opts.virtualboxMemory) { c = addOpt(c, '--virtualbox-memory', '6144'); }
       if (!opts.virtualboxNoVtxCheck) { c = addOpt(c, '--virtualbox-no-vtx-check'); }
     }
@@ -96,7 +112,15 @@ export class Machine extends CommonMethods {
   }
 }
 
-export interface IStartOpts {
+function isHyperV(opts: (ICreateOptsVirtualbox | ICreateOptsHyperv)): opts is ICreateOptsHyperv {
+  return (opts as any).driver === 'hyperv';
+}
+
+function isVirtualBox(opts: ICreateOptsVirtualbox | ICreateOptsHyperv): opts is ICreateOptsVirtualbox {
+  return (opts as any).driver === 'virtualbox';
+}
+
+export interface ICreateOpts {
   driver?: string;
   engineInstallUrl?: string;
   engineOpt?: string | string[];
@@ -114,7 +138,9 @@ export interface IStartOpts {
   swarmHost?: string;
   swarmAddr?: boolean;
   swarmExperimental?: boolean;
+}
 
+export interface ICreateOptsVirtualbox {
   virtualboxBoot2dockerUrl?: string;
   virtualboxCpuCount?: number;
   virtualboxDiskSize?: number;
@@ -127,4 +153,14 @@ export interface IStartOpts {
   virtualboxMemory?: number;
   virtualboxNoShare?: boolean;
   virtualboxNoVtxCheck?: boolean;
+}
+
+export interface ICreateOptsHyperv {
+  hypervBoot2dockerUrl?: string;
+  hypervVirtualSwitch?: string;
+  hypervDiskSize?: string;
+  hypervMemory?: string;
+  hypervCpuCount?: string;
+  hypervStaticMacaddress?: string;
+  hypervVlanId?: string;
 }

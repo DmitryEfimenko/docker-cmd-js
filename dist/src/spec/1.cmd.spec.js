@@ -42,15 +42,15 @@ var const_1 = require("./helpers/const");
 describe('Cmd()', function () {
     var cmd;
     beforeAll(function () {
-        cmd = new docker_cmd_js_1.Cmd(const_1.machineName);
+        cmd = new docker_cmd_js_1.Cmd(const_1.machineName).debug(true);
     });
-    fit('machine.start()', function (done) { return __awaiter(_this, void 0, void 0, function () {
+    it('machine.start()', function (done) { return __awaiter(_this, void 0, void 0, function () {
         var ex_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, cmd.machine.start()];
+                    return [4, cmd.machine.start.hyperv({ hypervVirtualSwitch: 'Primary Virtual Switch' })];
                 case 1:
                     _a.sent();
                     done();
